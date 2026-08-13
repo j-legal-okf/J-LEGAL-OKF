@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entirely invented fixture for offline J-LEGAL-OKF regression. -->
+<Law LawId="SyntheticLaw001" LawType="Act" Era="Reiwa" Year="2" PromulgateMonth="1" PromulgateDay="2">
+  <LawBody>
+    <LawTitle>架空の検証法</LawTitle>
+    <MainProvision>
+      <Article Num="1">
+        <ArticleCaption>（目的）</ArticleCaption>
+        <Paragraph>
+          <ParagraphNum>1</ParagraphNum>
+          <ParagraphSentence>これは合成された検証用の条文です。</ParagraphSentence>
+        </Paragraph>
+      </Article>
+    </MainProvision>
+  </LawBody>
+</Law>

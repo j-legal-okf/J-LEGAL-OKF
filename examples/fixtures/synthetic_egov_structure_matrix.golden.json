@@ -1,0 +1,52 @@
+{
+  "schema": "jlegal-synthetic-golden/v1",
+  "fixture": "examples/fixtures/synthetic_egov_structure_matrix.xml",
+  "authorship": "entirely-invented",
+  "corpus_id": "synthetic-egov-structure-matrix",
+  "converted_at": "2026-08-09T00:00:00Z",
+  "coverage_ids": [
+    "missing_article_numbers",
+    "deleted_article",
+    "branch_article",
+    "implicit_first_paragraph",
+    "iroha_subitems",
+    "supplementary_provision",
+    "appendix_table",
+    "table_structure",
+    "appendix_style",
+    "multiple_effective_dates",
+    "transitional_measure",
+    "reference_sentence",
+    "incorporation_sentence",
+    "read_as_sentence",
+    "delegation_sentence",
+    "amendment_supplementary_provision"
+  ],
+  "source_bytes": 5937,
+  "source_sha256": "c7018e5dc6546ccf3534d11d78e8bc613f14ab4b0cea81082679c4a4a7fcf8d0",
+  "expected_node_count": 41,
+  "projection_count": 40,
+  "kind_counts": {
+    "amendment_provision": 1,
+    "appendix": 2,
+    "article": 6,
+    "cell": 8,
+    "item": 1,
+    "law": 1,
+    "main_provision": 1,
+    "paragraph": 10,
+    "row": 4,
+    "subitem": 3,
+    "supplementary_provision": 2,
+    "table": 2
+  },
+  "node_identity_sha256": "340e879f7efd1e26c3ac4cd3f44c5a53441133e5a584eb14f755ef4e1c76774a",
+  "artifact_sha256": {
+    "corpus.jsonl": "4a4a2c655e7fed8a4df5f53c79bccb1b3b0ff2c2fea9c31e3badc0afa44fd174",
+    "crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+    "projection.jsonl": "77d7007be9bdfcfaa69d79e5cc3ca059c492d2c23fa22f50839b4dc19e037e0b",
+    "manifest.json": "a51224f85986ba615446ffdd7824e884e41f659a68d9b93d3445122e474ff534"
+  },
+  "bundle_manifest_sha256": "b597aec1773dd5b1a7aa51126385e84b380095dcf137633b4f913ee79f785f7b",
+  "bundle_file_entry_count": 48
+}

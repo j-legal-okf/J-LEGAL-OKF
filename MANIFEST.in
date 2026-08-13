@@ -1,0 +1,27 @@
+# Public source distributions contain the package, its public documentation,
+# synthetic fixtures, and the complete public regression suite.
+include pyproject.toml
+include README.md
+include LICENSE
+include NOTICE
+include ARCHITECTURE_BOUNDARY.md
+include CHANGELOG.md
+include CODE_OF_CONDUCT.md
+include CONTRIBUTING.md
+include GOVERNANCE.md
+include SECURITY.md
+recursive-include docs *.md
+recursive-include examples *.xml *.json
+recursive-include tests *.py
+recursive-include src/jlegal_okf *.py
+
+# Private knowledge bundles, repository automation, and local instructions
+# are never part of a public source distribution.
+exclude .github/**
+prune .github
+exclude .gitignore
+exclude OKF.md
+exclude okf/**
+prune okf
+exclude tools/**
+prune tools

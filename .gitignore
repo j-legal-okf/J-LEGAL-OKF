@@ -1,0 +1,50 @@
+# Python bytecode and packaging
+__pycache__/
+*.py[cod]
+*.so
+build/
+dist/
+*.egg-info/
+
+# Local Python environments and test coverage
+.venv/
+venv/
+env/
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# Editor and operating-system files
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# Local secrets (the documented template remains publishable)
+.env*
+!.env.example
+.credentials/
+credentials/
+secrets/
+*.key
+*.pem
+*.p12
+*.pfx
+token.txt
+
+# Local inputs, generated artifacts, reports, and state
+work/
+data/
+output/
+generated/
+reports/
+report/
+*.db
+*.sqlite
+*.sqlite3
+
+# Local agent working instructions (never published)
+AGENTS.md

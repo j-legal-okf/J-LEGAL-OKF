@@ -1,0 +1,16 @@
+J-LEGAL-OKF
+Copyright 2026 J-LEGAL-OKF contributors
+
+Licensed under the Apache License, Version 2.0. See the LICENSE file for the
+full license text.
+
+"JORI Engine" is this project's own reference implementation. The name is
+recorded in package metadata and in the `conversion` record of generated
+manifests as an implementation and manifest identifier. It is not asserted as
+a trademark or brand name.
+
+This distribution contains no third-party source code.
+
+Documentation in this repository quotes and paraphrases e-Gov-published
+content; see docs/licensing-and-attribution.md for that material's
+attribution.
