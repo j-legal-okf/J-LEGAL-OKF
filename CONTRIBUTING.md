@@ -49,8 +49,16 @@ canonical output.
 ```bash
 python -m pip install -e '.[dev]'
 python -m pytest
+python tools/check_boundary.py
 jlegal --help
 ```
+
+CI runs `tools/check_boundary.py` on every push and pull request; it scans the
+tracked tree for private path markers, local absolute paths, credential
+patterns, and e-mail addresses other than the project's own. CI also runs
+`tools/check_dco.py` over a pull request's own commits, so a missing
+`Signed-off-by` line fails the check rather than being noticed by hand. Run
+both locally before opening a pull request.
 
 The CLI currently exposes these subcommands: `validate-source`, `compile`,
 `validate`, `fetch`, `export-okf`, and `validate-okf`. Run

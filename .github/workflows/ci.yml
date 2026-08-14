@@ -11,6 +11,46 @@ permissions:
   contents: read
 
 jobs:
+  boundary:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # Scans the tracked tree, which is the gap in front of
+      # tools/verify_distribution.py: that verifier reads built artifacts, so
+      # nothing ran automatically against the repository itself.
+      - name: Scan the tracked tree for boundary violations
+        run: |
+          set -euo pipefail
+          python tools/check_boundary.py
+
+  dco:
+    # A pull request is where a contributor's certification arrives, and the
+    # base..head range is what keeps the repository's own unsigned initial
+    # commit out of scope.
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Check DCO sign-off on the pull request's commits
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          python tools/check_dco.py "${BASE_SHA}..${HEAD_SHA}"
+
   tests:
     runs-on: ubuntu-latest
     strategy:

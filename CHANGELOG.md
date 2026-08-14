@@ -12,6 +12,26 @@ Nothing has been tagged or released yet.
 
 ### Added
 
+- `tools/check_boundary.py`, a CI check that scans the tracked tree for
+  private path markers, local absolute paths, credential patterns, and e-mail
+  addresses other than the project's own. It complements
+  `tools/verify_distribution.py`, which reads built artifacts: until now
+  nothing ran automatically against the repository tree itself. It fails
+  closed on an unreadable baseline or an undecodable text file. Its built-in
+  patterns deliberately name nothing outside this project — a name that is
+  private is itself private information — so such patterns are supplied with
+  `--extra-patterns FILE` from wherever that knowledge already lives, and a
+  malformed, missing, or empty file is an error rather than a quiet reduction
+  in coverage. Only the test is exempt from the content scan, because it
+  plants a violation for every rule; a test asserts that the checker's own
+  sources need no exemption, and the exemption is printed on every run.
+- `tools/check_dco.py`, a CI check that requires a `Signed-off-by` trailer
+  matching the author or committer on every non-merge commit a pull request
+  proposes. `CONTRIBUTING.md` and `GOVERNANCE.md` already required the DCO;
+  nothing enforced it. The check runs over the pull request's `base..head`
+  range, so this repository's own initial commit — which carries no sign-off
+  and cannot be rewritten without discarding the audited single-commit
+  history — is out of range by design rather than by exemption.
 - The canonical `jori-corpus/v1` model, with deterministic corpus, node, and
   hash identifiers.
 - `jori-manifest/v5`, with hash-covered `acquisition` and static `conversion`
