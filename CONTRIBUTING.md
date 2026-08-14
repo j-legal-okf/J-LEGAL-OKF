@@ -113,6 +113,11 @@ By making a contribution to this project, I certify that:
     this project or the open source license(s) involved.
 ```
 
+The sign-off is required on every commit, not only on commits that arrive
+through a pull request: a maintainer pushing to `main` directly signs off the
+same way. `tools/check_dco.py` runs over a pull request's own commits, so a
+direct push is held to this rule rather than to the check.
+
 No CLA is required at this time.
 
 ## AI-assisted contributions

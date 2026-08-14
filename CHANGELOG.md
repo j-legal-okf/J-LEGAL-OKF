@@ -29,9 +29,10 @@ Nothing has been tagged or released yet.
   matching the author or committer on every non-merge commit a pull request
   proposes. `CONTRIBUTING.md` and `GOVERNANCE.md` already required the DCO;
   nothing enforced it. The check runs over the pull request's `base..head`
-  range, so this repository's own initial commit — which carries no sign-off
+  range, so this repository's own first two commits — which carry no sign-off
   and cannot be rewritten without discarding the audited single-commit
-  history — is out of range by design rather than by exemption.
+  history — are out of range by design rather than by exemption. The commit
+  that added this check is the second of those two.
 - The canonical `jori-corpus/v1` model, with deterministic corpus, node, and
   hash identifiers.
 - `jori-manifest/v5`, with hash-covered `acquisition` and static `conversion`

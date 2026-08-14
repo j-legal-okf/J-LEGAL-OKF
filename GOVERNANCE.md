@@ -29,9 +29,18 @@ Only the maintainer creates tags and releases. Nothing has been released.
 
 ## Contribution licensing
 
-Contributions are accepted under the Developer Certificate of Origin (DCO)
-from the start. Contributors keep their copyright and license their
-contribution under Apache-2.0.
+Contributions have been accepted under the Developer Certificate of Origin
+(DCO), rather than a contributor license agreement, since the project began.
+Contributors keep their copyright and license their contribution under
+Apache-2.0.
+
+Every commit must carry a `Signed-off-by` line, including a commit a
+maintainer pushes to `main` directly. `tools/check_dco.py` enforces this on
+the commits a pull request proposes, so a direct push rests on this rule
+rather than on the check. This repository's own first two commits predate the
+check and carry no sign-off; rewriting them would mean discarding the audited
+single-commit history, so they sit outside the enforced range by design
+rather than by exemption.
 
 A CLA is not used now. It would only be reconsidered at a specific trigger:
 relicensing, a need to consolidate rights under an agreement, or a case where
