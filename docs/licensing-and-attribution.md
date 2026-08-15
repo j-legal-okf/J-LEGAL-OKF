@@ -14,9 +14,33 @@ Copyright 2026 J-LEGAL-OKF contributors.
 ## Specification documents and CC BY 4.0
 
 CC BY 4.0 is not applied to the specification documents at this time. This is
-a current decision, not an oversight: the rights holder, the covered scope,
-existing attributions, and any third-party material have not been confirmed.
-Applying CC BY 4.0 later would require confirming all of these first.
+a current decision, and not a gap in what has been checked. The four questions
+that would have to be settled first were examined on 2026-08-15, and each has
+an answer:
+
+- **Covered scope.** Exactly one tracked document declares itself normative:
+  [the v0.1 profile](jlegal-okf-profile-0.1.0-draft.md), which states "This
+  document is the normative v0.1 profile for the public core." Every other
+  file listed under "Project documents" in the [README](../README.md) is a
+  project document, not part of the specification.
+- **Third-party material.** That document reproduces none. It contains no
+  quoted block, and it cites the e-Gov XML schema documentation, the e-Gov Law
+  API v2, and the Open Knowledge Format v0.2 specification by URL only — see
+  "Referenced external specifications" below, and its own statement that
+  referencing them does not incorporate their text.
+- **Existing attributions.** That document carries none of its own. The
+  repository-level [`LICENSE`](../LICENSE) and [`NOTICE`](../NOTICE) cover it.
+  The e-Gov attributions recorded further down this page apply to the quoted
+  material on this page, not to the profile.
+- **Rights holder.** J-LEGAL-OKF contributors, as stated in
+  [`NOTICE`](../NOTICE).
+
+What remains is the decision itself, and for v0.1 it is not to adopt CC BY
+4.0. Apache-2.0 already covers that document — this repository's license
+covers its documentation as well as its code, as stated at the top of this
+page. Adopting CC BY 4.0 in addition is a licensing change, reserved to the
+maintainer under [`GOVERNANCE.md`](../GOVERNANCE.md), and would restate the
+four points above as of the date it is adopted.
 
 ## Dependency licenses
 

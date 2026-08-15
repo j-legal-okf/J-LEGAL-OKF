@@ -236,6 +236,28 @@ Nothing has been tagged or released yet.
   checks their contents against an allowlist derived from the Git-tracked
   public files (`tools/verify_distribution.py`).
 
+### Changed
+
+- `NOTICE` and `ARCHITECTURE_BOUNDARY.md` now enumerate every place the
+  `JORI Engine` name is recorded. Both previously named two — package metadata
+  and a manifest's `conversion` record — which a reader would take as the
+  whole list. Compiling and exporting the synthetic fixture and scanning the
+  output shows two more categories: the schema identifiers — `jori-corpus/v1`,
+  `jori-manifest/v5`, and `jori-projection/v1` in that run, plus
+  `jori-manifest/v3` on the generic-adapter path and `jori-manifest/v6` when a
+  rights area is asserted — and the `Canonical JORI corpus` resource title in
+  an exported bundle's `derived/` and `source/` documents. The omitted sites
+  are the ones
+  that matter most: schema strings are part of the compatibility contract, so
+  the name is load-bearing rather than decorative. Nothing about the name's
+  use changed; what the two documents claim about it did.
+- `docs/licensing-and-attribution.md` now records the answers to the four
+  questions CC BY 4.0 would depend on — covered scope, third-party material,
+  existing attributions, and rights holder — instead of stating that they
+  "have not been confirmed". They were examined and each has an answer; the
+  reason CC BY 4.0 is not applied to the profile is that adopting it is a
+  maintainer decision not taken for v0.1, not that the groundwork is missing.
+
 ### Known limitations
 
 - This is a draft profile (`0.1.0-draft`), not a release.

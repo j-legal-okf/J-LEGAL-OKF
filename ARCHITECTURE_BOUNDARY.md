@@ -67,10 +67,15 @@ transferred into this repository.
 ## Naming
 
 `J-LEGAL-OKF`, `j-legal-okf`, `jlegal`, and `jlegal_okf` are the project's
-specification, repository, CLI, and package identifiers. `JORI Engine` is an
-implementation and manifest identifier, retained for determinism of the
-`conversion` record recorded in generated manifests. It is not a brand or
-trademark claim.
+specification, repository, CLI, and package identifiers. `JORI Engine`, and
+the lowercase `jori` token derived from it, are implementation and format
+identifiers. They are retained because they are load-bearing, not out of
+preference: `jori-corpus/v1`, `jori-manifest/v3`, `jori-manifest/v5`,
+`jori-manifest/v6`, and `jori-projection/v1` are schema strings that
+compatibility depends on, and the `conversion` record they accompany is fixed
+by regression data. Renaming any of them is a breaking change, not an edit.
+[`NOTICE`](NOTICE) enumerates every place the name is recorded. It is not a
+brand or trademark claim.
 
 ## Applying this boundary
 

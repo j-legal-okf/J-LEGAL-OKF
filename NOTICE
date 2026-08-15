@@ -4,10 +4,20 @@ Copyright 2026 J-LEGAL-OKF contributors
 Licensed under the Apache License, Version 2.0. See the LICENSE file for the
 full license text.
 
-"JORI Engine" is this project's own reference implementation. The name is
-recorded in package metadata and in the `conversion` record of generated
-manifests as an implementation and manifest identifier. It is not asserted as
-a trademark or brand name.
+"JORI Engine" is this project's own reference implementation. The name, and
+the lowercase "jori" token derived from it, are recorded as implementation and
+format identifiers in:
+
+  - package metadata (the distribution's summary);
+  - the "conversion" record of a generated manifest.json, which an exported
+    bundle copies into the frontmatter of its derived/ and source/ documents;
+  - the schema identifiers jori-corpus/v1, jori-manifest/v3, jori-manifest/v5,
+    jori-manifest/v6, and jori-projection/v1; and
+  - the "Canonical JORI corpus" resource title carried in an exported bundle's
+    derived/ and source/ documents.
+
+These are identifiers in a wire format and in generated output. No trademark
+or brand right is asserted in the name.
 
 This distribution contains no third-party source code.
 
