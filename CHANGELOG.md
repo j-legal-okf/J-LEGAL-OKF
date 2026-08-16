@@ -35,7 +35,7 @@ Nothing has been tagged or released yet.
   flags the sentences that legitimately name tags and releases.
 - `tools/check_release_state.py`, a CI check that scans the tracked tree for
   restatements of whether anything has been tagged or released. `CHANGELOG.md`
-  is the single source of truth for that state; before this, five other files
+  is the single source of truth for that state; before this, four other files
   asserted it in their own words. It lives in `tools/` rather than the test
   suite for two measured reasons: its exemption inventory must reach the
   run's output, and pytest discards a passing test's output; and `MANIFEST.in`
@@ -55,6 +55,11 @@ Nothing has been tagged or released yet.
   in coverage. Only the test is exempt from the content scan, because it
   plants a violation for every rule; a test asserts that the checker's own
   sources need no exemption, and the exemption is printed on every run.
+- `tools/verify_distribution.py --extra-patterns FILE`, applying the same
+  fail-closed external `label = regex` format to every sdist and wheel member
+  path. Private consumers can therefore audit built archives with identifiers
+  that do not belong in this public repository; missing, empty, malformed, or
+  invalid pattern files stop verification.
 - `tools/check_dco.py`, a CI check that requires a `Signed-off-by` trailer
   matching the author or committer on every non-merge commit a pull request
   proposes. `CONTRIBUTING.md` and `GOVERNANCE.md` already required the DCO;

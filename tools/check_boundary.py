@@ -27,7 +27,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-from verify_distribution import PRIVATE_PATH_MARKERS  # noqa: E402
+from verify_distribution import PRIVATE_PATH_MARKERS, load_extra_patterns  # noqa: E402
 
 # The test plants a violation for every rule, so it necessarily contains the
 # strings the content patterns look for.  This checker's own source does not:
@@ -75,41 +75,6 @@ EMAIL_RE = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 
 def _repo_root() -> Path:
     return Path(__file__).resolve().parents[1]
-
-
-def load_extra_patterns(path: Path) -> tuple[tuple[tuple[str, str], ...], list[str]]:
-    """Load `label = regex` lines from a file kept outside this repository.
-
-    Returns the patterns and any issues. A missing file, a malformed line, or
-    an invalid regex is an issue: a caller that asked for extra patterns must
-    not silently get fewer checks than it asked for.
-    """
-
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError as exc:
-        return (), [f"extra patterns unavailable: {path}: {exc}"]
-
-    patterns: list[tuple[str, str]] = []
-    issues: list[str] = []
-    for lineno, raw in enumerate(text.splitlines(), start=1):
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        label, separator, expression = line.partition("=")
-        if not separator or not label.strip() or not expression.strip():
-            issues.append(f"{path}:{lineno}: expected 'label = regex', got {raw!r}")
-            continue
-        expression = expression.strip()
-        try:
-            re.compile(expression)
-        except re.error as exc:
-            issues.append(f"{path}:{lineno}: invalid regex {expression!r}: {exc}")
-            continue
-        patterns.append((label.strip(), expression))
-    if not patterns and not issues:
-        issues.append(f"extra patterns file has no patterns: {path}")
-    return tuple(patterns), issues
 
 
 def tracked_files(repo_root: Path) -> tuple[list[str], list[str]]:

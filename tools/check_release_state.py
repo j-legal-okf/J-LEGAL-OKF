@@ -2,7 +2,7 @@
 """Scan the tracked tree for restatements of whether anything has been released.
 
 `CHANGELOG.md` is the single source of truth for release state.  Before this
-checker existed, five other files asserted that state in their own words, and
+checker existed, four other files asserted that state in their own words, and
 each one of them would have gone false the moment a tag was cut while the
 others stayed current.  That is the failure this checker exists to prevent: not
 a wrong sentence, but the same sentence in several places, ageing at different

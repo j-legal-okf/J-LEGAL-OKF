@@ -6,9 +6,12 @@ against a planted violation as well as against the real tree.
 
 from __future__ import annotations
 
+import io
 from pathlib import Path
 import subprocess
 import sys
+import tarfile
+import zipfile
 
 import pytest
 
@@ -31,6 +34,7 @@ sys.path.insert(0, str(TOOLS))
 
 import check_boundary  # noqa: E402
 import check_dco  # noqa: E402
+import verify_distribution  # noqa: E402
 
 
 # --------------------------------------------------------------------------
@@ -93,7 +97,7 @@ def test_builtin_patterns_are_structural_rather_than_named() -> None:
 @pytest.mark.parametrize(
     "path",
     [
-        "src/jori_vnext/model.py",
+        "src/private_overlay/model.py",
         "docs/legacy-notes.md",
         "tests/fixtures/municipal_sample.xml",
         "src/jlegal_okf/enrichment.py",
@@ -238,6 +242,65 @@ def test_missing_patterns_file_fails_closed(tmp_path: Path) -> None:
         )
         == 1
     )
+
+
+def _write_synthetic_archives(tmp_path: Path) -> tuple[Path, Path]:
+    sdist = tmp_path / "jlegal-okf-0.0.tar.gz"
+    payload = b"synthetic\n"
+    with tarfile.open(sdist, "w:gz") as archive:
+        info = tarfile.TarInfo("jlegal-okf-0.0/forbidden_component.py")
+        info.size = len(payload)
+        archive.addfile(info, io.BytesIO(payload))
+
+    wheel = tmp_path / "jlegal_okf-0.0-py3-none-any.whl"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        archive.writestr("jlegal_okf/forbidden_component.py", payload)
+    return sdist, wheel
+
+
+def test_distribution_extra_patterns_reject_both_archive_types(tmp_path: Path) -> None:
+    patterns = (("private-only component", r"forbidden_component"),)
+    sdist, wheel = _write_synthetic_archives(tmp_path)
+
+    sdist_issues = verify_distribution.verify_sdist(sdist, ROOT, patterns)
+    wheel_issues = verify_distribution.verify_wheel(wheel, ROOT, patterns)
+
+    assert any("private-only component" in issue for issue in sdist_issues), sdist_issues
+    assert any("private-only component" in issue for issue in wheel_issues), wheel_issues
+
+
+@pytest.mark.parametrize(
+    "body, expected",
+    [
+        (None, "extra patterns unavailable"),
+        ("# comments only\n", "has no patterns"),
+        ("bad regex = [unclosed\n", "invalid regex"),
+    ],
+)
+def test_distribution_extra_patterns_fail_closed_before_archive_read(
+    tmp_path: Path,
+    capsys: pytest.CaptureFixture[str],
+    body: str | None,
+    expected: str,
+) -> None:
+    patterns_file = tmp_path / "distribution-patterns.txt"
+    if body is not None:
+        patterns_file.write_text(body, encoding="utf-8")
+
+    result = verify_distribution.main(
+        [
+            "--sdist",
+            str(tmp_path / "missing.tar.gz"),
+            "--wheel",
+            str(tmp_path / "missing.whl"),
+            "--extra-patterns",
+            str(patterns_file),
+        ]
+    )
+    stderr = capsys.readouterr().err
+    assert result == 1
+    assert expected in stderr
+    assert "archive is missing" not in stderr
 
 
 def test_personal_email_is_reported_and_the_project_identity_is_not() -> None:

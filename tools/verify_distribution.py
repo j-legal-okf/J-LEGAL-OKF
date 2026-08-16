@@ -2,8 +2,8 @@
 """Verify the public allowlist of the J-LEGAL-OKF distributions.
 
 The verifier reads archive member names only.  It deliberately does not
-extract either archive, and it fails closed when the repository baseline or an
-archive entry cannot be classified.
+extract either archive, and it fails closed when the repository baseline, an
+archive entry, or a requested external pattern file cannot be classified.
 """
 
 from __future__ import annotations
@@ -64,9 +64,6 @@ FORBIDDEN_WHEEL_FILES = {".gitignore", "OKF.md", "AGENTS.md"}
 # These markers are private-boundary indicators, even when an attacker gives
 # a path an otherwise plausible public-looking suffix.
 PRIVATE_PATH_MARKERS = (
-    "rag_okf",
-    "jori_vnext",
-    "src/jori",
     "municipal",
     "private",
     "openrouter",
@@ -81,6 +78,57 @@ def _repo_root() -> Path:
     """Return the checkout containing this verifier."""
 
     return Path(__file__).resolve().parents[1]
+
+
+def load_extra_patterns(path: Path) -> tuple[tuple[tuple[str, str], ...], list[str]]:
+    """Load fail-closed ``label = regex`` path patterns from *path*.
+
+    Names that belong only to a Private consumer stay outside this public
+    repository.  Callers that own those names can supply them for both the
+    repository-tree and distribution-member scans.
+    """
+
+    try:
+        text = path.read_text(encoding="utf-8")
+    except (OSError, UnicodeError) as exc:
+        return (), [f"extra patterns unavailable: {path}: {exc}"]
+
+    patterns: list[tuple[str, str]] = []
+    issues: list[str] = []
+    for lineno, raw in enumerate(text.splitlines(), start=1):
+        line = raw.strip()
+        if not line or line.startswith("#"):
+            continue
+        label, separator, expression = line.partition("=")
+        if not separator or not label.strip() or not expression.strip():
+            issues.append(f"{path}:{lineno}: expected 'label = regex', got {raw!r}")
+            continue
+        expression = expression.strip()
+        try:
+            re.compile(expression)
+        except re.error as exc:
+            issues.append(f"{path}:{lineno}: invalid regex {expression!r}: {exc}")
+            continue
+        patterns.append((label.strip(), expression))
+    if not patterns and not issues:
+        issues.append(f"extra patterns file has no patterns: {path}")
+    return tuple(patterns), issues
+
+
+def _extra_pattern_issues(
+    prefix: str,
+    member_path: str,
+    patterns: tuple[tuple[str, str], ...],
+) -> list[str]:
+    """Report every supplied pattern that matches an archive member path."""
+
+    issues: list[str] = []
+    for label, expression in patterns:
+        if re.search(expression, member_path):
+            issues.append(
+                f"{prefix}: supplied private path pattern {label!r}: {member_path}"
+            )
+    return issues
 
 
 def _git_tracked_files(repo_root: Path) -> tuple[set[str], list[str]]:
@@ -196,7 +244,11 @@ def _is_prefix_of_allowed(path: str, allowed: set[str]) -> bool:
     return any(candidate.startswith(path + "/") for candidate in allowed)
 
 
-def verify_sdist(path: Path, repo_root: Path) -> list[str]:
+def verify_sdist(
+    path: Path,
+    repo_root: Path,
+    extra_patterns: tuple[tuple[str, str], ...] = (),
+) -> list[str]:
     """Verify a source archive without extracting it."""
 
     prefix = f"sdist {path}"
@@ -217,6 +269,7 @@ def verify_sdist(path: Path, repo_root: Path) -> list[str]:
                     issues.append(f"{prefix}: unsafe path {raw_name!r}: {reason}")
                 if normalized is None:
                     continue
+                issues.extend(_extra_pattern_issues(prefix, normalized, extra_patterns))
                 if normalized in seen:
                     issues.append(f"{prefix}: duplicate archive path: {raw_name}")
                 seen.add(normalized)
@@ -306,7 +359,11 @@ def _dist_info_required_paths(dist_info: str) -> tuple[set[str], set[str]]:
     return required, license_alternatives | notice_alternatives
 
 
-def verify_wheel(path: Path, repo_root: Path) -> list[str]:
+def verify_wheel(
+    path: Path,
+    repo_root: Path,
+    extra_patterns: tuple[tuple[str, str], ...] = (),
+) -> list[str]:
     """Verify a wheel's package and setuptools metadata allowlist."""
 
     prefix = f"wheel {path}"
@@ -327,6 +384,7 @@ def verify_wheel(path: Path, repo_root: Path) -> list[str]:
                     issues.append(f"{prefix}: unsafe path {raw_name!r}: {reason}")
                 if normalized is None:
                     continue
+                issues.extend(_extra_pattern_issues(prefix, normalized, extra_patterns))
                 if normalized in seen:
                     issues.append(f"{prefix}: duplicate archive path: {raw_name}")
                 seen.add(normalized)
@@ -430,11 +488,29 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--sdist", required=True, type=Path)
     parser.add_argument("--wheel", required=True, type=Path)
+    parser.add_argument(
+        "--extra-patterns",
+        type=Path,
+        default=None,
+        help=(
+            "file of additional 'label = regex' archive-member path patterns, "
+            "kept outside this repository"
+        ),
+    )
     args = parser.parse_args(argv)
 
+    extra: tuple[tuple[str, str], ...] = ()
+    if args.extra_patterns is not None:
+        extra, extra_issues = load_extra_patterns(args.extra_patterns)
+        if extra_issues:
+            print("distribution verification failed", file=sys.stderr)
+            for issue in extra_issues:
+                print(f"- {issue}", file=sys.stderr)
+            return 1
+
     repo_root = _repo_root()
-    issues = verify_sdist(args.sdist, repo_root)
-    issues.extend(verify_wheel(args.wheel, repo_root))
+    issues = verify_sdist(args.sdist, repo_root, extra)
+    issues.extend(verify_wheel(args.wheel, repo_root, extra))
     if issues:
         print("distribution verification failed", file=sys.stderr)
         for issue in sorted(dict.fromkeys(issues)):

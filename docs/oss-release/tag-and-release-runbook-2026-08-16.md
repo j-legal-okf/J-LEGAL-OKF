@@ -5,13 +5,12 @@ It exists so the day the maintainer cuts `v0.1.0-draft.1` can be executed
 mechanically, without re-deriving which sentences flip from true to false at
 that moment.
 
-This is change set B from the plan `sprightly-hatching-token.md`
-("公開前の矛盾解消"). Change set A (2026-08-16) intentionally left every
+The pre-public change set (2026-08-16) intentionally left every
 sentence in this document untouched, because each one is true today and
 false the moment a tag exists — flipping it early would have made it false
 now instead of tomorrow.
 
-Owner decisions this runbook assumes (recorded 2026-08-16, in the plan):
+Owner decisions this runbook assumes (recorded 2026-08-16):
 tag name `v0.1.0-draft.1`; package version bumped to `0.1.0.dev1` and
 already applied by change set A; **no release artifacts are attached** — the
 release carries notes only; PyPI is not used for this release.
@@ -85,21 +84,29 @@ exists (still scoped to security reports, not conduct reports — this
 document's point is that conduct reports have no channel yet, which remains
 true independent of visibility).
 
-## 4. GitHub repository settings (separate approval from Public化)
+## 4. GitHub repository settings and Public transition
 
-Both of the following are GitHub settings changes on
-`j-legal-okf/J-LEGAL-OKF`, not file edits, and each needs its own explicit
-approval per `jlegal-oss-separation-management`'s Git-work rules. Neither is
-authorized by this document or by change set A's commit approval.
+The owner first records the P7 final review, then gives a separate Public化
+approval. Branch protection and private vulnerability reporting are two more
+GitHub settings changes, each with its own explicit approval. None is
+authorized by this document or by a commit/push approval.
 
-1. **Branch protection on `main`**: require a pull request before merging,
-   and add `dco` (the job defined in `.github/workflows/ci.yml`) as a
-   required status check. This makes the DCO check something a contributor
-   cannot bypass by pushing directly, matching what `GOVERNANCE.md`
-   already claims about every commit needing a `Signed-off-by` trailer.
-2. **Private vulnerability reporting**: enable it under the repository's
-   Security tab. Do §2 and §3 above only after this is confirmed enabled,
-   not before and not at the same time without confirming first.
+Execute the transition in this order, without unrelated writes between steps:
+
+1. Confirm the frozen candidate SHA and CI, then obtain and record the P7
+   final review and the distinct Public化 approval.
+2. Change only repository visibility from PRIVATE to PUBLIC. Immediately
+   verify repository ID `1333075416`, visibility PUBLIC, and default branch
+   `main`. Do not roll visibility back automatically if a later step fails.
+3. **Branch protection on `main`**: immediately apply the separately approved
+   rule. Require a pull request, zero approving reviews, strict required check
+   `dco` from GitHub Actions app ID `15368`, admin enforcement, no bypass
+   actors, and prohibit force pushes and deletion. The unprotected window ends
+   only when a GET of the rule exactly matches every field. Stop on mismatch.
+4. **Private vulnerability reporting**: under its own approval, enable it and
+   confirm `enabled: true`. Do §2 and §3 above only after that confirmation.
+   If enabling fails, leave the repository Public and protected, stop, and do
+   not edit `SECURITY.md` or `CODE_OF_CONDUCT.md`.
 
 ## 5. Release artifacts (owner decision: none attached)
 
@@ -121,20 +128,29 @@ notes only** — no attached files, no PyPI publication. Concretely:
 
 ## 6. Order of operations
 
-1. Confirm the change set A commit (README/CHANGELOG/GOVERNANCE/SECURITY/
-   okf/project.md/tests, this runbook) is merged to `main`.
-2. Get the two separate GitHub-settings approvals in §4, execute them, and
-   confirm private vulnerability reporting is enabled before touching any
-   file in §2 or §3.
-3. Edit `SECURITY.md` and `CODE_OF_CONDUCT.md` per §2-3, in their own commit
-   (or the same commit as the tag-prep `CHANGELOG.md` edit — either is fine,
-   but do not combine with unrelated changes).
-4. Edit `CHANGELOG.md` per §1.
-5. Re-run the full verification matrix from
-   `sprightly-hatching-token.md` ("検証" section) against the result before
-   tagging: public suite, `tools/check_boundary.py`,
+1. Freeze the pre-public candidate SHA, complete P7 final review, and record
+   the separate Public化 approval.
+2. Execute the Public transition, then immediately establish and verify the
+   exact `main` protection described in §4.
+3. Enable and verify private vulnerability reporting under its separate
+   approval. Stop without document edits if it is not enabled.
+4. On a feature branch, edit `SECURITY.md` and `CODE_OF_CONDUCT.md` per §2-3
+   and `CHANGELOG.md` per §1. Use the actual intended tag date; if the tag
+   cannot be created that day, correct the date in a new signed-off PR.
+5. Re-run the full verification matrix against the result before tagging:
+   public suite, `tools/check_boundary.py`,
    `tools/check_release_state.py`, `jlegal --version` /
    `python -m jlegal_okf --version`, and the determinism check.
-6. Tag creation and the GitHub release itself are their own explicit
-   approvals, per `jlegal-oss-separation-management`'s Git-work rules — this
-   runbook prepares the tree for them but does not authorize them.
+6. Obtain separate approvals for the feature-branch commit, branch push, PR
+   creation, and squash merge. All eight check-runs must be `success`, including
+   `dco`; a skipped check is not success. The squash commit message must carry
+   `Signed-off-by: okf-works <294216476+okf-works@users.noreply.github.com>`.
+   After merge, recheck DCO over old-main..new-main and synchronize a clean
+   recorded base only by the phase gate's audited `merge --ff-only` exception.
+7. Create an annotated `v0.1.0-draft.1` tag only after its own approval. Verify
+   the tag object, tagger, message, and peeled target equal the new `main` SHA;
+   obtain a separate approval before pushing the tag.
+8. Publish the GitHub prerelease only after its own approval, with draft
+   profile status, known limitations, and non-warranty in the notes. Attach no
+   assets and perform no PyPI upload. Never delete or move the tag to repair a
+   release failure.
