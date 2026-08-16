@@ -11,11 +11,19 @@ import tempfile
 
 import yaml
 
+from . import __version__
 from .egov import admit_egov_xml, egov_xml_adapter, fetch_egov_xml, write_acquisition_receipt
 from .errors import AdapterError, JLegalError, ValidationError
 from .legal_okf import LegalOKFError, export_okf, validate_okf
-from .pipeline import _egov_acquisition, compile_corpus, read_crosswalk, read_jsonl, verify_manifest
+from .pipeline import JLEGAL_PROFILE, _egov_acquisition, compile_corpus, read_crosswalk, read_jsonl, verify_manifest
 from .validation import validate_corpus
+
+# Two version systems, surfaced together because the moment a user reaches
+# for --version is exactly when the distinction between them matters most:
+# the Python package version (this distribution's build) and the normative
+# profile version (the on-wire contract it implements). See README.md
+# "Versioning" for the full set of version systems this project tracks.
+_VERSION_TEXT = f"jlegal-okf {__version__} (profile {JLEGAL_PROFILE})"
 
 
 def _mapping(value: str | None):
@@ -157,6 +165,7 @@ def _validate_okf(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(prog="jlegal", description="J-LEGAL-OKF public reference core (JORI Engine)")
+    parser.add_argument("--version", action="version", version=_VERSION_TEXT)
     sub = parser.add_subparsers(dest="command", required=True)
     item = sub.add_parser("validate-source", help="Admit a saved e-Gov XML source before compilation."); item.add_argument("input"); item.add_argument("--law-id"); item.add_argument("--acquisition", help="Optional e-Gov fetch receipt JSON to verify."); item.add_argument("--report", help="Create a deterministic admission report; refuses to overwrite."); item.set_defaults(func=_validate_source)
     item = sub.add_parser("compile"); item.add_argument("input_positional", nargs="?"); item.add_argument("--input"); item.add_argument("--adapter", choices=("json", "xml", "html", "egov_xml")); item.add_argument("--mapping"); item.add_argument("--acquisition", help="Fetch receipt JSON written by jlegal fetch --receipt-out."); item.add_argument("--law-id"); item.add_argument("--out-dir", required=True); item.add_argument("--corpus-id"); item.add_argument("--rights", help="JSON file asserting source_license, bundle_license, redistribution_allowed, and commercial_use_allowed. Recorded verbatim; never inferred. Omit it and the manifest records no rights area at all."); item.set_defaults(func=_compile)

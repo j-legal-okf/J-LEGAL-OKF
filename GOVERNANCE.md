@@ -25,7 +25,9 @@ diagnostic codes — cannot be changed silently.
 
 ## Release authority
 
-Only the maintainer creates tags and releases. Nothing has been released.
+Only the maintainer creates tags and releases. Whether anything has been
+tagged or released is recorded in [`CHANGELOG.md`](CHANGELOG.md), which is
+the single place that assertion is made; it is not restated here.
 
 ## Contribution licensing
 

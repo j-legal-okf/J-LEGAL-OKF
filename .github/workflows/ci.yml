@@ -28,6 +28,16 @@ jobs:
           set -euo pipefail
           python tools/check_boundary.py
 
+      # CHANGELOG.md is the single source of truth for whether anything has
+      # been tagged or released. Five other files used to restate it, which is
+      # how one of them goes false while the others stay current. This runs
+      # here rather than in the test suite because its exemption inventory has
+      # to reach the run's output, and pytest discards a passing test's output.
+      - name: Scan the tracked tree for release-state restatements
+        run: |
+          set -euo pipefail
+          python tools/check_release_state.py
+
   dco:
     # A pull request is where a contributor's certification arrives, and the
     # base..head range is what keeps the repository's own unsigned initial

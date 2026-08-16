@@ -52,3 +52,16 @@ retrieval projectionを入力に取る別の公開プロジェクトが担うこ
 
 `generated` を実際の改訂者・改訂時刻へ更新した。`status: draft` / `verified: []` は
 変更していない（人間による確認は未了）。`okflint validate` は0エラー。
+
+**Update** — 版表記・リリース状態の再掲解消（`sprightly-hatching-token.md` 変更セットA）に伴い、
+`README.md`（`## Versioning` 節を新設）と `CHANGELOG.md`（バージョニング規約の明確化、
+「タグ／リリース無し」の再掲文3箇所の恒久表現への書き換え、`--version`/`__version__` の
+`### Added` 記録）を編集した。`project.md` の「現在地」も、`CHANGELOG.md` の文言を引用する形を
+やめ、リリース状態の正本が `CHANGELOG.md` であることを指すだけの記述へ書き直した
+（引用の再掲そのものが `okf-knowledge` の複製禁止に触れるため）。
+
+`okf_freshness.py` が検出した `SOURCE-DRIFT` 2件（`README.md` 08-12→08-16、
+`CHANGELOG.md` 08-15→08-16）は、両ファイルを読み直し、`project.md` の要約が現行の内容と
+矛盾しないことを確認したうえで `last_modified` を実ファイルへ合わせた。`generated` を
+実際の改訂者・改訂時刻へ更新した。`status: draft` / `verified: []` は変更していない。
+`okflint validate` / `audit` は0エラー、`okf_freshness.py` は本バンドルの新規 `SOURCE-DRIFT` 0件。

@@ -3,8 +3,14 @@
 All notable changes to this project are documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
-Versioning follows [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
-for released tags.
+[Semantic Versioning](https://semver.org/spec/v2.0.0.html) governs git tags
+(for example `v0.1.0-draft.1`); [PEP 440](https://peps.python.org/pep-0440/)
+governs the Python package version recorded in `pyproject.toml` (for example
+`0.1.0.dev1`). The two are related but not identical, and a tag is cut on a
+different trigger than a package version bump. See README.md
+["Versioning"](README.md#versioning) for the full set of version systems
+this project tracks, including the profile and wire schema versions that
+neither SemVer nor PEP 440 governs.
 
 ## [Unreleased]
 
@@ -12,6 +18,30 @@ Nothing has been tagged or released yet.
 
 ### Added
 
+- `jlegal --version` and `python -m jlegal_okf --version`, printing the
+  Python package version together with the profile version
+  (`jlegal-okf <package version> (profile <profile version>)`), and
+  `jlegal_okf.__version__`, both read from installed package metadata via
+  `importlib.metadata` rather than hardcoded. The package version is never
+  written into a compiled artifact; see README.md
+  ["Versioning"](README.md#versioning).
+- `tests/test_version_contract.py`, which checks that `pyproject.toml`'s
+  version literal agrees with installed package metadata and
+  `jlegal_okf.__version__`, that `--version` reports both the package and
+  profile versions, that the package version never leaks into a compiled
+  artifact, and that `tools/check_release_state.py` passes, prints every
+  exemption, fails on a planted restatement, fails closed without a git
+  baseline, and neither misses this repository's prior restatements nor
+  flags the sentences that legitimately name tags and releases.
+- `tools/check_release_state.py`, a CI check that scans the tracked tree for
+  restatements of whether anything has been tagged or released. `CHANGELOG.md`
+  is the single source of truth for that state; before this, five other files
+  asserted it in their own words. It lives in `tools/` rather than the test
+  suite for two measured reasons: its exemption inventory must reach the
+  run's output, and pytest discards a passing test's output; and `MANIFEST.in`
+  ships `tests/` into the sdist while pruning `tools/`, so a scan that shells
+  out to `git ls-files` would fail with exit status 128 in CI's
+  unpacked-sdist run. It fails closed on an unusable git baseline.
 - `tools/check_boundary.py`, a CI check that scans the tracked tree for
   private path markers, local absolute paths, credential patterns, and e-mail
   addresses other than the project's own. It complements
@@ -47,7 +77,7 @@ Nothing has been tagged or released yet.
   same three records (`acquisition`, `conversion`, `converted_at`) are
   copied to the `jlegal` extension in source and derived bundle frontmatter
   as sibling keys and checked by bundle validation. **Breaking**: renamed
-  from `jori-manifest/v4`; nothing has been tagged or released, so there is
+  from `jori-manifest/v4`; since no release preceded this change, there is
   no migration path to document.
 - An optional rights area recording `source_license`, `bundle_license`,
   `redistribution_allowed`, and `commercial_use_allowed`, written only from
@@ -140,9 +170,9 @@ Nothing has been tagged or released yet.
   identical bytes. **Breaking**: every identifier
   derived from `source.uri` changes, including `version_id`, `corpus_sha256`,
   `projection_sha256`, `build_options_sha256`, and
-  `attributes.build_provenance_sha256`. Nothing has been tagged or released,
-  so there is no migration path to document. `acquisition.source_url` is
-  unaffected; it still carries the real e-Gov retrieval URL.
+  `attributes.build_provenance_sha256`. Since no release preceded this
+  change, there is no migration path to document. `acquisition.source_url`
+  is unaffected; it still carries the real e-Gov retrieval URL.
 - `verify_manifest(..., source=...)` and `jlegal validate --source`, for
   replaying a manifest's declared recipe against an explicitly supplied file.
   `--verify-inputs` without `--source` fails closed with
@@ -203,7 +233,7 @@ Nothing has been tagged or released yet.
   this source/canonical conflation is retained rather than resolved here, and
   for why a content-free node that was pretty-printed keeps its layout
   whitespace instead of reaching that fallback.
-  Nothing has been tagged or released, so there is no migration path to
+  Since no release preceded this change, there is no migration path to
   document.
 - `DIAGNOSTIC_LAYERS` in `validation.py`, mapping every one of
   `collect_diagnostics()`'s 36 diagnostic codes to one of the four validator
@@ -238,6 +268,28 @@ Nothing has been tagged or released yet.
 
 ### Changed
 
+- Clarified that this project tracks four independent version systems
+  (profile, git tag, Python package, wire schema id) rather than one; see
+  README.md ["Versioning"](README.md#versioning) and the versioning note at
+  the top of this file. `pyproject.toml`'s package version moved from
+  `0.1.0.dev0` to `0.1.0.dev1`; this changes no hash-covered value.
+- Made `CHANGELOG.md` the single place that states whether anything has been
+  tagged or released. `GOVERNANCE.md`, `SECURITY.md`, `okf/project.md`, and
+  `docs/normalization-rules.md` previously restated that release state in
+  their own words, so cutting a tag would have made some of them false while
+  the others stayed current; each now either points to this file or is phrased
+  in the permanent past tense ("since no release preceded this change").
+  `tools/check_release_state.py`, run in CI's `boundary` job, scans the
+  tracked tree for that class of assertion. It matches a fixed set of English
+  and Japanese phrasings of the negated-existence claim, so a paraphrase
+  outside that set can still pass; it is a ratchet against the phrasings this
+  project has written, not a semantic judge. It exempts `CHANGELOG.md`, its
+  own source, `tests/test_version_contract.py`, and
+  `docs/oss-release/tag-and-release-runbook-2026-08-16.md` (which quotes the
+  sentence it instructs the reader to delete), plus the dated append-only
+  `okf/log.md` — whose whole-file exemption means a future log entry
+  restating release state is not scanned. Every exemption and that residual
+  gap are printed on every run, passing or failing.
 - `NOTICE` and `ARCHITECTURE_BOUNDARY.md` now enumerate every place the
   `JORI Engine` name is recorded. Both previously named two — package metadata
   and a manifest's `conversion` record — which a reader would take as the
@@ -260,6 +312,12 @@ Nothing has been tagged or released yet.
 
 ### Known limitations
 
+- `tools/check_release_state.py` matches a fixed pattern set, not meaning. It
+  covers the phrasings this repository has carried and a range of plausible
+  paraphrases in English and Japanese, all pinned in
+  `tests/test_version_contract.py`; a phrasing outside that set passes. Its
+  whole-file exemption for the append-only `okf/log.md` is likewise a real
+  gap, printed on every run.
 - This is a draft profile (`0.1.0-draft`), not a release.
 - Input is limited to e-Gov national-law XML; nothing is inferred from a
   title or file name.

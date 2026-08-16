@@ -131,6 +131,29 @@ jlegal validate-okf "$work_dir/bundle"
 Each command emits JSON. The generated canonical corpus and bundle retain the
 fixture's source hash; remove the temporary directory when finished.
 
+## Versioning
+
+This project tracks four independent version systems. They change on
+different triggers, and a single commit rarely bumps more than one:
+
+| System | Example | Changes when |
+|---|---|---|
+| Profile / spec | `J-LEGAL-OKF/0.1.0-draft` | the normative profile is revised |
+| git tag (SemVer) | `v0.1.0-draft.1` | a release is cut |
+| Python package (PEP 440) | `0.1.0.dev1` | a distribution is built |
+| wire schema id | `jori-corpus/v1`, `jori-manifest/v5`, `jlegal-okf-bundle/v1` | an on-wire contract changes |
+
+`jlegal --version` and `python -m jlegal_okf --version` print the Python
+package version together with the profile version, since confusing the two
+is the failure mode this table exists to prevent. `jlegal_okf.__version__`
+carries the same package version.
+
+The Python package version is never written into a compiled artifact: it is
+absent from `manifest.json`'s `conversion` record (which instead carries the
+fixed `JORI Engine` / profile pair covered by `build_options_sha256`) and
+from every other generated file. Bumping the package version therefore never
+changes a recorded digest.
+
 ## License
 
 Apache-2.0. Copyright 2026 J-LEGAL-OKF contributors. See

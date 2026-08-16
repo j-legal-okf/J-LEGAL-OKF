@@ -366,9 +366,9 @@ to the appendix node itself; it propagates to the identity of every
 numbered appendix's full subtree.
 
 **Backward compatibility**: this behavior is already the production
-implementation as of the current `main` branch of this repository; nothing
-has been tagged or released, so there is no prior public identifier scheme
-this entry migrates from or must remain compatible with. Consistent with
+implementation as of the current `main` branch of this repository; since no
+release preceded it, there is no prior public identifier scheme this entry
+migrates from or must remain compatible with. Consistent with
 this catalog's "Backward compatibility" section above, `JLEGAL-NORM-5`'s own
 definition — this locator form, this input domain, this fail-closed
 behavior — is never changed once relied upon; a future change to

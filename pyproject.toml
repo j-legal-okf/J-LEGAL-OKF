@@ -1,6 +1,6 @@
 [project]
 name = "jlegal-okf"
-version = "0.1.0.dev0"
+version = "0.1.0.dev1"
 description = "J-LEGAL-OKF public reference core (JORI Engine)"
 readme = "README.md"
 license = {text = "Apache-2.0"}

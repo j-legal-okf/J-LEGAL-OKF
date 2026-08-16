@@ -8,7 +8,7 @@ status: draft
 sources:
   - resource: ../README.md
     title: README.md
-    last_modified: 2026-08-12
+    last_modified: 2026-08-16
   - resource: ../ARCHITECTURE_BOUNDARY.md
     title: ARCHITECTURE_BOUNDARY.md
     last_modified: 2026-08-15
@@ -20,10 +20,10 @@ sources:
     last_modified: 2026-08-11
   - resource: ../CHANGELOG.md
     title: CHANGELOG.md
-    last_modified: 2026-08-15
+    last_modified: 2026-08-16
 generated:
-  by: anthropic/claude-opus-5
-  at: 2026-08-16T08:30:41+09:00
+  by: anthropic/claude-sonnet-5
+  at: 2026-08-16T17:37:42+09:00
 verified: []
 stale_after: 2026-10-31
 ---
@@ -32,8 +32,9 @@ stale_after: 2026-10-31
 
 公開候補の README、規範プロファイル、アーキテクチャ境界、scope inventory が、
 J-LEGAL-OKF の公開コア契約と除外範囲を定義する。本バンドルはその概要だけを保持し、
-実装仕様・手順・進捗を複製しない。CHANGELOG.md は「まだ何もタグ付け・リリースされて
-いない」と記録し、README.md はこの初期スライスを「完全なリリースではない」と明記する。
+実装仕様・手順・進捗を複製しない。タグ付け・リリースの有無という状態は
+[CHANGELOG.md](../CHANGELOG.md) だけが記録する正本であり、本バンドルはそれを
+再掲しない。
 
 # 何のためにあるか
 
