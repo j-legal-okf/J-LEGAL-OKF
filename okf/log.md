@@ -32,3 +32,23 @@ retrieval projectionを入力に取る別の公開プロジェクトが担うこ
 （README「It is not a complete release.」、CHANGELOG「Nothing has been tagged or released yet.」、
 プロファイルが `0.1.0-draft` のv0.1契約であり公開コアの構成要素が変わっていないこと）が
 現行の参照元でも成立することを確認したうえで `last_modified` を実ファイルへ合わせた。
+
+## 2026-08-16
+
+**Update** — `okf_freshness.py` が `project.md` に4件の `SOURCE-DRIFT`
+（`README.md` 2026-08-06→08-12、`ARCHITECTURE_BOUNDARY.md` 08-11→08-15、
+規範プロファイル 08-10→08-12、`CHANGELOG.md` 08-10→08-15）を検出したため、
+4件とも参照元を読み直してから `last_modified` を合わせた。
+
+読み直しで、`project.md` が依拠する既存の記述は現行の参照元でも成立することを確認した
+（README「It is not a complete release.」、CHANGELOG「Nothing has been tagged or released yet.」、
+公開/非公開の scope 列挙、非公式であることの明示）。一方、参照元が2026-08-12以降に
+獲得した事実のうち2件は要約に反映が必要だったため「全体の形」に追記した。
+
+- `jori-*` スキーマ識別子が互換契約の一部であり改名が破壊的変更であること、名称の
+  記録先を `NOTICE` が列挙すること（出所: `ARCHITECTURE_BOUNDARY.md` の Naming、2026-08-15改訂）
+- 権利情報を取得経路から推定せず、`jlegal compile --rights` の明示宣言時だけ記録すること
+  （出所: `README.md` の e-Gov acquisition provenance、2026-08-12改訂）
+
+`generated` を実際の改訂者・改訂時刻へ更新した。`status: draft` / `verified: []` は
+変更していない（人間による確認は未了）。`okflint validate` は0エラー。

@@ -8,22 +8,22 @@ status: draft
 sources:
   - resource: ../README.md
     title: README.md
-    last_modified: 2026-08-06
+    last_modified: 2026-08-12
   - resource: ../ARCHITECTURE_BOUNDARY.md
     title: ARCHITECTURE_BOUNDARY.md
-    last_modified: 2026-08-11
+    last_modified: 2026-08-15
   - resource: ../docs/jlegal-okf-profile-0.1.0-draft.md
     title: J-LEGAL-OKF Profile 0.1.0-draft
-    last_modified: 2026-08-10
+    last_modified: 2026-08-12
   - resource: ../docs/oss-release/scope-inventory.md
     title: Public scope inventory
     last_modified: 2026-08-11
   - resource: ../CHANGELOG.md
     title: CHANGELOG.md
-    last_modified: 2026-08-10
+    last_modified: 2026-08-15
 generated:
   by: anthropic/claude-opus-5
-  at: 2026-08-11T21:16:03+09:00
+  at: 2026-08-16T08:30:41+09:00
 verified: []
 stale_after: 2026-10-31
 ---
@@ -71,6 +71,15 @@ J-LEGAL-OKFは非公式のプロジェクトであり、政府・e-Gov・OKFの�
 入力hash・構造・変換証跡を保持し、validatorは安定した診断として不正な入力を
 fail-closedで報告する。exporterはsource、canonical、derivedの層を分離した
 OKF v0.2-shaped bundleを生成する。
+
+`jori-corpus/v1` をはじめとする `jori-*` スキーマ識別子は互換契約の一部であり、
+改名は編集ではなく破壊的変更である。`JORI Engine` の名称が記録される場所は
+[NOTICE](../NOTICE) が列挙し、実装・フォーマット識別子としての使用に留めて商標・
+ブランドの主張はしない（[ARCHITECTURE_BOUNDARY.md](../ARCHITECTURE_BOUNDARY.md) の Naming）。
+
+権利情報は取得経路から推定しない。e-Gov APIの受領証は `rights: null` を持ち、
+権利表明は `jlegal compile --rights` で明示的に宣言した場合だけ記録される
+（[README.md](../README.md)）。
 
 公開コアは公開された仕様、コード、合成fixtureだけで検証できることを境界原則とする。
 取得済みデータの再配布、利用者固有の設定、非決定的なモデル出力、運用情報、および
