@@ -6,10 +6,10 @@
 start.  Until now nothing enforced either sentence.
 
 The check runs over a commit range rather than over all history, so it applies
-to what a pull request proposes.  The repository's own initial commit predates
-this check and carries no sign-off; re-writing it is not possible without
-discarding the audited single-commit history, so it is out of range by design
-rather than by exemption.
+to what a pull request proposes.  The repository's own first two commits
+predate this check and carry no sign-off; re-writing them is not possible
+without discarding the audited single-commit history, so they are out of
+range by design rather than by exemption.
 
 Merge commits are skipped: a merge is created by the forge, not authored by
 the contributor whose certification the DCO is about.
