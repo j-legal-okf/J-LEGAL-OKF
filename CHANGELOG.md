@@ -14,7 +14,7 @@ neither SemVer nor PEP 440 governs.
 
 ## [Unreleased]
 
-Nothing has been tagged or released yet.
+## [0.1.0-draft.1] - 2026-08-18
 
 ### Added
 
@@ -389,4 +389,5 @@ Nothing has been tagged or released yet.
 - The project excludes LLM execution, audition, enrichment, OCR, municipal
   ordinances, case law, and legal interpretation.
 
-[Unreleased]: https://github.com/j-legal-okf/J-LEGAL-OKF/commits/main
+[Unreleased]: https://github.com/j-legal-okf/J-LEGAL-OKF/compare/v0.1.0-draft.1...main
+[0.1.0-draft.1]: https://github.com/j-legal-okf/J-LEGAL-OKF/releases/tag/v0.1.0-draft.1

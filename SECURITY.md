@@ -11,9 +11,7 @@ narrow this scope away from `main`.
 
 Use GitHub's private vulnerability reporting on
 [`j-legal-okf/J-LEGAL-OKF`](https://github.com/j-legal-okf/J-LEGAL-OKF)
-(Security tab → Report a vulnerability). This feature must be enabled on the
-repository by the maintainer, and until the repository is public and the
-feature is enabled, this reporting channel may not be available.
+(Security tab → Report a vulnerability). This reporting channel is enabled.
 
 Please do not open a public issue for a suspected vulnerability.
 
