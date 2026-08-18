@@ -66,9 +66,9 @@ available before deciding what to do:
 
 - GitHub's abuse or content reporting exists, but it is routed to GitHub, not
   to this project's maintainer.
-- Once this repository is public and the feature is enabled, the repository's
-  private security advisory form under the Security tab exists, but it is
-  scoped to security vulnerability reports rather than conduct reports.
+- The repository's private security advisory form under the Security tab
+  exists, but it is scoped to security vulnerability reports rather than
+  conduct reports.
 - Making this repository public does not add such a channel. If one is added,
   it will be stated here.
 
