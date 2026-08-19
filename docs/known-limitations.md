@@ -86,11 +86,17 @@ posture"](../SECURITY.md#known-parser-posture)):
   external references, which blocks entity-expansion bombs and XXE. These
   flags do not bound memory or CPU consumption from a large but
   well-formed document, and give no decompression-bomb protection.
-- **Known limitation — the 64 MiB admission cap does not cover `jlegal
-  fetch`.** The cap applies only to the saved-file path
-  (`_read_admissible_xml`); `fetch` parses the API response body before
-  the cap can apply, since the HTTP client has already decompressed and
-  returned the full body by the time parsing starts.
+- **The 64 MiB admission cap also covers `jlegal fetch`.** The saved-file
+  path enforces the cap with `_read_admissible_xml`; `fetch_egov_xml`
+  enforces the same `MAX_EGOV_XML_BYTES` cap independently, by reading the
+  HTTP response body incrementally and aborting as soon as the accumulated
+  byte count exceeds it, before the full body is ever materialized in
+  memory and before anything is written to disk. Exceeding the cap fails
+  closed with `EGOV_FETCH_TOO_LARGE`; no output file or acquisition receipt
+  is created. A server-supplied `Content-Length` over the cap is used only
+  as an early-exit optimization — correctness never depends on it, since
+  the header is absent for chunked responses and is a self-declared value
+  from an untrusted peer.
 - The generic `xml` and `html` adapters (`src/jlegal_okf/adapters.py`)
   parse with the standard library's `xml.etree.ElementTree`, which is
   **not** hardened against entity-expansion or quadratic-blowup

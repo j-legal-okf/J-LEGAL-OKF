@@ -43,6 +43,32 @@ def _minimal_law(body: str, *, date_value: str | None = None) -> str:
     return f"<law_data_response>{envelope}<law_full_text><Law LawId=\"InventedLaw001\" LawType=\"Act\" Era=\"Reiwa\" Year=\"2\" PromulgateMonth=\"4\" PromulgateDay=\"1\"><LawBody><LawTitle>架空検証法</LawTitle>{body}</LawBody></Law></law_full_text></law_data_response>"
 
 
+class _StreamedResponse:
+    """Context manager standing in for what ``httpx.stream(...)`` yields, so
+    tests can drive ``fetch_egov_xml`` without any network access."""
+
+    def __init__(self, response: httpx.Response) -> None:
+        self._response = response
+
+    def __enter__(self) -> httpx.Response:
+        return self._response
+
+    def __exit__(self, *exc_info: object) -> None:
+        return None
+
+
+def _stub_stream(monkeypatch: pytest.MonkeyPatch, response: httpx.Response) -> list[tuple[str, dict]]:
+    """Replace ``httpx.stream`` with a network-free stand-in returning ``response``."""
+    calls: list[tuple[str, dict]] = []
+
+    def _stream(method: str, url: str, **kwargs: object) -> _StreamedResponse:
+        calls.append((url, kwargs))
+        return _StreamedResponse(response)
+
+    monkeypatch.setattr(httpx, "stream", _stream)
+    return calls
+
+
 def test_ids_versions_and_diagnostics_are_stable() -> None:
     source = SourceRef("file:///synthetic.xml", hashlib.sha256(b"synthetic").hexdigest(), "fixture", "invented")
     root = LegalNode("Example", "Act", None, "invented", "/law/root", NodeKind.LAW, 0, "Invented", Temporal(), source)
@@ -569,19 +595,45 @@ def test_bare_egov_law_never_guesses_identity(tmp_path: Path) -> None:
 
 def test_fetch_helper_uses_v2_parameters_without_network(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     content = _minimal_law("<MainProvision><Article Num=\"1\"><Paragraph Num=\"1\"><ParagraphSentence>本文</ParagraphSentence></Paragraph></Article></MainProvision>").encode()
-    calls: list[tuple[str, dict]] = []
     response = httpx.Response(200, content=content, request=httpx.Request("GET", "https://laws.e-gov.go.jp/api/2/law_data/InventedLaw001?law_full_text_format=xml&response_format=xml&asof=2024-04-01"))
-    monkeypatch.setattr(httpx, "get", lambda url, **kwargs: calls.append((url, kwargs)) or response)
+    calls = _stub_stream(monkeypatch, response)
     output = tmp_path / "fetched.xml"
     result = fetch_egov_xml("InventedLaw001", output, as_of="2024-04-01")
     assert output.read_bytes() == content and result.sha256 == hashlib.sha256(content).hexdigest()
     assert calls[0][1]["params"] == {"response_format": "xml", "law_full_text_format": "xml", "asof": "2024-04-01"}
 
 
+def test_fetch_helper_bounds_response_body_without_content_length(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
+    """The size cap must hold even when the response never declares Content-Length
+
+    (e.g. a chunked transfer-encoding), because that header is a self-declared,
+    untrusted value that fetch_egov_xml must not depend on for correctness.
+    """
+    import jlegal_okf.egov as egov_module
+
+    monkeypatch.setattr(egov_module, "MAX_EGOV_XML_BYTES", 16)
+
+    def oversize_chunks() -> object:
+        for _ in range(4):
+            yield b"x" * 8  # 4 * 8 = 32 bytes, over the patched 16-byte cap
+
+    response = httpx.Response(
+        200,
+        content=oversize_chunks(),
+        request=httpx.Request("GET", "https://laws.e-gov.go.jp/api/2/law_data/InventedLaw001?law_full_text_format=xml&response_format=xml"),
+    )
+    assert "content-length" not in response.headers
+    _stub_stream(monkeypatch, response)
+    output = tmp_path / "fetched.xml"
+    with pytest.raises(JLegalError, match="EGOV_FETCH_TOO_LARGE"):
+        fetch_egov_xml("InventedLaw001", output)
+    assert not output.exists()
+
+
 def test_fetch_receipt_is_verified_and_propagated_to_okf_frontmatter(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     content = _minimal_law("<MainProvision><Article Num=\"1\"><Paragraph Num=\"1\"><ParagraphSentence>本文</ParagraphSentence></Paragraph></Article></MainProvision>").encode()
     response = httpx.Response(200, content=content, request=httpx.Request("GET", "https://laws.e-gov.go.jp/api/2/law_data/InventedLaw001?law_full_text_format=xml&response_format=xml&asof=2024-04-01"))
-    monkeypatch.setattr(httpx, "get", lambda *_args, **_kwargs: response)
+    _stub_stream(monkeypatch, response)
     xml = tmp_path / "fetched.xml"
     receipt = tmp_path / "receipt.json"
     result = fetch_egov_xml("InventedLaw001", xml, as_of="2024-04-01")
@@ -615,7 +667,7 @@ def test_fetch_receipt_is_verified_and_propagated_to_okf_frontmatter(tmp_path: P
 def test_acquisition_rejects_forged_retrieval_facts(tmp_path: Path, monkeypatch: pytest.MonkeyPatch, field: str, value: str) -> None:
     content = _minimal_law("<MainProvision><Article Num=\"1\"><Paragraph Num=\"1\"><ParagraphSentence>本文</ParagraphSentence></Paragraph></Article></MainProvision>").encode()
     response = httpx.Response(200, content=content, request=httpx.Request("GET", "https://laws.e-gov.go.jp/api/2/law_data/InventedLaw001?law_full_text_format=xml&response_format=xml&asof=2024-04-01"))
-    monkeypatch.setattr(httpx, "get", lambda *_args, **_kwargs: response)
+    _stub_stream(monkeypatch, response)
     xml = tmp_path / "fetched.xml"
     receipt = tmp_path / "receipt.json"
     write_acquisition_receipt(fetch_egov_xml("InventedLaw001", xml, as_of="2024-04-01"), receipt)

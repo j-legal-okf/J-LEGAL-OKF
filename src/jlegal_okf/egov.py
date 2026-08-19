@@ -763,16 +763,41 @@ def fetch_egov_xml(
     if normalized_as_of is not None:
         params["asof"] = normalized_as_of
     try:
-        response = httpx.get(endpoint, params=params, timeout=float(timeout), headers={"Accept": "application/xml"}, follow_redirects=True)
+        # Read the body incrementally and enforce MAX_EGOV_XML_BYTES as bytes
+        # arrive, so an oversize or malfunctioning endpoint can never make the
+        # full response materialise in memory (let alone reach disk) before
+        # the cap applies.
+        with httpx.stream(
+            "GET", endpoint, params=params, timeout=float(timeout),
+            headers={"Accept": "application/xml"}, follow_redirects=True,
+        ) as response:
+            # A declared Content-Length over the cap lets us bail before
+            # reading any body bytes, but this is an optimisation only:
+            # chunked responses have no Content-Length at all, and the header
+            # is a self-declared value from an untrusted peer, so it is never
+            # the thing the cap actually depends on -- the accumulated-byte
+            # check below is.
+            declared_length = response.headers.get("content-length")
+            if declared_length is not None and declared_length.isdigit() and int(declared_length) > MAX_EGOV_XML_BYTES:
+                raise JLegalError("EGOV_FETCH_TOO_LARGE")
+            buffer = bytearray()
+            for chunk in response.iter_bytes():
+                buffer.extend(chunk)
+                if len(buffer) > MAX_EGOV_XML_BYTES:
+                    raise JLegalError("EGOV_FETCH_TOO_LARGE")
+            content = bytes(buffer)
+            status_code = response.status_code
+            # Preserve the server-observed final URL, including any redirect,
+            # rather than reconstructing a request URL from local parameters.
+            source_url = str(response.url)
     except httpx.TimeoutException as exc:
         raise JLegalError("EGOV_FETCH_TIMEOUT") from exc
     except httpx.HTTPError as exc:
         raise JLegalError("EGOV_FETCH_NETWORK") from exc
-    content = response.content
-    if response.status_code < 200 or response.status_code >= 300:
+    if status_code < 200 or status_code >= 300:
         code = _response_error_code(content)
         suffix = f":{code}" if code else ""
-        raise JLegalError(f"EGOV_FETCH_HTTP_{response.status_code}{suffix}")
+        raise JLegalError(f"EGOV_FETCH_HTTP_{status_code}{suffix}")
     try:
         root = _safe_fromstring(content)
         # The API path also accepts law numbers and revision IDs.  Validate the
@@ -782,9 +807,6 @@ def fetch_egov_xml(
     except (DefusedXmlException, ET.ParseError, AdapterError) as exc:
         raise JLegalError("EGOV_FETCH_XML") from exc
     _atomic_bytes(target, content)
-    # Preserve the server-observed final URL, including any redirect, rather
-    # than reconstructing a request URL from local parameters.
-    source_url = str(response.url)
     retrieved_at = datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace("+00:00", "Z")
     return FetchResult(
         law_id.strip(), str(target), hashlib.sha256(content).hexdigest(), endpoint,
