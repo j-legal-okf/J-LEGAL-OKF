@@ -154,7 +154,7 @@ posture"](../SECURITY.md#known-parser-posture)):
 - **Known limitation — the `egov_xml` adapter populates only
   `Temporal.promulgated`.** Every node from a single `egov_xml` compile is
   built with `Temporal(promulgated=...)` only
-  (`src/jlegal_okf/egov.py:599`, the adapter's only `Temporal(...)`
+  (`src/jlegal_okf/egov.py` `egov_xml_adapter()`, the adapter's only `Temporal(...)`
   construction site); `valid_from`, `valid_to`, and `repealed` are always
   `null` for the `egov_xml` adapter's output specifically. Entry into
   force, amendment periods, and repeal are not derived from e-Gov source

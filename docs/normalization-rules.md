@@ -42,7 +42,7 @@ ASCII-whitespace-collapsed, and stripped before being hashed into a
 `law_`/`node_`/`ver_` UUID; jurisdiction and authority are additionally
 lowercased.
 
-**Function**: `normalize_identifier()`, `src/jlegal_okf/model.py:21-24`.
+**Function**: `normalize_identifier()`, `src/jlegal_okf/model.py` `normalize_identifier()`.
 
 ```python
 def normalize_identifier(value: str, *, authority_or_jurisdiction: bool = False) -> str:
@@ -50,7 +50,7 @@ def normalize_identifier(value: str, *, authority_or_jurisdiction: bool = False)
     return result.lower() if authority_or_jurisdiction else result
 ```
 
-`_WS` (`model.py:17`) is `re.compile(r"[\t\n\r\f\v ]+")` — tab, newline, CR,
+`_WS` (`src/jlegal_okf/model.py` `_WS`) is `re.compile(r"[\t\n\r\f\v ]+")` — tab, newline, CR,
 FF, VT, and ASCII space only. The regex itself does not match U+3000
 IDEOGRAPHIC SPACE. However, `unicodedata.normalize("NFKC", ...)` runs
 *first* and NFKC's decomposition maps U+3000 to U+0020 (ASCII space) before
@@ -63,37 +63,49 @@ is never elided.
 
 **Applies to** (all via `src/jlegal_okf/model.py`), with lowercasing noted
 per call site — this is the complete set of `normalize_identifier()` call
-sites in the package, including the three inside `semantic_locator()`
-(`JLEGAL-NORM-4`):
+sites that feed a hashed identifier, including the four inside
+`semantic_locator()` (three under `JLEGAL-NORM-4`, plus the `source_tag` call
+added by `JLEGAL-NORM-5`). Because several rows name the same function, each
+row also names *which* call inside it. The three further calls in
+`LegalNode.__post_init__` feed no identifier and are described after the
+table.
 
 | Field / call site | Function | `authority_or_jurisdiction` (lowercased?) |
 | --- | --- | --- |
-| `jurisdiction` | `law_identifier()` (`model.py:35`) | Yes |
-| `authority` | `law_identifier()` (`model.py:36`) | Yes |
-| `law_number_key` | `law_identifier()` (`model.py:39`) | No |
-| `source_law_key` | `law_identifier()` (`model.py:43`) | No |
-| `law_id` | `node_identifier()` (`model.py:50`) | No |
-| `locator` | `node_identifier()` (`model.py:50`) | No |
-| `node_id` | `version_identifier()` (`model.py:81`) | No |
-| `segment` (locator slug) | `semantic_locator()` (`model.py:295`, `JLEGAL-NORM-4`) | Yes |
-| `source_key` (locator hash fallback) | `semantic_locator()` (`model.py:300`, `JLEGAL-NORM-4`) | No |
-| `segment` (locator hash prefix) | `semantic_locator()` (`model.py:302`, `JLEGAL-NORM-4`) | No |
+| `jurisdiction` | `law_identifier()` (`src/jlegal_okf/model.py` `law_identifier()`) | Yes |
+| `authority` | `law_identifier()` (`src/jlegal_okf/model.py` `law_identifier()`) | Yes |
+| `law_number_key` | `law_identifier()` (`src/jlegal_okf/model.py` `law_identifier()`) | No |
+| `source_law_key` | `law_identifier()` (`src/jlegal_okf/model.py` `law_identifier()`) | No |
+| `law_id` | `node_identifier()` (`src/jlegal_okf/model.py` `node_identifier()`) | No |
+| `locator` | `node_identifier()` (`src/jlegal_okf/model.py` `node_identifier()`) | No |
+| `node_id` | `version_identifier()` (`src/jlegal_okf/model.py` `version_identifier()`) | No |
+| `segment` (locator slug) | `semantic_locator()`, the sanitized-slug call (`src/jlegal_okf/model.py` `semantic_locator()`, `JLEGAL-NORM-4`) | Yes |
+| `source_tag` (appendix locator tag) | `semantic_locator()`, the `source_tag` call reached only when `ordinal is not None and source_tag is not None` (`src/jlegal_okf/model.py` `semantic_locator()`, `JLEGAL-NORM-5`) | Yes |
+| `source_key` (locator hash fallback) | `semantic_locator()`, the fallback call taken when no ordinal was supplied and the sanitized slug is empty (`src/jlegal_okf/model.py` `semantic_locator()`, `JLEGAL-NORM-4`) | No |
+| `segment` (locator hash prefix) | `semantic_locator()`, the hash-prefix call taken when the slug is nonempty and `ordinal is None` (`src/jlegal_okf/model.py` `semantic_locator()`, `JLEGAL-NORM-4`) | No |
 
-`jurisdiction`, `authority`, and the locator `segment` sanitized at
-`model.py:295` are the only call sites that pass
-`authority_or_jurisdiction=True` and are therefore lowercased.
+Four identifier-feeding call sites pass `authority_or_jurisdiction=True` and
+are therefore lowercased: `jurisdiction` and `authority` in
+`src/jlegal_okf/model.py` `law_identifier()`, the locator `segment` sanitized
+into the slug in `src/jlegal_okf/model.py` `semantic_locator()`, and the
+appendix `source_tag` normalized in that same function under
+`JLEGAL-NORM-5`. (`LegalNode.__post_init__` passes the flag as well, for
+`jurisdiction` and `authority`, but only as an emptiness check — see the
+paragraph below.)
 `law_number_key`, `source_law_key`, `law_id`, `locator`, `node_id`, and the
-two other `normalize_identifier()` calls inside `semantic_locator()`
-(`source_key` at `model.py:300`, `segment` again at `model.py:302`) are
+two remaining `normalize_identifier()` calls inside `semantic_locator()` —
+the `source_key` fallback taken when the sanitized slug is empty, and the
+`segment` hash prefix taken when the slug is nonempty and no ordinal was
+supplied, both in `src/jlegal_okf/model.py` `semantic_locator()` — are
 NFKC-normalized and whitespace-collapsed but keep their original case.
-`LegalNode.__post_init__` (`model.py:191`) applies the same function to
+`LegalNode.__post_init__` (`src/jlegal_okf/model.py` `LegalNode`) applies the same function to
 `jurisdiction`, `authority`, and `locator` again, but only to check they are
 nonempty after normalization — it does not itself feed a hashed identifier.
 
 **Never applied to** `LegalNode.text` or the source XML bytes. `text` is
 produced by `_render_text` (`JLEGAL-TEXT-PRESERVE-1`) in
 `src/jlegal_okf/egov.py`, falling back to `_element_xml(child)` only when
-`_render_text` returns an empty string (`egov.py:634-635`) — `text` is never
+`_render_text` returns an empty string (`src/jlegal_okf/egov.py` `egov_xml_adapter()`) — `text` is never
 passed to `normalize_identifier()` in either case.
 
 **Verified examples** (run against this checkout, `.venv/bin/python`):
@@ -117,25 +129,25 @@ passed to `normalize_identifier()` in either case.
 `"二百三"`) into a nonnegative integer, for use only inside the ordinal/branch
 fallback parsing described in `JLEGAL-NORM-3`.
 
-**Function**: `_number_part()`, `src/jlegal_okf/egov.py:204-217`, using the
-digit and unit tables at `egov.py:36-37`:
+**Function**: `_number_part()`, `src/jlegal_okf/egov.py` `_number_part()`, using the
+digit and unit tables at `src/jlegal_okf/egov.py` `_KANJI_DIGITS`; `src/jlegal_okf/egov.py` `_KANJI_UNITS`:
 
-- `_KANJI_DIGITS` (`egov.py:36`): `〇一二三四五六七八九` → `0`-`9`.
-- `_KANJI_UNITS` (`egov.py:37`): `十百千` → `10`/`100`/`1000`.
+- `_KANJI_DIGITS` (`src/jlegal_okf/egov.py` `_KANJI_DIGITS`): `〇一二三四五六七八九` → `0`-`9`.
+- `_KANJI_UNITS` (`src/jlegal_okf/egov.py` `_KANJI_UNITS`): `十百千` → `10`/`100`/`1000`.
 
 **Applies to**: only the kanji-text branch inside `_ordinal_branch()`
 (`JLEGAL-NORM-3`), reached whenever `_ordinal_branch()` receives a value
 that is not the plain-ASCII-digit or ASCII/full-width digit-hyphen form.
 That value can come from either of `_node_number()`'s two sources
-(`egov.py:242-253`): the structural element's own `Num` XML attribute,
+(`src/jlegal_okf/egov.py` `_node_number()`): the structural element's own `Num` XML attribute,
 when that attribute's *value itself* is kanji (e.g. `Num="第十二条の二"`,
 verified: `_node_number()` applies `_ordinal_branch()` directly to the
-attribute value at `egov.py:245`, with no dependence on whether `Num` is
+attribute value at `src/jlegal_okf/egov.py` `_node_number()`, with no dependence on whether `Num` is
 present); or, only when no `Num` attribute is present or none of its
 values parse to a non-`None` ordinal, the `{tag}Num`/`{tag}Title`/
 `{tag}Label` child-element text fallback. There is no `{tag}Caption`
 fallback — `_node_number()`'s suffix loop is exactly
-`("Num", "Title", "Label")` (`egov.py:248`); `Caption` elements feed only
+`("Num", "Title", "Label")` (`src/jlegal_okf/egov.py` `_node_number()`); `Caption` elements feed only
 `_heading()`, a separate, unrelated function.
 
 **Never applied to** `LegalNode.text` or the source XML bytes.
@@ -159,12 +171,12 @@ into an `(ordinal: int, branch: tuple[int, ...])` pair. Branch numbers are
 always kept as a tuple of integers, never collapsed into a decimal — `"12-2"`
 is never treated as `"12.2"`.
 
-**Function**: `_ordinal_branch()`, `src/jlegal_okf/egov.py:220-239`, using
-`_NUMERIC_BRANCH` and `_JAPANESE_BRANCH` (`egov.py:38-39`).
+**Function**: `_ordinal_branch()`, `src/jlegal_okf/egov.py` `_ordinal_branch()`, using
+`_NUMERIC_BRANCH` and `_JAPANESE_BRANCH` (`src/jlegal_okf/egov.py` `_NUMERIC_BRANCH`; `src/jlegal_okf/egov.py` `_JAPANESE_BRANCH`).
 
 **Applies to**: the `Num` attribute's own value, or (when `Num` is absent or
 unparseable) the `{tag}Num`/`{tag}Title`/`{tag}Label` child-element text, of
-any structural element — via `_node_number()` (`egov.py:242-253`), which
+any structural element — via `_node_number()` (`src/jlegal_okf/egov.py` `_node_number()`), which
 feeds `LegalNode.ordinal` and `LegalNode.branch` in `egov_xml_adapter()`.
 
 Three input shapes:
@@ -222,7 +234,7 @@ The hash prefix in forms 2 and 3 makes same-input-same-locator stable and
 makes two different unstable inputs collision-*resistant* — a 64-bit
 truncated digest is not collision-*proof*.
 
-**Function**: `semantic_locator()`, `src/jlegal_okf/model.py:293-304`. It
+**Function**: `semantic_locator()`, `src/jlegal_okf/model.py` `semantic_locator()`. It
 first applies `JLEGAL-NORM-1` (`normalize_identifier(segment,
 authority_or_jurisdiction=True)` — NFKC + lowercase + whitespace-collapse),
 then strips every character outside `[a-z0-9_-]` via
@@ -230,7 +242,7 @@ then strips every character outside `[a-z0-9_-]` via
 
 **Applies to**: locator path segments only, i.e. the `<segment>` component
 of `/law/.../<kind>/<segment>` produced during `egov_xml_adapter()`'s tree
-walk (`egov.py:636-644`).
+walk (`src/jlegal_okf/egov.py` `egov_xml_adapter()`).
 
 **Never applied to** `LegalNode.text` or the source XML bytes.
 
@@ -277,7 +289,7 @@ the same `Num` happens to exist; a lone `AppdxStyle Num="1"` with no
 `AppdxTable` sibling still gets `appendix-appdxstyle-1`, not the bare
 `appendix-1` that `JLEGAL-NORM-4` alone would produce.
 
-**Function**: `semantic_locator()`, `src/jlegal_okf/model.py:293-304`,
+**Function**: `semantic_locator()`, `src/jlegal_okf/model.py` `semantic_locator()`,
 called with the additional `source_tag` keyword-only argument (already part
 of the function's signature and covered by `JLEGAL-NORM-4`'s function
 citation):
@@ -300,7 +312,7 @@ def semantic_locator(law_id: str, parent_locator: str | None, kind: NodeKind, se
 When `ordinal is not None` and `source_tag is not None`, `normalized_tag` is
 computed by reusing `JLEGAL-NORM-1`'s `normalize_identifier(source_tag,
 authority_or_jurisdiction=True)` (NFKC + lowercase + whitespace-collapse,
-`model.py:295`'s own normalization call, applied here to `source_tag`
+`src/jlegal_okf/model.py` `semantic_locator()`'s own normalization call, applied here to `source_tag`
 instead of `segment`), then applying the exact same sanitize step
 `JLEGAL-NORM-4` uses for its own `segment` — `re.sub(r"[^a-z0-9_-]+", "-",
 ...)` followed by `.strip("-")`. If `normalized_tag` is empty after this
@@ -310,7 +322,7 @@ and no locator is produced (fail-closed). When `ordinal is not None` and
 `safe = f"{kind.value}-{ordinal}"`, with no tag segment.
 
 **Call site**: `egov_xml_adapter()`'s `visit_children()`,
-`src/jlegal_okf/egov.py:636-645`:
+`src/jlegal_okf/egov.py` `egov_xml_adapter()`:
 
 ```python
             locator = semantic_locator(
@@ -325,7 +337,7 @@ and no locator is produced (fail-closed). When `ordinal is not None` and
             )
 ```
 
-`tag` (`egov.py:622`) is `_local(child.tag)` — the source XML element's own
+`tag` (`src/jlegal_okf/egov.py` `egov_xml_adapter()`) is `_local(child.tag)` — the source XML element's own
 local tag name (namespace stripped), read directly off the child being
 visited, before any kind-specific interpretation. The conditional
 expression `tag if kind is NodeKind.APPENDIX else None` selects *whether*
@@ -336,7 +348,7 @@ and so on — always receives `source_tag=None` at this call site and is
 therefore untouched by this rule.
 
 **Applies to**: every source XML element that `_NODE_TAGS`
-(`src/jlegal_okf/egov.py:348-376`) classifies as `NodeKind.APPENDIX`. As of
+(`src/jlegal_okf/egov.py` `_NODE_TAGS`) classifies as `NodeKind.APPENDIX`. As of
 this catalog entry that set is `Appdx`, `AppdxTable`, `AppdxStyle`,
 `AppdxNote`, `AppdxFig`, `AppdxFormat`, `SupplProvisionAppdx`,
 `SupplProvisionAppdxTable`, and `SupplProvisionAppdxStyle`. This rule is
@@ -353,10 +365,10 @@ display title, `Num` attribute, or any other derived value.
 appendix node's own locator path.
 
 **Effect on identity beyond the appendix node itself**: `node_identifier()`
-(`model.py:50`) hashes `locator` directly, and `version_identifier()`
-(`model.py:81`) hashes `node_id`, so a changed appendix locator changes both
+(`src/jlegal_okf/model.py` `node_identifier()`) hashes `locator` directly, and `version_identifier()`
+(`src/jlegal_okf/model.py` `version_identifier()`) hashes `node_id`, so a changed appendix locator changes both
 that appendix's `node_id` and `version_id`. Every descendant of an appendix
-node is located via `parent.locator` (`egov.py:638`, the `parent_locator`
+node is located via `parent.locator` (`src/jlegal_okf/egov.py` `egov_xml_adapter()`, the `parent_locator`
 argument threaded through `visit_children()`'s recursive walk), so an
 appendix's descendant nodes — every row, cell, and nested structural node
 under a numbered `AppdxTable`/`AppdxStyle`/etc. — also gets a changed
