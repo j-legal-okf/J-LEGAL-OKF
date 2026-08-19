@@ -10,5 +10,6 @@
 [規範プロファイル](docs/jlegal-okf-profile-0.1.0-draft.md)、[利用手順](README.md)、
 [セキュリティ](SECURITY.md)、[ライセンス](LICENSE)・[NOTICE](NOTICE)、
 [変更履歴](CHANGELOG.md)はリポジトリ直下の各正本を参照してください。
-OKF の変更・検証は `okf-knowledge` スキルの手順に従ってください。
+OKF の変更は [`CONTRIBUTING.md`](./CONTRIBUTING.md) のプルリクエスト手順に従い、内容は [`okf/project.md`](./okf/project.md) が定めるスコープ境界と整合させてください。
+検証は同じく [`CONTRIBUTING.md`](./CONTRIBUTING.md) の "Development setup and verification" にあるコマンド一式で行います。
 `okf/index.md` は機械生成ファイルであり、手編集しません。
