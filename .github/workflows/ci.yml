@@ -38,6 +38,14 @@ jobs:
           set -euo pipefail
           python tools/check_release_state.py
 
+      # Docs cite source code by symbol, not by line number, so a citation
+      # survives the file being edited. This confirms every cited symbol is
+      # still defined at module level in the file it names.
+      - name: Verify documentation citations resolve
+        run: |
+          set -euo pipefail
+          python tools/check_doc_citations.py
+
   dco:
     # A pull request is where a contributor's certification arrives, and the
     # base..head range is what keeps the repository's own unsigned initial

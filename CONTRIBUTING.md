@@ -50,8 +50,15 @@ canonical output.
 python -m pip install -e '.[dev]'
 python -m pytest
 python tools/check_boundary.py
+python tools/check_doc_citations.py
 jlegal --help
 ```
+
+Documentation in this repository cites source code by module-level symbol,
+never by line number, because a line number drifts silently the moment the
+cited file is edited. `tools/check_doc_citations.py` parses every cited file
+with `ast` and fails if a cited symbol is not defined at module level there,
+and it also rejects any reintroduced line-number citation.
 
 CI runs `tools/check_boundary.py` on every push and pull request; it scans the
 tracked tree for private path markers, local absolute paths, credential
