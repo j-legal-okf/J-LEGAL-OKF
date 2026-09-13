@@ -234,3 +234,35 @@ jobs:
             validate-source compile validate fetch export-okf validate-okf; do
             "$wheel_env_dir/venv/bin/jlegal" "$subcommand" --help
           done
+
+  ci-passed:
+    # Branch protection can require this one job instead of every job and
+    # matrix entry by name, so renaming a job or changing the Python matrix
+    # does not leave a required check waiting for a name that no longer
+    # runs. `always()` is what makes that safe: without it, a failed
+    # dependency makes GitHub skip this job, a skipped required check
+    # counts as passing, and the failure would merge. With it, this job
+    # always runs and `tools/check_ci_needs.py` fails unless every
+    # dependency succeeded.
+    #
+    # Do not replace it with `!cancelled()`: in a cancelled run that
+    # condition is false, this job is skipped, and the skip again counts
+    # as passing.
+    needs: [boundary, dco, tests, cli-e2e, package-distribution]
+    if: always()
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Evaluate whether every dependency's result allows merge
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          set -euo pipefail
+          python tools/check_ci_needs.py
