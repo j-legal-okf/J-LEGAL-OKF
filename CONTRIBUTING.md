@@ -67,6 +67,19 @@ patterns, and e-mail addresses other than the project's own. CI also runs
 `Signed-off-by` line fails the check rather than being noticed by hand. Run
 both locally before opening a pull request.
 
+This workflow also has an aggregate job, `ci-passed`, which depends on every
+other job here and only succeeds when each of them does; it is the one job
+to watch for whether a change passed everything CI checks, independent of
+whatever a given branch protection rule happens to require. If you add a job
+to this workflow, add it to `ci-passed`'s `needs` list as well -- a test
+enforces that the two stay in agreement. Keep CI skip instructions out of
+every commit message on a pull request's branch. GitHub does not run this
+workflow for a pull request whose head commit carries one, so `ci-passed`
+never reports; pushing a new commit without one makes it run again. A
+squash merge builds the commit on `main` from those messages or from the
+pull request title, so an instruction left in either also stops the run on
+`main` after the merge.
+
 The CLI currently exposes these subcommands: `validate-source`, `compile`,
 `validate`, `fetch`, `export-okf`, and `validate-okf`. Run
 `jlegal <subcommand> --help` for their arguments.
