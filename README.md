@@ -11,7 +11,7 @@ J-LEGAL-OKFは、日本の国法令を対象に、原典を保持しながら再
 
 ## 採用している規範とデータ形式
 
-v0.1はe-Govの法令標準XMLを入力とし、`jori-corpus/v1`を正準形式、`jori-manifest/v5`を取得・変換証跡を含むmanifest、公式Open Knowledge Format v0.2に形を合わせたbundle（OKF v0.2-shaped）を出力投影として採用します。同仕様への適合性試験は行っていません。原典忠実性、構造保持、出典追跡可能性、決定論的変換、derived knowledgeの分離を優先し、未レビューの構造を推測・平坦化しないfail-closedの方針です。詳細は[規範プロファイル](docs/jlegal-okf-profile-0.1.0-draft.md)を参照してください。既知の制限とfail-closed挙動の一覧は[`docs/known-limitations.md`](docs/known-limitations.md)にまとめています。
+現行の規範プロファイル（0.2.0-draft）はe-Govの法令標準XMLを入力とし、`jori-corpus/v2`を正準形式、`jori-manifest/v5`を取得・変換証跡を含むmanifest、公式Open Knowledge Format v0.2に形を合わせたbundle（OKF v0.2-shaped）を出力投影として採用します。同仕様への適合性試験は行っていません。原典忠実性、構造保持、出典追跡可能性、決定論的変換、derived knowledgeの分離を優先し、未レビューの構造を推測・平坦化しないfail-closedの方針です。詳細は[規範プロファイル](docs/jlegal-okf-profile-0.2.0-draft.md)を参照してください。既知の制限とfail-closed挙動の一覧は[`docs/known-limitations.md`](docs/known-limitations.md)にまとめています。
 
 ## Akoma Ntosoとの関係
 
@@ -27,8 +27,8 @@ specifications, synthetic fixtures, and their regression tests. Private
 research repositories consume this core as a dependency; they do not carry
 the authoritative public-core implementation forward.
 
-The normative v0.1 preservation policy is in
-[the public profile](docs/jlegal-okf-profile-0.1.0-draft.md). In brief,
+The normative 0.2.0-draft preservation policy is in
+[the public profile](docs/jlegal-okf-profile-0.2.0-draft.md). In brief,
 source fidelity, structural preservation, source traceability, deterministic
 conversion, and separation of derived knowledge take precedence over generated
 readability. v0.1 accepts only e-Gov national-law XML; it keeps source,
@@ -72,8 +72,8 @@ For local development, run `python -m pip install -e '.[dev]'`, then
 - [`CHANGELOG.md`](CHANGELOG.md) — notable changes, Keep a Changelog format.
 - [`docs/licensing-and-attribution.md`](docs/licensing-and-attribution.md) —
   license, dependency licenses, and fixture provenance.
-- [`docs/jlegal-okf-profile-0.1.0-draft.md`](docs/jlegal-okf-profile-0.1.0-draft.md)
-  — the normative v0.1 profile.
+- [`docs/jlegal-okf-profile-0.2.0-draft.md`](docs/jlegal-okf-profile-0.2.0-draft.md)
+  — the normative 0.2.0-draft profile.
 - [`docs/known-limitations.md`](docs/known-limitations.md) — consolidated
   known limitations and fail-closed behavior.
 - [`docs/validator-layers.md`](docs/validator-layers.md) — the validator's
@@ -108,7 +108,7 @@ delivery. To record licensing facts about a corpus and the bundle exported
 from it, assert them explicitly with `jlegal compile --rights <file.json>`
 (`source_license`, `bundle_license`, `redistribution_allowed`,
 `commercial_use_allowed`) — see
-[docs/jlegal-okf-profile-0.1.0-draft.md](docs/jlegal-okf-profile-0.1.0-draft.md#rights-metadata).
+[docs/jlegal-okf-profile-0.2.0-draft.md](docs/jlegal-okf-profile-0.2.0-draft.md#rights-metadata).
 Compiling without it records no rights area at all.
 
 ## Offline synthetic example
@@ -138,10 +138,10 @@ different triggers, and a single commit rarely bumps more than one:
 
 | System | Example | Changes when |
 |---|---|---|
-| Profile / spec | `J-LEGAL-OKF/0.1.0-draft` | the normative profile is revised |
+| Profile / spec | `J-LEGAL-OKF/0.2.0-draft` | the normative profile is revised |
 | git tag (SemVer) | `v0.1.0-draft.1` | a release is cut |
 | Python package (PEP 440) | `0.1.0.dev1` | a distribution is built |
-| wire schema id | `jori-corpus/v1`, `jori-manifest/v5`, `jlegal-okf-bundle/v1` | an on-wire contract changes |
+| wire schema id | `jori-corpus/v2`, `jori-manifest/v5`, `jlegal-okf-bundle/v1` | an on-wire contract changes |
 
 `jlegal --version` and `python -m jlegal_okf --version` print the Python
 package version together with the profile version, since confusing the two

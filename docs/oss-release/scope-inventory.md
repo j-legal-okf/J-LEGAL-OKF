@@ -10,7 +10,7 @@
 
 ## In scope for v0.1
 
-The canonical `jori-corpus/v1` model, deterministic identifiers, hashes,
+The canonical `jori-corpus/v2` model, deterministic identifiers, hashes,
 manifests, crosswalk serialization, and retrieval projection; validator
 diagnostics; generic JSON/XML/XHTML adapters; saved e-Gov national-law XML
 conversion and the explicit `fetch` helper; OKF v0.2 export and validation for

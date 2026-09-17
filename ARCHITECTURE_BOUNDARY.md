@@ -70,7 +70,7 @@ transferred into this repository.
 specification, repository, CLI, and package identifiers. `JORI Engine`, and
 the lowercase `jori` token derived from it, are implementation and format
 identifiers. They are retained because they are load-bearing, not out of
-preference: `jori-corpus/v1`, `jori-manifest/v3`, `jori-manifest/v5`,
+preference: `jori-corpus/v2`, `jori-manifest/v3`, `jori-manifest/v5`,
 `jori-manifest/v6`, and `jori-projection/v1` are schema strings that
 compatibility depends on, and the `conversion` record they accompany is fixed
 by regression data. Renaming any of them is a breaking change, not an edit.

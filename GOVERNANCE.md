@@ -19,7 +19,7 @@ consequence of activity.
 ## Decision-making
 
 Profile changes are normative and require a documented revision of
-[`docs/jlegal-okf-profile-0.1.0-draft.md`](docs/jlegal-okf-profile-0.1.0-draft.md).
+[`docs/jlegal-okf-profile-0.2.0-draft.md`](docs/jlegal-okf-profile-0.2.0-draft.md).
 Stability contracts — canonical IDs, hashes, the manifest schema, and
 diagnostic codes — cannot be changed silently.
 

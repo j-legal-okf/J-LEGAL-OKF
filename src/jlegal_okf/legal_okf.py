@@ -1,7 +1,7 @@
-"""Deterministic J-LEGAL-OKF v0.1 projection and offline verifier.
+"""Deterministic J-LEGAL-OKF projection and offline verifier.
 
 The generated legal bundle is deliberately separate from the repository's own
-``okf/`` project-knowledge bundle.  It projects a verified ``jori-corpus/v1``
+``okf/`` project-knowledge bundle.  It projects a verified ``jori-corpus/v2``
 artifact into an official OKF v0.2-shaped bundle without changing canonical
 source text or introducing AI-derived legal assertions.
 """

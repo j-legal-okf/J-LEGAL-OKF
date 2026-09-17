@@ -182,7 +182,7 @@ LEGITIMATE_SENTENCES = (
     "タグ付け・リリースの有無という状態は [CHANGELOG.md](../CHANGELOG.md) だけが記録する"
     "正本であり、本バンドルはそれを再掲しない。",
     "The supported target is the current `main` branch, at profile version "
-    "`0.1.0-draft`. Whether any tag or release exists is recorded in "
+    "`0.2.0-draft`. Whether any tag or release exists is recorded in "
     "[`CHANGELOG.md`](CHANGELOG.md); a tagged release does not, by itself, "
     "narrow this scope away from `main`.",
 )

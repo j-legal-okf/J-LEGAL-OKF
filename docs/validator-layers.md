@@ -2,8 +2,8 @@
 
 ## Status and scope
 
-[`jlegal-okf-profile-0.1.0-draft.md`, "Provenance, normalization, and
-validation policy"](jlegal-okf-profile-0.1.0-draft.md#provenance-normalization-and-validation-policy)
+[`jlegal-okf-profile-0.2.0-draft.md`, "Provenance, normalization, and
+validation policy"](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy)
 organizes `validate_corpus()`'s checks into four layers (syntax, structure,
 source fidelity, semantic and temporal relations) but states that the
 code-to-layer map itself was not yet written. This document is that map.

@@ -1,5 +1,5 @@
-# J-LEGAL-OKF Profile 0.1.0-draft
-*Superseded by [0.2.0-draft](jlegal-okf-profile-0.2.0-draft.md); kept, unedited beyond this line, as the record of the contract 0.1.0-draft itself defined.*
+# J-LEGAL-OKF Profile 0.2.0-draft
+
 ## Status and purpose
 
 J-LEGAL-OKF is a draft public profile for reproducible, source-preserving
@@ -7,12 +7,48 @@ Japanese national-law knowledge bundles. It is not an official e-Gov, Japanese
 Government, or Open Knowledge Format endorsement, and it does not determine the
 legal meaning or correctness of a source.
 
+This document supersedes [the 0.1.0-draft profile](jlegal-okf-profile-0.1.0-draft.md)
+as the normative contract for the public core. The prior document is kept,
+unedited beyond a pointer to this one, as the record of what 0.1.0-draft
+itself defined; it is not simultaneously in force alongside this one.
+
+### Changes from 0.1.0-draft
+
+- **Canonical model (`LegalNode`)**: `text == ""` is now accepted. The
+  non-empty-text check that previously covered `jurisdiction`, `authority`,
+  `locator`, and `text` together now checks only `jurisdiction`, `authority`,
+  and `locator`, and is named `NODE_IDENTIFIER_EMPTY` (was `NODE_TEXT_EMPTY`).
+- **`egov_xml` adapter**: no longer backfills a structural node's empty
+  `text` with that element's own XML serialization. An empty structural node
+  (defined under "Preservation levels") now keeps exactly the empty string
+  its source renders to; see that section for the current behavior in full,
+  including the two edge cases the prior "Known limitation" note described.
+- **Projection**: `RetrievalDocument.text` may also be empty; the
+  non-empty check was dropped for this one field (a check that it is a
+  `str` remains). Every substantive canonical node is therefore still
+  projected one to one, including one whose `text` is `""`.
+- **Wire schema**: the canonical corpus schema is `jori-corpus/v2` (was
+  `jori-corpus/v1`). `LegalNode.from_dict()` reports a `jori-corpus/v1` (or
+  any other non-`jori-corpus/v2`) `schema` value as `CORPUS_SCHEMA_UNSUPPORTED`,
+  naming the received and expected values, and checks this before it checks
+  the key set; a corpus produced by the 0.1.0-draft profile's reference
+  implementation fails closed at read time rather than being silently
+  reinterpreted under the new identifiers. `jori-manifest/*` schema versions
+  are unaffected by this change: a manifest does not itself carry the corpus
+  schema string, and a v1 corpus is already rejected before a manifest's own
+  contents matter.
+- Because canonical text feeds `version_id`, the `version_id` of an empty
+  structural node changes, and so does every hash built on it. Every
+  `corpus.jsonl` also changes bytes because of the schema string. See
+  [`CHANGELOG.md`](../CHANGELOG.md) for the full breaking-change notice.
+
 JORI Engine is the profile's reference implementation. Its canonical internal
-form remains `jori-corpus/v1`; official OKF v0.2 is an export projection, not a
+form remains `jori-corpus/v2`; official OKF v0.2 is an export projection, not a
 replacement for canonical evidence.
 
-This document is the normative v0.1 profile for the public core. Research
-notes, review records, and Private overlays do not alter this contract.
+This document is the normative 0.2.0-draft profile for the public core.
+Research notes, review records, and Private overlays do not alter this
+contract.
 
 ## Normative and authoritative references
 
@@ -25,7 +61,7 @@ Format-dependent behavior in this profile follows these primary sources:
 They define the referenced XML, API, and OKF formats. They do not endorse
 J-LEGAL-OKF itself, which remains this project's independent draft profile.
 
-## v0.1 contract
+## 0.2.0-draft contract
 
 ### Preservation and scope
 
@@ -33,9 +69,9 @@ The following priorities apply in order: source fidelity, structural
 preservation, source traceability, deterministic transformation, and separation
 of derived knowledge. Readability or generated prose must not override them.
 
-v0.1 is limited to Japanese national-law XML supplied by e-Gov. It does not
-infer a national-law source from a title, filename, or a different input type.
-Each accepted source has three distinct concerns:
+0.2.0-draft is limited to Japanese national-law XML supplied by e-Gov. It does
+not infer a national-law source from a title, filename, or a different input
+type. Each accepted source has three distinct concerns:
 
 - **source**: the received bytes/text and their provenance;
 - **canonical**: the deterministic structural representation derived from that
@@ -152,27 +188,61 @@ This rule never rewrites character data; it only omits the subset of XML
 `S`-production whitespace that the content model guarantees is layout, not
 source text.
 
-**Known limitation**: a structural node with no character data of its own
-(for example, an empty appendix-table cell written as `<TableColumn/>`)
-currently carries that element's own XML serialization as `text` instead of
-an empty string, because the canonical model's existing non-empty-text
-invariant (`NODE_TEXT_EMPTY` in `model.py`) rejects a node with `text == ""`.
-This is a known source/canonical conflation, retained here for compatibility
-with that invariant rather than resolved by this revision; resolving it —
-for example, by relaxing the invariant or introducing an explicit null/empty
-representation — requires a separate reviewed change. This limitation is
-also indexed in [`docs/known-limitations.md`, "Supported
-structure"](known-limitations.md#1-supported-structure).
+In this section, an **empty structural node** is a canonical node whose
+rendered `text` is the empty string: no element anywhere in its subtree
+contributes a character, and that includes XML whitespace inside a leaf,
+which is never elided (see below). A node whose descendants carry text, such
+as an `Article` whose `Sentence` has text, is not an empty structural node,
+even though the `Article` element owns no character data directly.
 
-That substitution is keyed on the rendered text being the empty string, which
-is narrower than "content-free". A leaf element has no children, so it is
-never subject to formatting elision: the same empty cell written as
-`<TableColumn>` plus a newline and indentation renders as that indentation,
-which is not empty and therefore keeps the layout whitespace rather than
-reaching the substitution. The two spellings therefore disagree with each
-other, and their `version_id`s differ. A content-free element that does have
-element children is layout-dependent inside the substitution branch as well,
-because the element's own serialization re-emits the whitespace between them.
+An empty structural node — for example, an empty appendix-table cell written
+as `<TableColumn/>` — has `text == ""`. The element's own XML serialization
+is never substituted: canonical `text` is exactly the empty string the
+source renders to, and `LegalNode` accepts `text == ""` (only `jurisdiction`,
+`authority`, and `locator` must remain nonempty after normalization,
+`NODE_IDENTIFIER_EMPTY` in `model.py`). A structural element with element
+children is empty in the same way when every descendant renders to the empty
+string, because the formatting whitespace between structural children is
+elided by the rule above. For example, an `Article` containing only a
+`Paragraph` containing only a self-closing `Item`, with or without
+pretty-printed whitespace between those elements, gives `Item`, `Paragraph`,
+and `Article` the same `text == ""`.
+
+This does not make every content-free node layout-independent. A **leaf**
+element (no child elements) never has its own text elided, whether or not
+that text is XML formatting whitespace: the same empty cell written as
+`<TableColumn>` plus a newline and indentation is a leaf whose only text node
+is that whitespace, so it keeps it verbatim (`text == "\n      "`, not `""`),
+exactly as any other leaf's text is kept. And because a structural ancestor
+elides only *its own* directly owned text and tail nodes — never text a
+descendant's render already contributed — that same leaf whitespace
+propagates upward unelided through every structural ancestor whose own
+contribution is otherwise empty: an `Item` whose entire content is a newline
+and indentation, nested inside an otherwise content-free `Paragraph` inside an
+otherwise content-free `Article`, gives `Item`, `Paragraph`, and `Article` the
+identical `text == "\n    "`, not `""` — because each ancestor's rendered
+text is the concatenation of its children's *already rendered* text, which is
+not itself re-elided. None of these nodes is an empty structural node. The two spellings
+`<TableColumn/>` and `<TableColumn> </TableColumn>` (one XML S-production
+space) remain distinct XML infosets with distinct character data — `""`
+versus `" "` — so they keep different `text` and different `version_id`, as
+source fidelity requires; see "What this revision fixes, and what it does
+not" below.
+
+**What this revision fixes, and what it does not.** 0.1.0-draft's
+non-empty-text invariant forced an empty structural node to carry that
+element's own XML serialization as `text` instead of
+`""`, so canonical text — and therefore `version_id` and every hash built on
+it — could contain markup the source never had. That is the conflation this
+revision removes. It does **not** change, and was never meant to change, the
+separate fact that two source spellings with different character data get
+different identity: `<TableColumn/>` and `<TableColumn> </TableColumn>` are
+different XML infosets — empty versus one space — and keep different `text`
+and different `version_id` after this revision exactly as before it. Reading
+the prior "Known limitation" note as describing *that* difference would be
+describing a different, not-a-defect behavior that this profile's
+source-fidelity priority (see "Preservation and scope" above) requires and
+does not relax.
 
 Excluding `TableHeaderColumn` from the structural set has the same shape of
 cost: its whitespace may be character data in mixed content, so it is always
@@ -186,9 +256,10 @@ Whitespace between the child elements of a structural tag is dropped, so
 re-indenting those text nodes does not change `text`. Whitespace that lands
 inside any element outside the structural set — every `Sentence`, title,
 caption, label, and `*Num` tag — is preserved verbatim and does change the
-enclosing node's `text` and `version_id`, as do the content-free case and
-`TableHeaderColumn` above. A node that carries character data is therefore
-not guaranteed to be layout-stable; only the elided text nodes are.
+enclosing node's `text` and `version_id`, as does a leaf's own whitespace
+(propagating through every structural ancestor whose only content it is, per
+above) and `TableHeaderColumn` above. A node that carries character data is
+therefore not guaranteed to be layout-stable; only the elided text nodes are.
 
 **Examples**:
 
@@ -284,11 +355,22 @@ reaches byte-identical `corpus_sha256`, `crosswalk_sha256`,
 and therefore `manifest.json`'s raw bytes, may differ. `jori-manifest/v3` is
 what compilation produces for the generic JSON, XML, and HTML adapters; it
 carries no `acquisition`, `conversion`, or `converted_at` record and cannot
-be exported as a v0.1 J-LEGAL-OKF bundle for that reason. An acquisition
-receipt's own `rights` field is always null: a non-null value in a receipt is
-rejected, because e-Gov API delivery is not a rights assertion. Licensing
-facts are recorded in the separate rights area below, from an explicit
-assertion rather than from delivery.
+be exported as a 0.2.0-draft J-LEGAL-OKF bundle for that reason. An
+acquisition receipt's own `rights` field is always null: a non-null value in
+a receipt is rejected, because e-Gov API delivery is not a rights assertion.
+Licensing facts are recorded in the separate rights area below, from an
+explicit assertion rather than from delivery.
+
+The canonical corpus itself is schema-versioned independently of the
+manifest. `LegalNode.from_dict()` — and therefore the corpus-reading path of
+`jlegal validate` and `jlegal export-okf` — rejects a `schema` value other than `jori-corpus/v2`
+with `CORPUS_SCHEMA_UNSUPPORTED`, naming the received and expected values,
+checked before the key-set check (`NODE_KEYS`) that a malformed or non-object
+line still gets. A `jori-corpus/v1` corpus produced by the 0.1.0-draft
+profile's reference implementation therefore fails closed on read rather than
+being silently reinterpreted under the new identifiers; it must be
+recompiled from its original source under this profile to obtain a
+`jori-corpus/v2` corpus.
 
 Every `LegalNode.source` and manifest `inputs` entry carries a content-addressed
 `uri` (`jlegal:source:sha256:<hex>`), never a local file path. Compiling the
@@ -407,8 +489,8 @@ API response, or the adapter can produce it.
   `validate_okf` compares the two in both directions, so a bundle can neither
   invent an assertion its corpus does not make nor drop one it does
   (`JLEGAL_OKF_RIGHTS_MISMATCH`).
-- Access control and usage-scope descriptions are out of scope for v0.1; this
-  area holds licensing and permission facts only.
+- Access control and usage-scope descriptions are out of scope for
+  0.2.0-draft; this area holds licensing and permission facts only.
 
 ## Exclusions
 
@@ -418,6 +500,6 @@ or advice, Akoma Ntoso output, index/search/evaluation, and benchmark corpora.
 Future capabilities require a separately reviewed profile revision and must
 not mutate source or canonical data. LLM execution and audition specifically
 remain the independent responsibility of a Private overlay; they are not
-part of v0.1's required public-core implementation. See
+part of 0.2.0-draft's required public-core implementation. See
 [`docs/known-limitations.md`](known-limitations.md) for this scope statement
 alongside the profile's other known limitations and fail-closed behaviors.

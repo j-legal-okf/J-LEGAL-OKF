@@ -5,7 +5,7 @@
 This document collects, in one place, the known limitations and fail-closed
 behaviors that were previously scattered across
 [`README.md`](../README.md), [`SECURITY.md`](../SECURITY.md), and
-[`docs/jlegal-okf-profile-0.1.0-draft.md`](jlegal-okf-profile-0.1.0-draft.md).
+[`docs/jlegal-okf-profile-0.2.0-draft.md`](jlegal-okf-profile-0.2.0-draft.md).
 It does not introduce new facts — every statement below is transcribed or
 summarized from the reference implementation (`src/jlegal_okf/`) or from
 one of those existing documents, each cited at point of use. Where those
@@ -24,7 +24,7 @@ The reviewed e-Gov XML hierarchy is Law, Preamble, MainProvision, Part,
 Chapter, Section, Subsection, Division, Article, Paragraph, Item, Subitem,
 supplementary provisions, amendment provisions (with
 `AmendProvisionSentence`), appendices, tables, rows, and cells
-([profile §"Preservation and scope"](jlegal-okf-profile-0.1.0-draft.md#preservation-and-scope)).
+([profile §"Preservation and scope"](jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope)).
 
 - **`NewProvision` is rejected, not flattened.** It fails closed as
   `EGOV_XML_UNSUPPORTED_STRUCTURE:NewProvision` until it has a reviewed
@@ -47,22 +47,28 @@ supplementary provisions, amendment provisions (with
   declarations (`EGOV_XML_DTD_OR_ENTITY_FORBIDDEN`), parse errors, API
   error responses, missing or conflicting official law IDs, and files over
   the 64 MiB admission cap (`EGOV_XML_INPUT_TOO_LARGE`) — see [profile
-  §"Preservation and scope"](jlegal-okf-profile-0.1.0-draft.md#preservation-and-scope).
-- **Known limitation — empty structural nodes.** A structural node with no
-  character data of its own (for example an empty appendix-table cell
-  written as `<TableColumn/>`) currently carries that element's own XML
-  serialization as `text` instead of an empty string, because the
-  canonical model's non-empty-text invariant (`NODE_TEXT_EMPTY` in
-  `model.py`) rejects `text == ""`. The equivalent cell written as
-  `<TableColumn>` plus whitespace does not hit this substitution and keeps
-  the whitespace instead, so the two spellings disagree and produce
-  different `version_id`s. This is a known source/canonical conflation,
-  retained for compatibility with the non-empty-text invariant rather than
-  resolved; see [profile §"Preservation levels", "Known
-  limitation"](jlegal-okf-profile-0.1.0-draft.md#preservation-levels) for
-  the full description and the two other whitespace-elision edge cases
-  documented alongside it (`TableHeaderColumn`'s always-preserved
-  whitespace, and content-free elements with element children).
+  §"Preservation and scope"](jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope).
+- **Empty structural nodes.** A structural node whose rendered text is
+  empty (for example an empty appendix-table cell written as
+  `<TableColumn/>`) has `text == ""`; the adapter no longer backfills it
+  with that element's own XML serialization, and `LegalNode` accepts
+  `text == ""` (the former `NODE_TEXT_EMPTY` invariant is now
+  `NODE_IDENTIFIER_EMPTY` and no longer considers `text`, only
+  `jurisdiction`/`authority`/`locator`). This also holds for a structural
+  element with element children when every descendant renders to the empty
+  string: no leaf beneath it holds any character, not even whitespace. A
+  **leaf** element whose only content is XML formatting whitespace
+  (for example the same cell written as `<TableColumn>` plus a newline and
+  indentation) keeps that whitespace verbatim instead, and that whitespace
+  propagates upward through every structural ancestor whose only content it
+  is. `<TableColumn/>` (empty) and `<TableColumn> </TableColumn>` (one
+  space) remain distinct XML infosets and therefore keep different
+  `version_id`s — this is the source-fidelity behavior the profile keeps,
+  not a defect; see [profile §"Preservation levels", "Character-level
+  preservation"](jlegal-okf-profile-0.2.0-draft.md#character-level-preservation-canonical-layer-legalnodetext--rule-jlegal-text-preserve-1)
+  for the full description, both edge cases with examples, and the
+  distinction between the conflation this profile revision removed and the
+  source-fidelity behavior it does not change.
 
 - **Source-preserving only for legal relations.** Multiple effective dates in
   one supplementary-provision sentence, references, incorporation by
@@ -109,10 +115,10 @@ posture"](../SECURITY.md#known-parser-posture)):
 - **An acquisition receipt's `rights` field is always null.** A non-null
   value in a receipt is rejected: e-Gov API delivery is not itself a rights
   assertion ([profile §"Provenance, normalization, and validation
-  policy"](jlegal-okf-profile-0.1.0-draft.md#provenance-normalization-and-validation-policy)).
+  policy"](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy)).
 - **A recorded rights area is a claim, not a verified fact.** The separate,
   optional rights area ([profile §"Rights
-  metadata"](jlegal-okf-profile-0.1.0-draft.md#rights-metadata)) is written
+  metadata"](jlegal-okf-profile-0.2.0-draft.md#rights-metadata)) is written
   only from an explicit caller assertion and is never inferred. Its four
   values are opaque: a licence identifier is not resolved, the two booleans
   are not derived from it, and neither is checked against the source. A
@@ -207,7 +213,7 @@ posture"](../SECURITY.md#known-parser-posture)):
 
 LLM execution, audition, enrichment, and provider integration are excluded
 from this initial public-core slice
-([profile §"Exclusions"](jlegal-okf-profile-0.1.0-draft.md#exclusions);
+([profile §"Exclusions"](jlegal-okf-profile-0.2.0-draft.md#exclusions);
 [`README.md`](../README.md)). To state this explicitly: LLM audition is
 maintained as an independent responsibility of a Private overlay, and it is
 not included in v0.1's required public-core implementation. A Private

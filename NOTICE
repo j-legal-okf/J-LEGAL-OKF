@@ -11,7 +11,7 @@ format identifiers in:
   - package metadata (the distribution's summary);
   - the "conversion" record of a generated manifest.json, which an exported
     bundle copies into the frontmatter of its derived/ and source/ documents;
-  - the schema identifiers jori-corpus/v1, jori-manifest/v3, jori-manifest/v5,
+  - the schema identifiers jori-corpus/v2, jori-manifest/v3, jori-manifest/v5,
     jori-manifest/v6, and jori-projection/v1; and
   - the "Canonical JORI corpus" resource title carried in an exported bundle's
     derived/ and source/ documents.

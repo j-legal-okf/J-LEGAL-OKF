@@ -14,6 +14,62 @@ neither SemVer nor PEP 440 governs.
 
 ## [Unreleased]
 
+### Added
+
+- `docs/jlegal-okf-profile-0.2.0-draft.md`, the normative profile revision
+  covering the changes below. `docs/jlegal-okf-profile-0.1.0-draft.md` is
+  kept, unedited beyond a pointer to the newer document, as the record of the
+  contract 0.1.0-draft defined; it is no longer in force.
+
+### Changed
+
+- **Breaking**: an empty structural node's canonical `text` is now `""`
+  instead of that element's own XML serialization. An empty structural node
+  is one whose rendered text is empty, such as an appendix-table cell written
+  as `<TableColumn/>`; the profile's "Preservation levels" section defines the
+  term. `LegalNode` used to reject `text == ""` (`NODE_TEXT_EMPTY`), and
+  `egov_xml_adapter()` filled such a node's text with the element's own
+  serialization to satisfy that check, so canonical text could carry markup
+  the source never contained. `LegalNode` now accepts `text == ""`; the
+  remaining check covers only `jurisdiction`, `authority`, and `locator` and
+  is named `NODE_IDENTIFIER_EMPTY`.
+- `RetrievalDocument` no longer requires non-empty `text` (it must still be a
+  `str`), so a node whose `text` is `""` is still projected one to one.
+- Among the bundled adapters, the generic `json` adapter now also accepts a
+  node `text` of `""`. The generic `xml` and `html` adapters do not: their
+  field mapping turns an empty value into `None`, which `LegalNode` rejects as
+  `NODE_STRING`, as before.
+- **Breaking**: the canonical corpus schema is `jori-corpus/v2` (was
+  `jori-corpus/v1`) and the profile ID is `J-LEGAL-OKF/0.2.0-draft` (was
+  `J-LEGAL-OKF/0.1.0-draft`). `jori-manifest/*` identifiers are unchanged.
+  `LegalNode.from_dict()` reports any other `schema` value as
+  `CORPUS_SCHEMA_UNSUPPORTED`, naming the received and expected values, before
+  it checks the key set, so `jlegal validate` and `jlegal export-okf` stop on a
+  `jori-corpus/v1` corpus with that diagnostic. A bundle exported under the
+  prior profile stops in `jlegal validate-okf` with
+  `JLEGAL_OKF_MANIFEST_SHAPE`; no dedicated diagnostic was added for that case.
+- What changes when the same source is compiled again, kept apart because the
+  two are easy to conflate:
+  - For every source, `corpus.jsonl` differs in bytes and SHA-256, because
+    each line carries the schema string. The manifest's `corpus_sha256`,
+    `build_options_sha256`, and `conversion` record change with it, and so
+    does any bundle exported from that corpus.
+  - Only for a source that contains an empty structural node, that node's
+    `version_id` and its `projection.jsonl` entry also change. Other nodes'
+    `version_id`s are unchanged, and a source without such a node produces
+    the same `version_id`s and the same `projection.jsonl` bytes as before.
+- Artifacts produced with `v0.1.0-draft.1` must be regenerated from source:
+  their corpora are rejected on read, and their corpus and manifest hashes are
+  not reproduced. This project treats deterministic transformation as a
+  priority, so this break is stated here rather than left for a consumer to
+  discover.
+- What this revision does not change: two source spellings with different
+  character data keep different identity. `<TableColumn/>` (empty) and
+  `<TableColumn> </TableColumn>` (one space) are different XML infosets and
+  keep different `version_id`s, as before. The defect removed here is markup
+  injected into canonical text, not the difference between those spellings.
+  See the profile's "What this revision fixes, and what it does not".
+
 ## [0.1.0-draft.1] - 2026-08-18
 
 ### Added

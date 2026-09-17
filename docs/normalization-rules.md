@@ -12,7 +12,7 @@ elsewhere in this profile:
 
 - **Byte/text/display preservation** (`JLEGAL-BYTE-PRESERVE-1`,
   `JLEGAL-TEXT-PRESERVE-1`, `JLEGAL-DISPLAY-TRIM-1`) is normative in
-  [`jlegal-okf-profile-0.1.0-draft.md`, "Preservation levels"](jlegal-okf-profile-0.1.0-draft.md#preservation-levels).
+  [`jlegal-okf-profile-0.2.0-draft.md`, "Preservation levels"](jlegal-okf-profile-0.2.0-draft.md#preservation-levels).
   Those rules govern how source bytes and `LegalNode.text` are preserved or
   trimmed; the rules below govern identifier and locator normalization, a
   distinct concern (identity/addressing, not content preservation), so they
@@ -22,7 +22,7 @@ elsewhere in this profile:
   `egov.py`) is out of scope here: it derives `Temporal.promulgated` from
   schema-defined Era/Year/Month/Day XML attributes rather than normalizing a
   designated comparison field, and it is already covered by the profile's
-  ["Provenance, normalization, and validation policy"](jlegal-okf-profile-0.1.0-draft.md#provenance-normalization-and-validation-policy)
+  ["Provenance, normalization, and validation policy"](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy)
   section.
 
 ## Backward compatibility (applies to every rule below)
@@ -103,10 +103,12 @@ NFKC-normalized and whitespace-collapsed but keep their original case.
 nonempty after normalization — it does not itself feed a hashed identifier.
 
 **Never applied to** `LegalNode.text` or the source XML bytes. `text` is
-produced by `_render_text` (`JLEGAL-TEXT-PRESERVE-1`) in
-`src/jlegal_okf/egov.py`, falling back to `_element_xml(child)` only when
-`_render_text` returns an empty string (`src/jlegal_okf/egov.py` `egov_xml_adapter()`) — `text` is never
-passed to `normalize_identifier()` in either case.
+`_render_text`'s result itself (`JLEGAL-TEXT-PRESERVE-1`,
+`src/jlegal_okf/egov.py`), including when it is the empty string; there is no
+fallback to `_element_xml(child)` for an empty render (`_element_xml` is used
+only to serialize an inline/unknown-leaf child inside `_render_text` itself,
+`src/jlegal_okf/egov.py` `_render_text()`) — `text` is never passed to
+`normalize_identifier()`.
 
 **Verified examples** (run against this checkout, `.venv/bin/python`):
 
