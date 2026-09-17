@@ -85,7 +85,7 @@ def _admission_failure(diagnostic: str) -> dict:
         "diagnostics": [diagnostic],
         "input_kind": None,
         "official_law_id": None,
-        "profile": "J-LEGAL-OKF/0.1.0-draft",
+        "profile": "J-LEGAL-OKF/0.2.0-draft",
         "receipt_verified": False,
         "schema": "jlegal-egov-admission/v1",
         "source_bytes": None,

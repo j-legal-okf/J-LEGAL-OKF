@@ -65,3 +65,16 @@ retrieval projectionを入力に取る別の公開プロジェクトが担うこ
 矛盾しないことを確認したうえで `last_modified` を実ファイルへ合わせた。`generated` を
 実際の改訂者・改訂時刻へ更新した。`status: draft` / `verified: []` は変更していない。
 `okflint validate` / `audit` は0エラー、`okf_freshness.py` は本バンドルの新規 `SOURCE-DRIFT` 0件。
+
+## 2026-09-18
+
+**Update** — 規範プロファイルの改版（`0.1.0-draft` → `0.2.0-draft`、正準コーパスの
+schema `jori-corpus/v1` → `jori-corpus/v2`）に追従した。`OKF.md` と `project.md` の
+プロファイルへのリンク、`sources` の参照先、本文の schema 識別子2箇所を更新した。
+
+`README.md`、`ARCHITECTURE_BOUNDARY.md`、`docs/oss-release/scope-inventory.md`、
+`CHANGELOG.md`、新しいプロファイルを読み直した。`project.md` の要約のうち、改版で
+食い違ったのは schema 識別子とプロファイルの参照だけで、目的・スコープ境界・
+公開／非公開の判定原則の記述は現行の内容と矛盾しないことを確認したうえで、
+`last_modified` を実ファイルへ合わせた。`generated` を実際の改訂者・改訂時刻へ更新した。
+`status: draft` / `verified: []` は変更していない（人間による確認は未了）。

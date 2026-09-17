@@ -344,7 +344,7 @@ material derived from it:
   applying. What this project did not verify is whether `laws.e-gov.go.jp`
   publishes a 重要情報 of its own with different examples; its terms page
   renders client-side and its text was not retrieved.
-- Treat this project's canonicalisation (`jori-corpus/v1` compilation) and
+- Treat this project's canonicalisation (`jori-corpus/v2` compilation) and
   its OKF v0.2 projection as "editing/processing" (編集・加工) in PDL1.0's
   sense, and separately state that the content was processed and by which
   party, distinct from the source attribution, per PDL1.0 §1.1. The 重要情報

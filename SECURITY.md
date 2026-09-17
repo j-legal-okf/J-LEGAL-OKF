@@ -3,7 +3,7 @@
 ## Supported versions
 
 The supported target is the current `main` branch, at profile version
-`0.1.0-draft`. Whether any tag or release exists is recorded in
+`0.2.0-draft`. Whether any tag or release exists is recorded in
 [`CHANGELOG.md`](CHANGELOG.md); a tagged release does not, by itself,
 narrow this scope away from `main`.
 

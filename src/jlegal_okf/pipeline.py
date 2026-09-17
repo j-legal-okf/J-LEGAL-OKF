@@ -35,7 +35,7 @@ _REQUIRED_INPUT_ROLES = {
 }
 _OPTIONAL_INPUT_ROLES = {"egov_xml": frozenset({"mapping"})}
 _INLINE_MAPPING_URI = "inline:canonical-json-v1"
-JLEGAL_PROFILE = "J-LEGAL-OKF/0.1.0-draft"
+JLEGAL_PROFILE = "J-LEGAL-OKF/0.2.0-draft"
 JLEGAL_CONVERTER = {"name": "JORI Engine", "version": "0.1.0-draft", "profile": JLEGAL_PROFILE}
 _ACQUISITION_KEYS = {"schema", "source_authority", "source_url", "retrieved_at", "source_format", "official_law_id", "law_number", "requested_law_id", "as_of", "sha256", "rights"}
 _RIGHTS_KEYS = {"source_license", "bundle_license", "redistribution_allowed", "commercial_use_allowed"}

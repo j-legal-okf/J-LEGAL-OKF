@@ -12,7 +12,7 @@ import unicodedata
 import uuid
 from typing import Any, Iterable
 
-SCHEMA = "jori-corpus/v1"
+SCHEMA = "jori-corpus/v2"
 ID_NAMESPACE = uuid.UUID("9b7b7100-8305-5e41-b8d4-e541ce517491")
 _WS = re.compile(r"[\t\n\r\f\v ]+")
 _LOCATOR = re.compile(r"^/law(?:/[a-z][a-z0-9_-]*)+$")
@@ -188,8 +188,8 @@ class LegalNode:
     def __post_init__(self) -> None:
         if any(not isinstance(value,str) for value in (self.jurisdiction,self.authority,self.locator,self.text)) or any(value is not None and not isinstance(value,str) for value in (self.law_number_key,self.source_law_key,self.label,self.heading)):
             raise ValueError("NODE_STRING")
-        if not normalize_identifier(self.jurisdiction,authority_or_jurisdiction=True) or not normalize_identifier(self.authority,authority_or_jurisdiction=True) or not normalize_identifier(self.locator) or not self.text:
-            raise ValueError("NODE_TEXT_EMPTY")
+        if not normalize_identifier(self.jurisdiction,authority_or_jurisdiction=True) or not normalize_identifier(self.authority,authority_or_jurisdiction=True) or not normalize_identifier(self.locator):
+            raise ValueError("NODE_IDENTIFIER_EMPTY")
         if not isinstance(self.kind,NodeKind) or not isinstance(self.temporal,Temporal) or not isinstance(self.source,SourceRef) or (self.parent_id is not None and not isinstance(self.parent_id,str)):
             raise ValueError("NODE_TYPES")
         if type(self.depth) is not int or self.depth < 0: raise ValueError("NODE_DEPTH")
@@ -227,7 +227,11 @@ class LegalNode:
     @classmethod
     def from_dict(cls, raw: dict[str, Any]) -> "LegalNode":
         expected = {"schema", "jurisdiction", "authority", "law_number_key", "source_law_key", "law_id", "node_id", "version_id", "parent_id", "kind", "locator", "depth", "ordinal", "branch", "label", "heading", "attributes", "text", "temporal", "source"}
-        if set(raw) != expected or raw.get("schema") != SCHEMA or not isinstance(raw["attributes"], dict):
+        if not isinstance(raw, dict):
+            raise ValueError("NODE_KEYS")
+        if "schema" in raw and raw["schema"] != SCHEMA:
+            raise ValueError(f"CORPUS_SCHEMA_UNSUPPORTED: received {raw['schema']!r}, expected {SCHEMA!r}")
+        if set(raw) != expected or not isinstance(raw["attributes"], dict):
             raise ValueError("NODE_KEYS")
         if not isinstance(raw["branch"], list) or not all(isinstance(x,int) for x in raw["branch"]): raise ValueError("BRANCH_TYPE")
         node = cls(jurisdiction=raw["jurisdiction"], authority=raw["authority"], law_number_key=raw["law_number_key"], source_law_key=raw["source_law_key"], locator=raw["locator"], kind=NodeKind(raw["kind"]), depth=raw["depth"], text=raw["text"], temporal=Temporal.from_dict(raw["temporal"]), source=SourceRef.from_dict(raw["source"]), parent_id=raw["parent_id"], ordinal=raw["ordinal"], branch=tuple(raw["branch"]), label=raw["label"], heading=raw["heading"], attributes=tuple(raw["attributes"].items()))
@@ -277,8 +281,8 @@ class RetrievalDocument:
     evidence: SourceRef
 
     def __post_init__(self) -> None:
-        required=(self.projection_id,self.projection_version,self.node_id,self.version_id,self.law_id,self.locator,self.text)
-        if any(not isinstance(value,str) or not value for value in required) or not valid_locator(self.locator) or (self.heading is not None and not isinstance(self.heading,str)) or not isinstance(self.kind,NodeKind) or not isinstance(self.temporal,Temporal) or not isinstance(self.evidence,SourceRef): raise ValueError("PROJECTION_FIELDS")
+        required=(self.projection_id,self.projection_version,self.node_id,self.version_id,self.law_id,self.locator)
+        if any(not isinstance(value,str) or not value for value in required) or not isinstance(self.text,str) or not valid_locator(self.locator) or (self.heading is not None and not isinstance(self.heading,str)) or not isinstance(self.kind,NodeKind) or not isinstance(self.temporal,Temporal) or not isinstance(self.evidence,SourceRef): raise ValueError("PROJECTION_FIELDS")
 
     def to_dict(self) -> dict[str, Any]:
         return {"schema": "jori-projection/v1", "projection_id": self.projection_id, "projection_version": self.projection_version, "node_id": self.node_id, "version_id": self.version_id, "law_id": self.law_id, "locator": self.locator, "heading": self.heading, "text": self.text, "kind": self.kind.value, "temporal": self.temporal.to_dict(), "evidence": self.evidence.to_dict()}

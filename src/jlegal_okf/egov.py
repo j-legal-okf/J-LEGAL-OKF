@@ -30,7 +30,7 @@ EGOV_SOURCE_AUTHORITY = "e-Gov 法令API Version 2"
 EGOV_XML_FULL_TEXT_FORMAT = "e-Gov Law API v2 XML full-text response"
 EGOV_ACQUISITION_SCHEMA = "jlegal-egov-acquisition/v1"
 EGOV_ADMISSION_SCHEMA = "jlegal-egov-admission/v1"
-EGOV_ADMISSION_PROFILE = "J-LEGAL-OKF/0.1.0-draft"
+EGOV_ADMISSION_PROFILE = "J-LEGAL-OKF/0.2.0-draft"
 MAX_EGOV_XML_BYTES = 64 * 1024 * 1024
 
 _KANJI_DIGITS = {"〇": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
@@ -608,7 +608,7 @@ def egov_xml_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adapt
         locator=semantic_locator("unused", None, NodeKind.LAW, "root"),
         kind=NodeKind.LAW,
         depth=0,
-        text=_render_text(law) or ET.tostring(law, encoding="unicode", short_empty_elements=False),
+        text=_render_text(law),
         temporal=temporal,
         source=source,
         heading=title,
@@ -631,8 +631,6 @@ def egov_xml_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adapt
                 continue
             ordinal, branch = _node_number(child, tag)
             text = _render_text(child)
-            if not text:
-                text = _element_xml(child)
             locator = semantic_locator(
                 root.law_id,
                 parent.locator,

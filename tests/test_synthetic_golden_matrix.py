@@ -168,7 +168,7 @@ def test_structure_matrix_matches_fixed_golden_and_replays_from_bundle(tmp_path:
     assert manifest["adapter_version"] == "1"
     assert manifest["conversion"] == {
         "name": "JORI Engine",
-        "profile": "J-LEGAL-OKF/0.1.0-draft",
+        "profile": "J-LEGAL-OKF/0.2.0-draft",
         "version": "0.1.0-draft",
     }
     assert manifest["acquisition"]["schema"] == "jlegal-egov-acquisition/v1"

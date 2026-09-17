@@ -8,22 +8,22 @@ status: draft
 sources:
   - resource: ../README.md
     title: README.md
-    last_modified: 2026-08-16
+    last_modified: 2026-09-18
   - resource: ../ARCHITECTURE_BOUNDARY.md
     title: ARCHITECTURE_BOUNDARY.md
-    last_modified: 2026-08-15
-  - resource: ../docs/jlegal-okf-profile-0.1.0-draft.md
-    title: J-LEGAL-OKF Profile 0.1.0-draft
-    last_modified: 2026-08-12
+    last_modified: 2026-09-18
+  - resource: ../docs/jlegal-okf-profile-0.2.0-draft.md
+    title: J-LEGAL-OKF Profile 0.2.0-draft
+    last_modified: 2026-09-18
   - resource: ../docs/oss-release/scope-inventory.md
     title: Public scope inventory
-    last_modified: 2026-08-11
+    last_modified: 2026-09-18
   - resource: ../CHANGELOG.md
     title: CHANGELOG.md
-    last_modified: 2026-08-16
+    last_modified: 2026-09-18
 generated:
-  by: anthropic/claude-sonnet-5
-  at: 2026-08-16T17:37:42+09:00
+  by: anthropic/claude-opus-5
+  at: 2026-09-18T00:42:00+09:00
 verified: []
 stale_after: 2026-10-31
 ---
@@ -50,7 +50,7 @@ JORI Engine はこの公開コアの参照実装であり、`jlegal_okf` パッ�
 
 公開コアに含めるもの:
 
-- `jori-corpus/v1` の正準モデル、決定論的ID・hash・manifest処理、crosswalkのシリアライズ、retrieval projection
+- `jori-corpus/v2` の正準モデル、決定論的ID・hash・manifest処理、crosswalkのシリアライズ、retrieval projection
 - validator診断、generic JSON/XML/XHTML adapter
 - 保存済みe-Gov国法令XMLの変換と明示的なfetch helper
 - OKF v0.2-shaped export/validation
@@ -73,7 +73,7 @@ J-LEGAL-OKFは非公式のプロジェクトであり、政府・e-Gov・OKFの�
 fail-closedで報告する。exporterはsource、canonical、derivedの層を分離した
 OKF v0.2-shaped bundleを生成する。
 
-`jori-corpus/v1` をはじめとする `jori-*` スキーマ識別子は互換契約の一部であり、
+`jori-corpus/v2` をはじめとする `jori-*` スキーマ識別子は互換契約の一部であり、
 改名は編集ではなく破壊的変更である。`JORI Engine` の名称が記録される場所は
 [NOTICE](../NOTICE) が列挙し、実装・フォーマット識別子としての使用に留めて商標・
 ブランドの主張はしない（[ARCHITECTURE_BOUNDARY.md](../ARCHITECTURE_BOUNDARY.md) の Naming）。
@@ -93,7 +93,7 @@ OKF v0.2-shaped bundleを生成する。
 | 知りたいこと | 正本 |
 |---|---|
 | 公開コアの利用手順とoffline例 | [README.md](../README.md) |
-| v0.1の規範プロファイル | [docs/jlegal-okf-profile-0.1.0-draft.md](../docs/jlegal-okf-profile-0.1.0-draft.md) |
+| 規範プロファイル（0.2.0-draft） | [docs/jlegal-okf-profile-0.2.0-draft.md](../docs/jlegal-okf-profile-0.2.0-draft.md) |
 | 公開／非公開の判定原則 | [ARCHITECTURE_BOUNDARY.md](../ARCHITECTURE_BOUNDARY.md) |
 | 移植対象と除外対象 | [docs/oss-release/scope-inventory.md](../docs/oss-release/scope-inventory.md) |
 | 変更履歴 | [CHANGELOG.md](../CHANGELOG.md) |
