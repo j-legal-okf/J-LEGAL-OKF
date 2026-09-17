@@ -7,6 +7,7 @@ from pathlib import Path
 
 import pytest
 
+from jlegal_okf.errors import ValidationError
 from jlegal_okf.model import (
     CrosswalkRelation,
     LegalNode,
@@ -99,6 +100,97 @@ def test_strict_node_keys() -> None:
     raw.pop("heading")
     with pytest.raises(ValueError, match="NODE_KEYS"):
         type(make_node()).from_dict(raw)
+
+
+def test_node_text_may_be_empty() -> None:
+    assert make_node(text="").text == ""
+
+
+@pytest.mark.parametrize("field", ["jurisdiction", "authority", "locator"])
+def test_empty_identifier_field_raises_dedicated_diagnostic(field: str) -> None:
+    """jurisdiction/authority/locator must stay non-empty after normalization;
+    text is no longer part of this check (see test_node_text_may_be_empty)."""
+    with pytest.raises(ValueError, match="NODE_IDENTIFIER_EMPTY"):
+        replace(make_node(), **{field: "   "})
+
+
+def test_legacy_schema_raises_dedicated_diagnostic() -> None:
+    """A v1 corpus schema must fail closed with CORPUS_SCHEMA_UNSUPPORTED, not the generic NODE_KEYS."""
+    raw = make_node().to_dict()
+    raw["schema"] = "jori-corpus/v1"
+    with pytest.raises(ValueError, match="CORPUS_SCHEMA_UNSUPPORTED"):
+        LegalNode.from_dict(raw)
+
+
+def test_legacy_schema_corpus_fails_closed_through_read_jsonl(tmp_path: Path) -> None:
+    raw = make_node().to_dict()
+    raw["schema"] = "jori-corpus/v1"
+    target = tmp_path / "legacy.jsonl"
+    target.write_text(json.dumps(raw) + "\n", encoding="utf-8")
+    with pytest.raises(ValidationError, match="CORPUS_SCHEMA_UNSUPPORTED"):
+        read_jsonl(target)
+
+
+def test_unknown_schema_is_reported_as_schema_not_as_key_mismatch() -> None:
+    """A schema this build does not read is its own diagnostic, not NODE_KEYS."""
+    raw = make_node().to_dict()
+    raw["schema"] = "jori-corpus/v0"
+    with pytest.raises(ValueError, match="CORPUS_SCHEMA_UNSUPPORTED"):
+        LegalNode.from_dict(raw)
+
+
+def test_schema_mismatch_is_checked_before_the_key_set() -> None:
+    raw = make_node().to_dict()
+    raw["schema"] = "jori-corpus/v1"
+    raw.pop("heading")
+    with pytest.raises(ValueError, match="CORPUS_SCHEMA_UNSUPPORTED"):
+        LegalNode.from_dict(raw)
+
+
+def test_schema_mismatch_message_names_received_and_expected_schema() -> None:
+    raw = make_node().to_dict()
+    raw["schema"] = "jori-corpus/v1"
+    with pytest.raises(ValueError) as caught:
+        LegalNode.from_dict(raw)
+    assert str(caught.value) == "CORPUS_SCHEMA_UNSUPPORTED: received 'jori-corpus/v1', expected 'jori-corpus/v2'"
+
+
+def test_missing_schema_key_stays_a_key_mismatch() -> None:
+    raw = make_node().to_dict()
+    raw.pop("schema")
+    with pytest.raises(ValueError, match="^NODE_KEYS$"):
+        LegalNode.from_dict(raw)
+
+
+@pytest.mark.parametrize("line", ['"xschemax"', '["schema"]', '"abc"'])
+def test_non_object_corpus_line_is_a_key_mismatch(tmp_path: Path, line: str) -> None:
+    """The schema check must not index into a JSON string or array before it knows the line is an object."""
+    target = tmp_path / "corpus.jsonl"
+    target.write_text(line + "\n", encoding="utf-8")
+    with pytest.raises(ValidationError, match="^JSONL_LINE_1: NODE_KEYS$"):
+        read_jsonl(target)
+
+
+def test_retrieval_document_allows_empty_text_but_rejects_non_string() -> None:
+    node = make_node()
+    base = dict(
+        projection_id="projection_fixture",
+        projection_version="1",
+        node_id=node.node_id,
+        version_id=node.version_id,
+        law_id=node.law_id,
+        locator=node.locator,
+        heading=node.heading,
+        text="",
+        kind=node.kind,
+        temporal=node.temporal,
+        evidence=node.source,
+    )
+    document = RetrievalDocument(**base)
+    assert document.text == ""
+    for value in ([], {}, 1, None):
+        with pytest.raises(ValueError, match="PROJECTION_FIELDS"):
+            RetrievalDocument(**{**base, "text": value})
 
 
 def test_root_contract_diagnostic() -> None:

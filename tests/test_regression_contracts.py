@@ -530,13 +530,14 @@ def test_subitem_sentence_numbered_and_unnumbered_spellings_produce_identical_te
     assert unnumbered.text == numbered.text == "イ子号の本文"
 
 
-def test_empty_table_cell_falls_back_to_element_markup_without_crashing(tmp_path: Path) -> None:
-    """A structural node with no character data of its own (an empty appendix-table cell) must not crash.
+def test_empty_table_cell_preserves_empty_source_text(tmp_path: Path) -> None:
+    """A structural node with no character data of its own (an empty appendix-table cell) keeps text == "".
 
-    This is the retained conflation documented in the profile's "Known
-    limitation" note under "Preservation levels": the empty-text fallback
-    embeds the element's own XML serialization as text rather than failing
-    the model's NODE_TEXT_EMPTY invariant.
+    The adapter no longer backfills such a node's text with its own element's
+    XML serialization; a canonical node with no source character data now
+    keeps exactly the empty string its source XML has, per LegalNode's
+    relaxed non-empty-text invariant (NODE_IDENTIFIER_EMPTY no longer
+    considers text).
     """
     body = (
         "<MainProvision><Article Num=\"1\"><Paragraph Num=\"1\"><ParagraphSentence>本文</ParagraphSentence>"
@@ -545,7 +546,51 @@ def test_empty_table_cell_falls_back_to_element_markup_without_crashing(tmp_path
     )
     path = tmp_path / "law.xml"; path.write_text(_minimal_law(body), encoding="utf-8")
     cells = [n.text for n in egov_xml_adapter(path).nodes if n.kind is NodeKind.CELL]
-    assert cells == ["a", "<TableColumn></TableColumn>"]
+    assert cells == ["a", ""]
+
+
+def test_empty_structural_node_text_is_deterministic_across_repeated_conversion(tmp_path: Path) -> None:
+    """Converting the same XML twice in one process must yield identical version_ids for the text=="" node.
+
+    Guards that an empty structural node's canonical text is reproducibly the
+    empty string, so its version_id depends only on source character data.
+    """
+    body = (
+        "<MainProvision><Article Num=\"1\"><Paragraph Num=\"1\"><ParagraphSentence>本文</ParagraphSentence>"
+        "<TableStruct><Table><TableRow><TableColumn>a</TableColumn><TableColumn/></TableRow></Table></TableStruct>"
+        "</Paragraph></Article></MainProvision>"
+    )
+    path = tmp_path / "law.xml"; path.write_text(_minimal_law(body), encoding="utf-8")
+    first_empty = [n for n in egov_xml_adapter(path).nodes if n.text == ""]
+    second_empty = [n for n in egov_xml_adapter(path).nodes if n.text == ""]
+    assert first_empty and second_empty
+    assert [n.version_id for n in first_empty] == [n.version_id for n in second_empty]
+
+
+def test_self_closing_and_whitespace_only_table_column_get_different_version_ids(tmp_path: Path) -> None:
+    """`<TableColumn/>` (empty) and `<TableColumn> </TableColumn>` (one space) are distinct XML infosets.
+
+    Both preserve their own character data verbatim (`""` vs `" "`), so their
+    version_id differs. This is the "different source text, different
+    version_id" case the profile keeps -- distinct from the conflation this
+    batch removes, where an empty node's text was replaced by invented XML
+    markup rather than its own (possibly empty) character data.
+    """
+    def body(second_column: str) -> str:
+        return (
+            "<MainProvision><Article Num=\"1\"><Paragraph Num=\"1\"><ParagraphSentence>本文</ParagraphSentence>"
+            f"<TableStruct><Table><TableRow><TableColumn>a</TableColumn>{second_column}</TableRow></Table></TableStruct>"
+            "</Paragraph></Article></MainProvision>"
+        )
+    empty_path = tmp_path / "empty.xml"
+    empty_path.write_text(_minimal_law(body("<TableColumn/>")), encoding="utf-8")
+    space_path = tmp_path / "space.xml"
+    space_path.write_text(_minimal_law(body("<TableColumn> </TableColumn>")), encoding="utf-8")
+    empty_cell = [n for n in egov_xml_adapter(empty_path).nodes if n.kind is NodeKind.CELL][1]
+    space_cell = [n for n in egov_xml_adapter(space_path).nodes if n.kind is NodeKind.CELL][1]
+    assert empty_cell.text == ""
+    assert space_cell.text == " "
+    assert empty_cell.version_id != space_cell.version_id
 
 
 def test_table_header_column_preserves_mixed_content_whitespace(tmp_path: Path) -> None:
