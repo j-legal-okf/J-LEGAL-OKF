@@ -28,9 +28,29 @@ supplementary provisions, amendment provisions (with
 
 - **`NewProvision` is rejected, not flattened.** It fails closed as
   `EGOV_XML_UNSUPPORTED_STRUCTURE:NewProvision` until it has a reviewed
-  nested-hierarchy contract (`src/jlegal_okf/egov.py`, `_ensure_supported_tree`).
+  nested-hierarchy contract (`src/jlegal_okf/egov.py` `_ensure_supported_tree()`).
   The same fail-closed posture applies to any other structural element
-  outside the reviewed set.
+  outside the reviewed set. Fixed by
+  `tests/test_known_limitations.py` `test_new_provision_is_rejected_fail_closed()`.
+  A `NewProvision` contains a second legal hierarchy for a material
+  amendment. `_ensure_supported_tree()` runs, via `admit_egov_xml()`, over
+  the *entire* `<Law>` element before any node is built, so a `NewProvision`
+  anywhere in the document — even nested deep inside one amending
+  supplementary provision, alongside an otherwise ordinary, fully supported
+  `MainProvision` — aborts the whole conversion: `egov_xml_adapter()` raises
+  before constructing a single `LegalNode`, not only for the amendment
+  branch (verified: adding one `NewProvision` to an otherwise-valid law
+  produced zero nodes, not a partial tree missing only that branch). **A
+  law containing a `NewProvision` is therefore not partially supported; it
+  is not processed at all.** The outer wrapper around it,
+  `AmendProvisionSentence`, is read and preserved as source text on its
+  own when no `NewProvision` sits inside it; it is the `NewProvision`
+  itself, not the wrapper, that trips this all-or-nothing failure. **What
+  fraction of all law is affected by this is not yet measured.** No count
+  of how many laws, or what proportion of provisions, contain an
+  unsupported `NewProvision` has been run against a corpus of real e-Gov
+  law; that measurement is planned for a future full-corpus survey, not
+  this revision.
 - **Appendix identity is source-tagged when the schema permits a number
   collision.** `AppdxTable` and `AppdxStyle` can both use the same `Num` under
   one `LawBody`; the adapter retains their common `appendix` node kind but
@@ -68,7 +88,8 @@ supplementary provisions, amendment provisions (with
   preservation"](jlegal-okf-profile-0.2.0-draft.md#character-level-preservation-canonical-layer-legalnodetext--rule-jlegal-text-preserve-1)
   for the full description, both edge cases with examples, and the
   distinction between the conflation this profile revision removed and the
-  source-fidelity behavior it does not change.
+  source-fidelity behavior it does not change. Fixed by
+  `tests/test_known_limitations.py` `test_empty_structural_node_keeps_empty_text()`.
 
 - **Source-preserving only for legal relations.** Multiple effective dates in
   one supplementary-provision sentence, references, incorporation by
@@ -109,6 +130,8 @@ posture"](../SECURITY.md#known-parser-posture)):
   denial-of-service input. They are implementation utilities and do not
   expand v0.1's accepted source scope beyond e-Gov national-law XML
   ([`README.md`](../README.md)); treat XML fed to them as trusted input.
+  Fixed by
+  `tests/test_known_limitations.py` `test_generic_xml_and_html_adapters_do_not_use_defusedxml()`.
 
 ## 3. Acquisition provenance
 
@@ -116,6 +139,8 @@ posture"](../SECURITY.md#known-parser-posture)):
   value in a receipt is rejected: e-Gov API delivery is not itself a rights
   assertion ([profile §"Provenance, normalization, and validation
   policy"](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy)).
+  Fixed by
+  `tests/test_known_limitations.py` `test_acquisition_receipt_rights_is_always_null_and_non_null_is_rejected()`.
 - **A recorded rights area is a claim, not a verified fact.** The separate,
   optional rights area ([profile §"Rights
   metadata"](jlegal-okf-profile-0.2.0-draft.md#rights-metadata)) is written
@@ -172,6 +197,20 @@ posture"](../SECURITY.md#known-parser-posture)):
   field mapping supplies them directly — that is a caller-supplied value,
   not something the adapter derives from a legal-document source the way
   `egov_xml`'s `promulgated` is.
+- **The evidence grade behind a node's `Temporal` is discoverable from
+  `LegalNode.source.adapter`.** `"egov_xml"` means every populated
+  `Temporal` field on that node was derived from the e-Gov source XML
+  itself, as described above; any other adapter name means the caller
+  supplied the value directly, and it is an unverified claim, not a
+  derivation. `export-okf`
+  (`src/jlegal_okf/legal_okf.py` `_require_egov_profile_corpus()`) rejects, before export, any corpus
+  whose manifest `adapter` is not `"egov_xml"` or whose nodes carry any
+  other `source.adapter` — so a caller-supplied Temporal claim from a
+  generic adapter never reaches a public OKF bundle; only the
+  source-derived, `egov_xml`-only guarantee above does. This is an
+  existing guarantee of the implementation, not new in this revision.
+  Fixed by
+  `tests/test_known_limitations.py` `test_egov_xml_nodes_only_populate_promulgated_and_export_okf_rejects_generic_adapter_corpus()`.
 - **Promulgation date derivation is deliberately conservative.** The API
   envelope's `law_info/promulgation_date`, when present, takes precedence.
   For bare `<Law>` XML, a date is derived only from a complete
@@ -202,7 +241,9 @@ posture"](../SECURITY.md#known-parser-posture)):
   `Temporal` window is not contained within its parent's fails this check
   even when the corpus has exactly one version of every node (verified
   against a synthetic single-version parent/child pair with mismatched
-  validity windows, compiled through the `json` adapter).
+  validity windows, compiled through the `json` adapter). All three
+  claims in this and the preceding bullet are fixed by
+  `tests/test_known_limitations.py` `test_temporal_overlap_and_semantic_identity_drift_are_vacuous_and_parent_temporal_is_active()`.
 - `Temporal.__post_init__` rejects a node whose `valid_from` is not
   strictly before its `valid_to` when both are given
   (`src/jlegal_okf/model.py`); a single-instant or inverted validity
