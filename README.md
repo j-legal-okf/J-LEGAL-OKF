@@ -76,6 +76,8 @@ For local development, run `python -m pip install -e '.[dev]'`, then
   — the normative 0.2.0-draft profile.
 - [`docs/known-limitations.md`](docs/known-limitations.md) — consolidated
   known limitations and fail-closed behavior.
+- [`docs/okf-v0.2-mapping.md`](docs/okf-v0.2-mapping.md) — OKF v0.2 standard
+  key and `jlegal` extension key mapping, and the trust boundary between them.
 - [`docs/validator-layers.md`](docs/validator-layers.md) — the validator's
   four layers mapped to every diagnostic code.
 - [`docs/normalization-rules.md`](docs/normalization-rules.md) —
