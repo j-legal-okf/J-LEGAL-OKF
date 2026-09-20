@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Entirely invented fixture for the offline J-LEGAL-OKF structure matrix. -->
+<Law LawType="Act" Era="Reiwa" Year="2" Num="1" Lang="ja" PromulgateMonth="1" PromulgateDay="2">
+  <LawNum>架空構造検証法</LawNum>
+  <LawBody>
+    <LawTitle>架空構造検証法</LawTitle>
+    <MainProvision>
+      <!-- Article 2 and Article 4 are intentionally absent. -->
+      <Article Num="1">
+        <ArticleCaption>（目的）</ArticleCaption>
+        <ArticleTitle>第一条</ArticleTitle>
+        <Paragraph Num="1">
+          <!-- The first paragraph is explicitly numbered in XML, but its display number is empty. -->
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>この法律は、合成構造を検証することを目的とする。</Sentence></ParagraphSentence>
+        </Paragraph>
+      </Article>
+      <Article Num="3-2">
+        <ArticleCaption>（構造の保持）</ArticleCaption>
+        <ArticleTitle>第三条の二</ArticleTitle>
+        <Paragraph Num="1">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>本則の共通本文を保持する。</Sentence></ParagraphSentence>
+          <Item Num="1">
+            <ItemTitle>一</ItemTitle>
+            <ItemSentence><Sentence>同じ項の列挙を保持する。</Sentence></ItemSentence>
+            <Subitem1 Num="1">
+              <Subitem1Title>イ</Subitem1Title>
+              <Subitem1Sentence><Sentence>第一の子号本文。</Sentence></Subitem1Sentence>
+            </Subitem1>
+            <Subitem1 Num="2">
+              <Subitem1Title>ロ</Subitem1Title>
+              <Subitem1Sentence><Sentence>第二の子号本文。</Sentence></Subitem1Sentence>
+            </Subitem1>
+            <Subitem1 Num="3">
+              <Subitem1Title>ハ</Subitem1Title>
+              <Subitem1Sentence><Sentence>第三の子号本文。</Sentence></Subitem1Sentence>
+            </Subitem1>
+          </Item>
+          <TableStruct>
+            <Table>
+              <TableHeaderRow>
+                <TableHeaderColumn>項目</TableHeaderColumn>
+                <TableHeaderColumn>内容</TableHeaderColumn>
+              </TableHeaderRow>
+              <TableRow>
+                <TableColumn><Sentence>一</Sentence></TableColumn>
+                <TableColumn><Sentence>本文</Sentence></TableColumn>
+              </TableRow>
+            </Table>
+          </TableStruct>
+        </Paragraph>
+      </Article>
+      <Article Num="5" Delete="true">
+        <ArticleCaption>（削除）</ArticleCaption>
+        <ArticleTitle/>
+        <Paragraph Num="1">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence/></ParagraphSentence>
+        </Paragraph>
+      </Article>
+    </MainProvision>
+    <!-- Both appendices deliberately use Num=1 under the same LawBody parent. -->
+    <AppdxTable Num="1">
+      <AppdxTableTitle>別表第一</AppdxTableTitle>
+      <TableStruct>
+        <Table>
+          <TableHeaderRow>
+            <TableHeaderColumn>区分</TableHeaderColumn>
+            <TableHeaderColumn>説明</TableHeaderColumn>
+          </TableHeaderRow>
+          <TableRow>
+            <TableColumn><Sentence>架空</Sentence></TableColumn>
+            <TableColumn><Sentence>合成</Sentence></TableColumn>
+          </TableRow>
+        </Table>
+      </TableStruct>
+    </AppdxTable>
+    <AppdxStyle Num="1">
+      <AppdxStyleTitle>様式第一</AppdxStyleTitle>
+      <StyleStruct>
+        <Style>様式の本文を原文どおり保持する。</Style>
+      </StyleStruct>
+    </AppdxStyle>
+    <SupplProvision>
+      <SupplProvisionLabel>附則</SupplProvisionLabel>
+      <Article Num="1">
+        <ArticleCaption>（施行期日）</ArticleCaption>
+        <ArticleTitle>第一条</ArticleTitle>
+        <Paragraph Num="1">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>この法律は、令和二年四月一日及び令和二年五月一日に施行する。</Sentence></ParagraphSentence>
+        </Paragraph>
+      </Article>
+      <Article Num="2">
+        <ArticleCaption>（経過措置）</ArticleCaption>
+        <ArticleTitle>第二条</ArticleTitle>
+        <Paragraph Num="1">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>この法律の施行前にした行為については、なお従前の例による。</Sentence></ParagraphSentence>
+        </Paragraph>
+        <Paragraph Num="2">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>第三条の二の規定を参照する。</Sentence></ParagraphSentence>
+        </Paragraph>
+        <Paragraph Num="3">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>第三条の二の規定を準用する。</Sentence></ParagraphSentence>
+        </Paragraph>
+        <Paragraph Num="4">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>この法律中「甲」とあるのは「乙」と読み替える。</Sentence></ParagraphSentence>
+        </Paragraph>
+        <Paragraph Num="5">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>必要な事項は、架空規則で定める。</Sentence></ParagraphSentence>
+        </Paragraph>
+      </Article>
+    </SupplProvision>
+    <SupplProvision Type="Amend" AmendLawNum="架空改正法（令和二年法律第一号）">
+      <SupplProvisionLabel>改正附則</SupplProvisionLabel>
+      <Article Num="1">
+        <ArticleCaption>（改正規定）</ArticleCaption>
+        <ArticleTitle>第一条</ArticleTitle>
+        <Paragraph Num="1">
+          <ParagraphNum/>
+          <ParagraphSentence><Sentence>改正附則の本文を保持する。</Sentence></ParagraphSentence>
+          <AmendProvision>
+            <AmendProvisionSentence><Sentence>この改正附則は、架空の改正を定める。</Sentence></AmendProvisionSentence>
+          </AmendProvision>
+        </Paragraph>
+      </Article>
+    </SupplProvision>
+  </LawBody>
+</Law>

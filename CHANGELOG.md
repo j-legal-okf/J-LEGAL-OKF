@@ -16,6 +16,16 @@ neither SemVer nor PEP 440 governs.
 
 ### Added
 
+- Offline assurance inventory and measurement commands with frozen input
+  hashes, explicit law identities, failure-preserving denominators, bounded
+  subprocesses, verified implementation locks and full-file reproducibility.
+  Optional external-validator integration pins source revision and hashes,
+  records its judgment separately, and checks that bundles are unchanged.
+- Independent artifact submission checks and requirement/case catalogs;
+  see `docs/conformance-suite.md` for their bounded coverage.
+- `jlegal compile --converted-at` to fix conversion provenance timestamps;
+  CI now compares manifests and complete exported bundles across repeats.
+
 - `docs/jlegal-okf-profile-0.2.0-draft.md`, the normative profile revision
   covering the changes below. `docs/jlegal-okf-profile-0.1.0-draft.md` is
   kept, unedited beyond a pointer to the newer document, as the record of the

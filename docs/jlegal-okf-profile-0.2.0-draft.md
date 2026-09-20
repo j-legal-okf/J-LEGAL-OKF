@@ -50,6 +50,10 @@ This document is the normative 0.2.0-draft profile for the public core.
 Research notes, review records, and Private overlays do not alter this
 contract.
 
+The [fixed-case artifact conformance suite](conformance-suite.md) records
+bounded independent checks and observed reference discrepancies against this
+contract; it does not revise these normative rules.
+
 ## Normative and authoritative references
 
 Format-dependent behavior in this profile follows these primary sources:

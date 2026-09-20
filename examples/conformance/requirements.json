@@ -1,0 +1,271 @@
+{
+  "schema": "jlegal-conformance-requirements/v1",
+  "scope": "bounded fixed cases; no claim of full arbitrary-input or behavioral conformance",
+  "official_spec": {
+    "repository": "GoogleCloudPlatform/open-knowledge-format",
+    "commit": "ad30107c31c06aec8a7d5636e0d1058118604e6f",
+    "path": "SPEC.md",
+    "sha256": "26aa5da029278939f914e578107242d9607d4f2dc5fe153272b82f9ed1030101"
+  },
+  "fixture_schema_validation": {
+    "source": "https://laws.e-gov.go.jp/file/XMLSchemaForJapaneseLaw_v3.xsd",
+    "sha256": "f5e11ddb0d91c26232d6eb49a59001c3f5d418ef34fd2aef3b59223a6f633276",
+    "checked_on": "2026-09-19",
+    "result": "all four synthetic XML files validate; complete schema has no includes or imports"
+  },
+  "requirements": [
+    {
+      "id": "okf-concept-floor",
+      "layer": "okf_format",
+      "level": "MUST",
+      "spec_anchor": "https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/ad30107c31c06aec8a7d5636e0d1058118604e6f/SPEC.md#11-conformance",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time"
+      ],
+      "method": "utf8_yaml_nonempty_type_reserved_files"
+    },
+    {
+      "id": "missing_article_numbers",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "deleted_article",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "branch_article",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "implicit_first_paragraph",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "iroha_subitems",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "supplementary_provision",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "appendix_table",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "table_structure",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "appendix_style",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "multiple_effective_dates",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "transitional_measure",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "reference_sentence",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "incorporation_sentence",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "read_as_sentence",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "delegation_sentence",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "amendment_supplementary_provision",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "matrix"
+      ],
+      "method": "fixed_node_fields_parent_links_projection_concepts"
+    },
+    {
+      "id": "whitespace-and-empty",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-levels",
+      "cases": [
+        "edges"
+      ],
+      "method": "exact_fixed_text_including_empty_and_unicode_whitespace"
+    },
+    {
+      "id": "unknown-date",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "edges"
+      ],
+      "method": "all_temporal_fields_null"
+    },
+    {
+      "id": "appendix-identity",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/normalization-rules.md#jlegal-norm-5-source-tagged-appendix-locator-identity",
+      "cases": [
+        "matrix",
+        "appendix-alone"
+      ],
+      "method": "fixed_locators_uuid_formula_and_cross_case_node_ids"
+    },
+    {
+      "id": "stable-id-and-reproducibility",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy",
+      "cases": [
+        "matrix",
+        "relocated",
+        "different-time",
+        "edges"
+      ],
+      "method": "cross_case_all_bundle_bytes_node_ids_and_version_ids"
+    },
+    {
+      "id": "source-byte-identity",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-levels",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time",
+        "tampered-source"
+      ],
+      "method": "source_identity_digest_and_deliberately_tampered_embed_detection"
+    },
+    {
+      "id": "unsupported-new-provision",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "cases": [
+        "new-provision"
+      ],
+      "method": "fixed_input_and_rejection_record_only_no_execution_attestation"
+    },
+    {
+      "id": "reference-byte-regression",
+      "layer": "jori_byte_regression",
+      "level": "IMPLEMENTATION_SPECIFIC",
+      "spec_anchor": "../../docs/synthetic-golden-matrix.md",
+      "cases": [
+        "matrix"
+      ],
+      "method": "optional_existing_immutable_golden_hashes"
+    }
+  ]
+}

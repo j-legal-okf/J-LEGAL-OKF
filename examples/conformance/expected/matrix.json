@@ -1,0 +1,631 @@
+{
+  "schema": "jlegal-conformance-expectation/v1",
+  "authorship": "source-only independent fixed expectations; no producer execution",
+  "source_law_key": "SyntheticStructureMatrix001",
+  "jurisdiction": "Japan",
+  "authority": "Act",
+  "law_number_key": null,
+  "temporal": {
+    "valid_from": null,
+    "valid_to": null,
+    "promulgated": "2020-01-02",
+    "repealed": null
+  },
+  "nodes": [
+    {
+      "locator": "/law/root",
+      "parent_locator": null,
+      "kind": "law",
+      "depth": 0,
+      "ordinal": null,
+      "branch": [],
+      "heading": "架空構造検証法",
+      "label": null,
+      "attributes": {
+        "LawType": "Act",
+        "Era": "Reiwa",
+        "Year": "2",
+        "Num": "1",
+        "Lang": "ja",
+        "PromulgateMonth": "1",
+        "PromulgateDay": "2",
+        "egov_tag": "Law"
+      },
+      "text": "架空構造検証法架空構造検証法（目的）第一条この法律は、合成構造を検証することを目的とする。（構造の保持）第三条の二本則の共通本文を保持する。一同じ項の列挙を保持する。イ第一の子号本文。ロ第二の子号本文。ハ第三の子号本文。項目内容一本文（削除）別表第一区分説明架空合成様式第一様式の本文を原文どおり保持する。附則（施行期日）第一条この法律は、令和二年四月一日及び令和二年五月一日に施行する。（経過措置）第二条この法律の施行前にした行為については、なお従前の例による。第三条の二の規定を参照する。第三条の二の規定を準用する。この法律中「甲」とあるのは「乙」と読み替える。必要な事項は、架空規則で定める。改正附則（改正規定）第一条改正附則の本文を保持する。この改正附則は、架空の改正を定める。",
+      "allowed_extra_attributes": {
+        "Delete": "true",
+        "AmendLawNum": "架空改正法（令和二年法律第一号）"
+      }
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1",
+      "parent_locator": "/law/root",
+      "kind": "main_provision",
+      "depth": 1,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "MainProvision"
+      },
+      "text": "（目的）第一条この法律は、合成構造を検証することを目的とする。（構造の保持）第三条の二本則の共通本文を保持する。一同じ項の列挙を保持する。イ第一の子号本文。ロ第二の子号本文。ハ第三の子号本文。項目内容一本文（削除）",
+      "allowed_extra_attributes": {
+        "Delete": "true"
+      }
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-1",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1",
+      "kind": "article",
+      "depth": 2,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "（目的）",
+      "label": "第一条",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Article"
+      },
+      "text": "（目的）第一条この法律は、合成構造を検証することを目的とする。"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-1/paragraph/paragraph-1",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-1",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 1,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Paragraph"
+      },
+      "text": "この法律は、合成構造を検証することを目的とする。"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1",
+      "kind": "article",
+      "depth": 2,
+      "ordinal": 3,
+      "branch": [
+        2
+      ],
+      "heading": "（構造の保持）",
+      "label": "第三条の二",
+      "attributes": {
+        "Num": "3-2",
+        "egov_tag": "Article"
+      },
+      "text": "（構造の保持）第三条の二本則の共通本文を保持する。一同じ項の列挙を保持する。イ第一の子号本文。ロ第二の子号本文。ハ第三の子号本文。項目内容一本文"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 1,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Paragraph"
+      },
+      "text": "本則の共通本文を保持する。一同じ項の列挙を保持する。イ第一の子号本文。ロ第二の子号本文。ハ第三の子号本文。項目内容一本文"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1",
+      "kind": "item",
+      "depth": 4,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "一",
+      "label": "一",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Item"
+      },
+      "text": "一同じ項の列挙を保持する。イ第一の子号本文。ロ第二の子号本文。ハ第三の子号本文。"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1/subitem/subitem-1",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1",
+      "kind": "subitem",
+      "depth": 5,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "イ",
+      "label": "イ",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Subitem1"
+      },
+      "text": "イ第一の子号本文。"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1/subitem/subitem-2",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1",
+      "kind": "subitem",
+      "depth": 5,
+      "ordinal": 2,
+      "branch": [],
+      "heading": "ロ",
+      "label": "ロ",
+      "attributes": {
+        "Num": "2",
+        "egov_tag": "Subitem1"
+      },
+      "text": "ロ第二の子号本文。"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1/subitem/subitem-3",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/item/item-1",
+      "kind": "subitem",
+      "depth": 5,
+      "ordinal": 3,
+      "branch": [],
+      "heading": "ハ",
+      "label": "ハ",
+      "attributes": {
+        "Num": "3",
+        "egov_tag": "Subitem1"
+      },
+      "text": "ハ第三の子号本文。"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1",
+      "kind": "table",
+      "depth": 4,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "Table"
+      },
+      "text": "項目内容一本文"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-2c95a8ed8ba7a633-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl",
+      "kind": "row",
+      "depth": 5,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableHeaderRow"
+      },
+      "text": "項目内容"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-2c95a8ed8ba7a633-lawbody-1-mainprovision-1-articl/cell/u-53a1cdc1b0c82df8-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-2c95a8ed8ba7a633-lawbody-1-mainprovision-1-articl",
+      "kind": "cell",
+      "depth": 6,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableHeaderColumn"
+      },
+      "text": "項目"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-2c95a8ed8ba7a633-lawbody-1-mainprovision-1-articl/cell/u-47c9e3296bbbcb18-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-2c95a8ed8ba7a633-lawbody-1-mainprovision-1-articl",
+      "kind": "cell",
+      "depth": 6,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableHeaderColumn"
+      },
+      "text": "内容"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-e864b3a5a6777758-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl",
+      "kind": "row",
+      "depth": 5,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableRow"
+      },
+      "text": "一本文"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-e864b3a5a6777758-lawbody-1-mainprovision-1-articl/cell/u-828d47073dfc023e-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-e864b3a5a6777758-lawbody-1-mainprovision-1-articl",
+      "kind": "cell",
+      "depth": 6,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableColumn"
+      },
+      "text": "一"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-e864b3a5a6777758-lawbody-1-mainprovision-1-articl/cell/u-630bd377209014cc-lawbody-1-mainprovision-1-articl",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-3-2/paragraph/paragraph-1/table/u-13369d0bb7d35650-lawbody-1-mainprovision-1-articl/row/u-e864b3a5a6777758-lawbody-1-mainprovision-1-articl",
+      "kind": "cell",
+      "depth": 6,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableColumn"
+      },
+      "text": "本文"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-5",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1",
+      "kind": "article",
+      "depth": 2,
+      "ordinal": 5,
+      "branch": [],
+      "heading": "（削除）",
+      "label": null,
+      "attributes": {
+        "Num": "5",
+        "Delete": "true",
+        "egov_tag": "Article"
+      },
+      "text": "（削除）"
+    },
+    {
+      "locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-5/paragraph/paragraph-1",
+      "parent_locator": "/law/root/main_provision/u-193b76a67d162091-lawbody-1-mainprovision-1/article/article-5",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 1,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Paragraph"
+      },
+      "text": ""
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1",
+      "parent_locator": "/law/root",
+      "kind": "appendix",
+      "depth": 1,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "別表第一",
+      "label": "別表第一",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "AppdxTable"
+      },
+      "text": "別表第一区分説明架空合成"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1",
+      "kind": "table",
+      "depth": 2,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "Table"
+      },
+      "text": "区分説明架空合成"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-068ed9d9e80613c6-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru",
+      "kind": "row",
+      "depth": 3,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableHeaderRow"
+      },
+      "text": "区分説明"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-068ed9d9e80613c6-lawbody-1-appdxtable-1-tablestru/cell/u-cf6fec78c776f39d-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-068ed9d9e80613c6-lawbody-1-appdxtable-1-tablestru",
+      "kind": "cell",
+      "depth": 4,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableHeaderColumn"
+      },
+      "text": "区分"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-068ed9d9e80613c6-lawbody-1-appdxtable-1-tablestru/cell/u-af3572d212624be8-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-068ed9d9e80613c6-lawbody-1-appdxtable-1-tablestru",
+      "kind": "cell",
+      "depth": 4,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableHeaderColumn"
+      },
+      "text": "説明"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-2cbed6f7e07589ba-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru",
+      "kind": "row",
+      "depth": 3,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableRow"
+      },
+      "text": "架空合成"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-2cbed6f7e07589ba-lawbody-1-appdxtable-1-tablestru/cell/u-8ae643b81fb442ce-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-2cbed6f7e07589ba-lawbody-1-appdxtable-1-tablestru",
+      "kind": "cell",
+      "depth": 4,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableColumn"
+      },
+      "text": "架空"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-2cbed6f7e07589ba-lawbody-1-appdxtable-1-tablestru/cell/u-cd4b415fb2fc699f-lawbody-1-appdxtable-1-tablestru",
+      "parent_locator": "/law/root/appendix/appendix-appdxtable-1/table/u-e9b47ab63decc2e9-lawbody-1-appdxtable-1-tablestru/row/u-2cbed6f7e07589ba-lawbody-1-appdxtable-1-tablestru",
+      "kind": "cell",
+      "depth": 4,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "TableColumn"
+      },
+      "text": "合成"
+    },
+    {
+      "locator": "/law/root/appendix/appendix-appdxstyle-1",
+      "parent_locator": "/law/root",
+      "kind": "appendix",
+      "depth": 1,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "様式第一",
+      "label": "様式第一",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "AppdxStyle"
+      },
+      "text": "様式第一様式の本文を原文どおり保持する。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1",
+      "parent_locator": "/law/root",
+      "kind": "supplementary_provision",
+      "depth": 1,
+      "ordinal": null,
+      "branch": [],
+      "heading": "附則",
+      "label": null,
+      "attributes": {
+        "egov_tag": "SupplProvision"
+      },
+      "text": "附則（施行期日）第一条この法律は、令和二年四月一日及び令和二年五月一日に施行する。（経過措置）第二条この法律の施行前にした行為については、なお従前の例による。第三条の二の規定を参照する。第三条の二の規定を準用する。この法律中「甲」とあるのは「乙」と読み替える。必要な事項は、架空規則で定める。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-1",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1",
+      "kind": "article",
+      "depth": 2,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "（施行期日）",
+      "label": "第一条",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Article"
+      },
+      "text": "（施行期日）第一条この法律は、令和二年四月一日及び令和二年五月一日に施行する。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-1/paragraph/paragraph-1",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-1",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 1,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Paragraph"
+      },
+      "text": "この法律は、令和二年四月一日及び令和二年五月一日に施行する。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1",
+      "kind": "article",
+      "depth": 2,
+      "ordinal": 2,
+      "branch": [],
+      "heading": "（経過措置）",
+      "label": "第二条",
+      "attributes": {
+        "Num": "2",
+        "egov_tag": "Article"
+      },
+      "text": "（経過措置）第二条この法律の施行前にした行為については、なお従前の例による。第三条の二の規定を参照する。第三条の二の規定を準用する。この法律中「甲」とあるのは「乙」と読み替える。必要な事項は、架空規則で定める。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2/paragraph/paragraph-1",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 1,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Paragraph"
+      },
+      "text": "この法律の施行前にした行為については、なお従前の例による。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2/paragraph/paragraph-2",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 2,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "2",
+        "egov_tag": "Paragraph"
+      },
+      "text": "第三条の二の規定を参照する。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2/paragraph/paragraph-3",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 3,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "3",
+        "egov_tag": "Paragraph"
+      },
+      "text": "第三条の二の規定を準用する。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2/paragraph/paragraph-4",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 4,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "4",
+        "egov_tag": "Paragraph"
+      },
+      "text": "この法律中「甲」とあるのは「乙」と読み替える。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2/paragraph/paragraph-5",
+      "parent_locator": "/law/root/supplementary_provision/u-4bc3d4a6dc115a23-lawbody-1-supplprovision-1/article/article-2",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 5,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "5",
+        "egov_tag": "Paragraph"
+      },
+      "text": "必要な事項は、架空規則で定める。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2",
+      "parent_locator": "/law/root",
+      "kind": "supplementary_provision",
+      "depth": 1,
+      "ordinal": null,
+      "branch": [],
+      "heading": "改正附則",
+      "label": null,
+      "attributes": {
+        "Type": "Amend",
+        "AmendLawNum": "架空改正法（令和二年法律第一号）",
+        "egov_tag": "SupplProvision"
+      },
+      "text": "改正附則（改正規定）第一条改正附則の本文を保持する。この改正附則は、架空の改正を定める。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2/article/article-1",
+      "parent_locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2",
+      "kind": "article",
+      "depth": 2,
+      "ordinal": 1,
+      "branch": [],
+      "heading": "（改正規定）",
+      "label": "第一条",
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Article"
+      },
+      "text": "（改正規定）第一条改正附則の本文を保持する。この改正附則は、架空の改正を定める。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2/article/article-1/paragraph/paragraph-1",
+      "parent_locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2/article/article-1",
+      "kind": "paragraph",
+      "depth": 3,
+      "ordinal": 1,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "Num": "1",
+        "egov_tag": "Paragraph"
+      },
+      "text": "改正附則の本文を保持する。この改正附則は、架空の改正を定める。"
+    },
+    {
+      "locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2/article/article-1/paragraph/paragraph-1/amendment_provision/u-b39552e99f8b1185-lawbody-1-supplprovision-2-artic",
+      "parent_locator": "/law/root/supplementary_provision/u-bb0a8d34c16ab7ef-lawbody-1-supplprovision-2/article/article-1/paragraph/paragraph-1",
+      "kind": "amendment_provision",
+      "depth": 4,
+      "ordinal": null,
+      "branch": [],
+      "heading": null,
+      "label": null,
+      "attributes": {
+        "egov_tag": "AmendProvision"
+      },
+      "text": "この改正附則は、架空の改正を定める。"
+    }
+  ]
+}

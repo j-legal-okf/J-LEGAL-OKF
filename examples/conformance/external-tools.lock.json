@@ -1,0 +1,12 @@
+{
+  "schema": "jlegal-external-tools-lock/v1",
+  "repository": "https://github.com/Sudhakaran88/okf-conformance",
+  "revision": "3e958ae965bf9673fc291859a44feb05a60a9748",
+  "entrypoint": "validator/okf-validate.mjs",
+  "files": {
+    "validator/okf-validate.mjs": "d4b3a0ee9c2f486cdb5b853304bd0af8b36cf3c6af41de60589f117f2413eb99",
+    "validator/okf-graph.mjs": "e58b90c9139fa3a3943161d57a048f233562ff95ce7f5874e83e2fb0a33b8373"
+  },
+  "official_spec_repository": "https://github.com/GoogleCloudPlatform/open-knowledge-format",
+  "official_spec_revision": "ad30107c31c06aec8a7d5636e0d1058118604e6f"
+}

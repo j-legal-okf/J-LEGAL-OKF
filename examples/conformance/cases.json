@@ -1,0 +1,132 @@
+{
+  "schema": "jlegal-conformance-catalog/v1",
+  "requirements": "requirements.json",
+  "cases": [
+    {
+      "id": "matrix",
+      "method": "artifact",
+      "source": "sources/matrix.xml",
+      "source_sha256": "c7018e5dc6546ccf3534d11d78e8bc613f14ab4b0cea81082679c4a4a7fcf8d0",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-09T00:00:00Z",
+      "expected": "expected/matrix.json",
+      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62",
+      "coverage": [
+        "missing_article_numbers",
+        "deleted_article",
+        "branch_article",
+        "implicit_first_paragraph",
+        "iroha_subitems",
+        "supplementary_provision",
+        "appendix_table",
+        "table_structure",
+        "appendix_style",
+        "multiple_effective_dates",
+        "transitional_measure",
+        "reference_sentence",
+        "incorporation_sentence",
+        "read_as_sentence",
+        "delegation_sentence",
+        "amendment_supplementary_provision"
+      ],
+      "jori_sha256": {
+        "canonical/corpus.jsonl": "53f4b24f9749a2b9368097db97a61023b01ff718401dddf135feb0668b624b76",
+        "canonical/crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+        "canonical/projection.jsonl": "b5ec173cfbd4bac652d54b32a5749bab6ee8b3cffafeedb537637cbafb24dad9",
+        "canonical/manifest.json": "f482d7181b11ca2f1737ac385a553f643d357a52ccb38f10a999287c5bf16187"
+      }
+    },
+    {
+      "id": "edges",
+      "method": "artifact",
+      "source": "sources/edges.xml",
+      "source_sha256": "06daec7ff305b72b8743a61cb59fe88afef6da87e85d5f93d25ef4438698aec3",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-09T00:00:00Z",
+      "expected": "expected/edges.json",
+      "expected_sha256": "e0876c53af9032dc4ca0c28d07feda8912459949f87785660b605c2eed8b6afe"
+    },
+    {
+      "id": "appendix-alone",
+      "method": "artifact",
+      "source": "sources/appendix-alone.xml",
+      "source_sha256": "804647ff9769f0d99160f86ddae2b24e0e2f44554bf33ca4472ec9f5527570a0",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-09T00:00:00Z",
+      "expected": "expected/appendix-alone.json",
+      "expected_sha256": "ecff97bab7aa083526d4f98d1431c2cb495a8dfb4eec9faa7fbfe6e690845ddc"
+    },
+    {
+      "id": "relocated",
+      "method": "artifact",
+      "source": "sources/matrix.xml",
+      "source_sha256": "c7018e5dc6546ccf3534d11d78e8bc613f14ab4b0cea81082679c4a4a7fcf8d0",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-09T00:00:00Z",
+      "expected": "expected/matrix.json",
+      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62"
+    },
+    {
+      "id": "different-time",
+      "method": "artifact",
+      "source": "sources/matrix.xml",
+      "source_sha256": "c7018e5dc6546ccf3534d11d78e8bc613f14ab4b0cea81082679c4a4a7fcf8d0",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-10T00:00:00Z",
+      "expected": "expected/matrix.json",
+      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62"
+    },
+    {
+      "id": "tampered-source",
+      "method": "source_tamper",
+      "source": "sources/matrix.xml",
+      "source_sha256": "c7018e5dc6546ccf3534d11d78e8bc613f14ab4b0cea81082679c4a4a7fcf8d0",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-09T00:00:00Z",
+      "expected": "expected/matrix.json",
+      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62"
+    },
+    {
+      "id": "new-provision",
+      "method": "rejection",
+      "source": "sources/new-provision.xml",
+      "source_sha256": "7c1c96099b661dc01d46f0bb30b5d37da1988dee67ed1189ee257a9c72eda56b",
+      "official_law_id": "SyntheticStructureMatrix001",
+      "corpus_id": "synthetic-egov-structure-matrix",
+      "converted_at": "2026-08-09T00:00:00Z",
+      "diagnostic": "EGOV_XML_UNSUPPORTED_STRUCTURE:NewProvision"
+    }
+  ],
+  "relations": [
+    {
+      "id": "path-independent-bytes",
+      "method": "identical_bundle",
+      "left": "matrix",
+      "right": "relocated"
+    },
+    {
+      "id": "time-independent-versions",
+      "method": "same_versions",
+      "left": "matrix",
+      "right": "different-time"
+    },
+    {
+      "id": "appendix-sibling-stability",
+      "method": "same_node_ids",
+      "left": "matrix",
+      "right": "appendix-alone"
+    },
+    {
+      "id": "text-date-independent-node-ids",
+      "method": "same_node_ids",
+      "left": "matrix",
+      "right": "edges"
+    }
+  ]
+}

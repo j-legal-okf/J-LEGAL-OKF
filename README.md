@@ -80,6 +80,11 @@ For local development, run `python -m pip install -e '.[dev]'`, then
   key and `jlegal` extension key mapping, and the trust boundary between them.
 - [`docs/validator-layers.md`](docs/validator-layers.md) — the validator's
   four layers mapped to every diagnostic code.
+- [`docs/measurement.md`](docs/measurement.md) — offline inventory, all-input
+  measurement denominators, complete artifact repetition and opt-in pinned
+  external-tool judgments.
+- [`docs/conformance-suite.md`](docs/conformance-suite.md) — independent
+  artifact checks, separated from reference-implementation byte regressions.
 - [`docs/normalization-rules.md`](docs/normalization-rules.md) —
   identifier/locator normalization rule catalog.
 - [`docs/v0.1-review-answers.md`](docs/v0.1-review-answers.md) — answers to
@@ -127,11 +132,18 @@ jlegal validate-source examples/synthetic_egov_law.xml --report "$work_dir/admis
 jlegal compile examples/synthetic_egov_law.xml --adapter egov_xml --corpus-id synthetic-egov-law --out-dir "$work_dir/corpus"
 jlegal validate --corpus "$work_dir/corpus/corpus.jsonl" --manifest "$work_dir/corpus/manifest.json" --verify-inputs --source examples/synthetic_egov_law.xml
 jlegal export-okf --corpus "$work_dir/corpus/corpus.jsonl" --manifest "$work_dir/corpus/manifest.json" --out-dir "$work_dir/bundle" --source examples/synthetic_egov_law.xml
-jlegal validate-okf "$work_dir/bundle"
+jlegal validate-okf "$work_dir/bundle" --verify-source
 ```
 
 Each command emits JSON. The generated canonical corpus and bundle retain the
 fixture's source hash; remove the temporary directory when finished.
+
+For byte-identical repeats including manifests and exported concepts, pass a
+fixed `compile --converted-at 2026-08-09T00:00:00Z` and the same corpus ID.
+The installed `python -m jlegal_okf.assurance` commands measure a frozen local
+sample without downloading data; see [the measurement guide](docs/measurement.md).
+Synthetic suite results and third-party tool judgments are scoped evidence,
+not a claim of full arbitrary-input or official OKF compliance.
 
 ## Versioning
 

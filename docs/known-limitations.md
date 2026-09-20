@@ -49,8 +49,10 @@ supplementary provisions, amendment provisions (with
   fraction of all law is affected by this is not yet measured.** No count
   of how many laws, or what proportion of provisions, contain an
   unsupported `NewProvision` has been run against a corpus of real e-Gov
-  law; that measurement is planned for a future full-corpus survey, not
-  this revision.
+  law; that measurement still requires a future full-corpus survey. The offline
+  inventory/survey tools in [measurement.md](measurement.md) now retain all
+  inputs and failures for that work, but synthetic tests do not establish
+  a real-law acceptance percentage or close the population-measurement task.
 - **Appendix identity is source-tagged when the schema permits a number
   collision.** `AppdxTable` and `AppdxStyle` can both use the same `Num` under
   one `LawBody`; the adapter retains their common `appendix` node kind but

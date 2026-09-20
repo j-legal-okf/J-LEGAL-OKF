@@ -119,37 +119,38 @@ jobs:
           jlegal compile examples/synthetic_egov_law.xml --adapter egov_xml --corpus-id synthetic-egov-law --out-dir "$work_dir/corpus"
           jlegal validate --corpus "$work_dir/corpus/corpus.jsonl" --manifest "$work_dir/corpus/manifest.json" --verify-inputs --source examples/synthetic_egov_law.xml
           jlegal export-okf --corpus "$work_dir/corpus/corpus.jsonl" --manifest "$work_dir/corpus/manifest.json" --out-dir "$work_dir/bundle" --source examples/synthetic_egov_law.xml
-          jlegal validate-okf "$work_dir/bundle"
+          jlegal validate-okf "$work_dir/bundle" --verify-source
 
       # Compile the same synthetic fixture into two separate output
       # directories and diff the generated artifacts byte-for-byte.
       # `compile` refuses to write into an existing output directory, so
       # each run gets its own fresh subdirectory under a shared temp root.
       #
-      # manifest.json is intentionally excluded from this comparison: it
-      # embeds a wall-clock "converted_at" timestamp
-      # (src/jlegal_okf/pipeline.py, _now_canonical_utc) that is set at
-      # compile time and has no override flag on the CLI, so it is expected
-      # to differ between two separate invocations even when nothing else
-      # changed. corpus.jsonl, crosswalk.jsonl, and projection.jsonl carry
-      # no such timestamp and were confirmed byte-identical across repeated
-      # local runs.
+      # Fix the conversion timestamp so manifest and all bundle bytes are
+      # part of the comparison, including embedded provenance timestamps.
       - name: Determinism check (compile output, byte-for-byte)
         run: |
           set -euo pipefail
           tmp_root="$(mktemp -d)"
           out_a="$tmp_root/a"
           out_b="$tmp_root/b"
-          jlegal compile examples/synthetic_egov_law.xml --adapter egov_xml --corpus-id synthetic-egov-law --out-dir "$out_a"
-          jlegal compile examples/synthetic_egov_law.xml --adapter egov_xml --corpus-id synthetic-egov-law --out-dir "$out_b"
+          jlegal compile examples/synthetic_egov_law.xml --adapter egov_xml --corpus-id synthetic-egov-law --converted-at 2026-08-09T00:00:00Z --out-dir "$out_a"
+          jlegal compile examples/synthetic_egov_law.xml --adapter egov_xml --corpus-id synthetic-egov-law --converted-at 2026-08-09T00:00:00Z --out-dir "$out_b"
+          jlegal export-okf --corpus "$out_a/corpus.jsonl" --manifest "$out_a/manifest.json" --source examples/synthetic_egov_law.xml --out-dir "$tmp_root/bundle-a"
+          jlegal export-okf --corpus "$out_b/corpus.jsonl" --manifest "$out_b/manifest.json" --source examples/synthetic_egov_law.xml --out-dir "$tmp_root/bundle-b"
+          jlegal validate-okf "$tmp_root/bundle-a" --verify-source
+          jlegal validate-okf "$tmp_root/bundle-b" --verify-source
           status=0
-          for f in corpus.jsonl crosswalk.jsonl projection.jsonl; do
+          for f in corpus.jsonl crosswalk.jsonl projection.jsonl manifest.json; do
             if ! cmp -s "$out_a/$f" "$out_b/$f"; then
               echo "::error::determinism check failed: $f differs between runs"
               diff "$out_a/$f" "$out_b/$f" || true
               status=1
             fi
           done
+          if ! diff -qr "$tmp_root/bundle-a" "$tmp_root/bundle-b"; then
+            status=1
+          fi
           exit "$status"
 
   package-distribution:
@@ -214,7 +215,7 @@ jobs:
               --out-dir "$readme_work_dir/bundle" \
               --source examples/synthetic_egov_law.xml
             "$sdist_env_dir/venv/bin/jlegal" validate-okf \
-              "$readme_work_dir/bundle"
+              "$readme_work_dir/bundle" --verify-source
           )
 
           rebuilt_dir="$(mktemp -d)"
@@ -230,6 +231,7 @@ jobs:
           "$wheel_env_dir/venv/bin/python" -m pip install --upgrade pip
           "$wheel_env_dir/venv/bin/python" -m pip install "$rebuilt_wheel"
           "$wheel_env_dir/venv/bin/jlegal" --help
+          "$wheel_env_dir/venv/bin/python" -m jlegal_okf.assurance --help
           for subcommand in \
             validate-source compile validate fetch export-okf validate-okf; do
             "$wheel_env_dir/venv/bin/jlegal" "$subcommand" --help
