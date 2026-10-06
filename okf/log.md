@@ -78,3 +78,12 @@ schema `jori-corpus/v1` → `jori-corpus/v2`）に追従した。`OKF.md` と `p
 公開／非公開の判定原則の記述は現行の内容と矛盾しないことを確認したうえで、
 `last_modified` を実ファイルへ合わせた。`generated` を実際の改訂者・改訂時刻へ更新した。
 `status: draft` / `verified: []` は変更していない（人間による確認は未了）。
+
+## 2026-10-02
+
+**Update** — 陳腐化検査の SOURCE-DRIFT 3組（`project.md` × README・profile 0.2.0-draft・CHANGELOG）を読み直した。参照元ごとに `git log -p --since="<記録日> 00:00"` と `git diff HEAD` を読み、本文が依拠する文が変わったかを確かめてから `last_modified` を実ファイルの日付に合わせた（日付だけを合わせてはいない）。`okf/index.md` は編集していない。
+追加は計測・適合性試験の導線で、目的・スコープ境界・正本の在り処の記述は変わらない。`last_modified` だけ更新した。`status: draft` / `verified: []` は変更していない。
+
+## 2026-10-07
+
+**Update** — 陳腐化検査の SOURCE-DRIFT 1組（`project.md` × profile 0.2.0-draft）を読み直した。参照元の差分は 4a12125 の1段落で、決定論的な受け入れ契約（`docs/deterministic-bundle-contract.md`）へのリンクを足し、規範は改めないと明記するもの。本文が依拠する文は変わらないため、`last_modified` だけを 2026-10-06 に更新した。`okf/index.md` は編集していない。`status: draft` / `verified: []` は変更していない。

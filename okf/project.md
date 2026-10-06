@@ -8,19 +8,19 @@ status: draft
 sources:
   - resource: ../README.md
     title: README.md
-    last_modified: 2026-09-18
+    last_modified: 2026-09-19
   - resource: ../ARCHITECTURE_BOUNDARY.md
     title: ARCHITECTURE_BOUNDARY.md
     last_modified: 2026-09-18
   - resource: ../docs/jlegal-okf-profile-0.2.0-draft.md
     title: J-LEGAL-OKF Profile 0.2.0-draft
-    last_modified: 2026-09-18
+    last_modified: 2026-10-06
   - resource: ../docs/oss-release/scope-inventory.md
     title: Public scope inventory
     last_modified: 2026-09-18
   - resource: ../CHANGELOG.md
     title: CHANGELOG.md
-    last_modified: 2026-09-18
+    last_modified: 2026-09-19
 generated:
   by: anthropic/claude-opus-5
   at: 2026-09-18T00:42:00+09:00
