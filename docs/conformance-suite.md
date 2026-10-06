@@ -100,6 +100,31 @@ common checks and fail the optional JORI bytes. This is a checker acceptance
 test, not evidence of a released second implementation. Tests explicitly keep
 the unmodified reference discrepancy visible and reject arbitrary added markup.
 
+## Acceptance contract and current gaps
+
+The [deterministic acceptance contract](deterministic-bundle-contract.md)
+defines count equality, full-node projection identity/version and target strict
+display/use requirements. The checker enforces `DB-COUNTS-1`: all four counts
+must be nonnegative integers excluding booleans and equal the submitted data.
+It counts every node record, distinct `law_id` values, crosswalk records and
+projection records independently. The fixed cases still require an exactly
+empty crosswalk file; a correctly counted nonempty crosswalk remains rejected.
+
+Resealed mutation tests change each count separately, including incorrect zero,
+negative, boolean and string values, so a digest failure cannot mask a missing
+count predicate. A genuine zero crosswalk count passes. These tests use the
+fixture-only producer described above and do not repair the Style discrepancy.
+
+The checker still accepts arbitrary nonempty projection ID/version strings.
+That gap is not evidence that the missing predicates hold. The target display
+grammar is stricter than the marker/presence behavior documented above and is
+not yet enforced here.
+
+`requirements.json` records the implemented count requirement in its
+`requirements` array. Its separate `contract_design` link remains non-executable
+metadata; a design reference adds no executed test or guarantee. The seven
+catalog cases and their immutable source-authored oracles remain unchanged.
+
 ## Submission and execution
 
 Create a submission JSON file alongside its artifact directories. Paths are

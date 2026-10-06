@@ -258,6 +258,21 @@
       "method": "fixed_input_and_rejection_record_only_no_execution_attestation"
     },
     {
+      "id": "DB-COUNTS-1",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/deterministic-bundle-contract.md#count-definitions-and-scope",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time",
+        "tampered-source"
+      ],
+      "method": "independent_four_record_counts_nonnegative_integers_and_resealed_mutation_tests"
+    },
+    {
       "id": "reference-byte-regression",
       "layer": "jori_byte_regression",
       "level": "IMPLEMENTATION_SPECIFIC",
@@ -267,5 +282,12 @@
       ],
       "method": "optional_existing_immutable_golden_hashes"
     }
-  ]
+  ],
+  "contract_design": {
+    "document": "../../docs/deterministic-bundle-contract.md",
+    "revision": 1,
+    "status": "design-only",
+    "executable": false,
+    "coverage": "No additional checks are implemented by this metadata; the requirements array describes the existing fixed-case scope."
+  }
 }

@@ -76,6 +76,68 @@ def test_rehashed_semantic_mutations_do_not_pass(built, tmp_path, mutation, code
         assert row["layers"]["profile"]["codes"] == [code]
 
 
+def _mutate_counts(built, tmp_path, field, value, *, crosswalk=None):
+    root = _copy(built, tmp_path)
+    for case in _load(CATALOG)["cases"]:
+        if case["method"] == "rejection":
+            continue
+        bundle = root / case["id"] / "bundle"
+        path = bundle / "canonical/manifest.json"
+        manifest = _load(path)
+        manifest[field] = value
+        if crosswalk is not None:
+            (bundle / "canonical/crosswalk.jsonl").write_bytes(crosswalk)
+            manifest["crosswalk_sha256"] = hashlib.sha256(crosswalk).hexdigest()
+        _write(path, manifest)
+        _reseal(bundle)
+    return check_submission(CATALOG, root / "submission.json", tmp_path / "report")
+
+
+def _assert_count_failure(result, required_codes):
+    assert not result["common_passed"]
+    assert all(row["status"] == "pass" for row in result["relations"])
+    for row in result["cases"]:
+        codes = set(row["layers"]["profile"]["codes"])
+        if row["id"] == "new-provision":
+            assert not codes
+        else:
+            assert required_codes <= codes
+            # A checksum or unrelated failure must not mask this contract.
+            assert codes <= {"MANIFEST_COUNTS", "MANIFEST_TYPES", "CROSSWALK_UNEXPECTED"}
+
+
+@pytest.mark.parametrize("field,value", [
+    ("node_count", 999), ("node_count", 0),
+    ("law_count", 999), ("law_count", 0),
+    ("crosswalk_count", 999), ("crosswalk_count", 1),
+    ("projection_count", 999), ("projection_count", 0),
+])
+def test_manifest_count_mismatch_is_rejected_after_resealing(built, tmp_path, field, value):
+    result = _mutate_counts(built, tmp_path, field, value)
+    _assert_count_failure(result, {"MANIFEST_COUNTS"})
+    assert all(row["layers"]["profile"]["codes"] == ["MANIFEST_COUNTS"]
+               for row in result["cases"] if row["id"] != "new-provision")
+
+
+@pytest.mark.parametrize("field", ["node_count", "law_count", "crosswalk_count", "projection_count"])
+@pytest.mark.parametrize("value", [-1, True, False, "0"])
+def test_manifest_count_types_are_rejected_after_resealing(built, tmp_path, field, value):
+    result = _mutate_counts(built, tmp_path, field, value)
+    _assert_count_failure(result, {"MANIFEST_TYPES"})
+
+
+@pytest.mark.parametrize("crosswalk,count,codes", [
+    (b'{}\n', 0, {"CROSSWALK_UNEXPECTED", "MANIFEST_COUNTS"}),
+    (b'{}\n', 1, {"CROSSWALK_UNEXPECTED"}),
+    (b'\n', 0, {"CROSSWALK_UNEXPECTED"}),
+])
+def test_crosswalk_record_count_does_not_relax_empty_file_contract(built, tmp_path, crosswalk, count, codes):
+    result = _mutate_counts(built, tmp_path, "crosswalk_count", count, crosswalk=crosswalk)
+    _assert_count_failure(result, codes)
+    assert all(set(row["layers"]["profile"]["codes"]) == codes
+               for row in result["cases"] if row["id"] != "new-provision")
+
+
 @pytest.mark.parametrize("text", ["", " ", "\n　text\u00a0\n"])
 def test_marked_payload_is_exact_without_requiring_reference_headings(text):
     from jlegal_okf.assurance.conformance import _source_payload_matches
@@ -162,6 +224,11 @@ def test_fixed_suite_passes_and_never_invokes_producer(built, tmp_path, monkeypa
     assert all(r["status"] == "pass" for r in result["relations"])
     assert result["cases"][0]["layers"]["jori_byte_regression"]["status"] == "not_checked"
     assert _load(built / "matrix/bundle/canonical/manifest.json")["conversion"]["name"] != "JORI Engine"
+    for case in _load(CATALOG)["cases"]:
+        if case["method"] != "rejection":
+            bundle = built / case["id"] / "bundle"
+            assert _load(bundle / "canonical/manifest.json")["crosswalk_count"] == 0
+            assert (bundle / "canonical/crosswalk.jsonl").read_bytes() == b""
 
 
 def test_reference_style_discrepancy_is_reported_without_changing_golden(tmp_path):

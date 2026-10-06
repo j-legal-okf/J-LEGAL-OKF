@@ -130,6 +130,15 @@ semantic identity, and the reasoning recorded for crosswalk judgments.
 | `CROSSWALK_EXACT_REASON` | A crosswalk row with `relation == EXACT` has no `reason` (a reason would contradict "exact"). |
 | `CROSSWALK_REPEATED_POLICY` | When the same `legacy_id` appears in more than one crosswalk row, every row for it is `AMBIGUOUS` with a `reason`, and each row targets a distinct `target_version_id`. |
 
+## Assurance decisions are separate from diagnostic layers
+
+The [deterministic acceptance contract](deterministic-bundle-contract.md)
+distinguishes source preservation, canonical fidelity, bundle integrity and
+use eligibility. A diagnostic family named `source_fidelity` can contain only
+a hash-shape check; passing it is not source re-verification or proof of legal
+applicability. Target diagnostics listed in that design are not entries in the
+current `DIAGNOSTIC_LAYERS` table and are not implemented CLI promises.
+
 ## CLI: machine-readable diagnostics
 
 `jlegal validate`'s default output is unchanged:

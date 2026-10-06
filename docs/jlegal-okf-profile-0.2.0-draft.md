@@ -54,6 +54,11 @@ The [fixed-case artifact conformance suite](conformance-suite.md) records
 bounded independent checks and observed reference discrepancies against this
 contract; it does not revise these normative rules.
 
+The [deterministic acceptance contract](deterministic-bundle-contract.md)
+separates existing invariants from target strict checks and records the next
+coordinated version transition. It does not activate that transition or claim
+that pending checks already run under this profile.
+
 ## Normative and authoritative references
 
 Format-dependent behavior in this profile follows these primary sources:

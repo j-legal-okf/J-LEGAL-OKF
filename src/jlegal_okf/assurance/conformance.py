@@ -230,6 +230,7 @@ def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[
         check(all(projected[key].get(k) == substantive[key][k] for k in ("node_id", "version_id", "law_id", "locator", "heading", "text", "kind", "temporal")), "PROJECTION_CONTENT")
         check(projected[key].get("evidence") == source, "PROJECTION_SOURCE")
     check(_bytes(files["canonical/crosswalk.jsonl"]) == b"", "CROSSWALK_UNEXPECTED")
+    crosswalk = _records(files["canonical/crosswalk.jsonl"])
 
     manifest = _json(files["canonical/manifest.json"])
     # These fixed recipes assert no rights. A rights-bearing case requires a
@@ -243,7 +244,15 @@ def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[
     check(manifest.get("adapter") == "egov_xml", "MANIFEST_ADAPTER")
     check(manifest.get("converted_at") == case["converted_at"], "CONVERSION_TIME")
     check(manifest.get("corpus_id") == case["corpus_id"], "CORPUS_ID")
-    check(manifest.get("node_count") == len(nodes) and manifest.get("projection_count") == len(projections), "MANIFEST_COUNTS")
+    # Count submitted records independently; the fixed-case empty-crosswalk
+    # requirement above remains separate from the count equality predicate.
+    actual_counts = {
+        "node_count": len(nodes),
+        "law_count": len({node["law_id"] for node in nodes}),
+        "crosswalk_count": len(crosswalk),
+        "projection_count": len(projections),
+    }
+    check(all(manifest.get(name) == count for name, count in actual_counts.items()), "MANIFEST_COUNTS")
     conversion = manifest.get("conversion", {})
     check(type(conversion) is dict and conversion.get("profile") == PROFILE and all(isinstance(conversion.get(k), str) and conversion[k] for k in ("name", "version")), "CONVERTER_METADATA")
     inputs = manifest.get("inputs", [])
