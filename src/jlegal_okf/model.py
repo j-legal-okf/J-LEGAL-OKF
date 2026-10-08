@@ -12,7 +12,7 @@ import unicodedata
 import uuid
 from typing import Any, Iterable
 
-SCHEMA = "jori-corpus/v2"
+SCHEMA = "jori-corpus/v3"
 ID_NAMESPACE = uuid.UUID("9b7b7100-8305-5e41-b8d4-e541ce517491")
 _WS = re.compile(r"[\t\n\r\f\v ]+")
 _LOCATOR = re.compile(r"^/law(?:/[a-z][a-z0-9_-]*)+$")

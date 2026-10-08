@@ -272,3 +272,54 @@ def test_compile_cli_fixed_time_covers_manifest_and_bundle(tmp_path):
                      "--manifest", str(root / "canonical/manifest.json"), "--source", str(FIXTURE),
                      "--out-dir", str(root / "bundle")]) == 0
     assert tree_hashes(tmp_path / "a") == tree_hashes(tmp_path / "b")
+
+
+def test_inventory_keeps_size_depth_elements_and_empty_in_denominator(tmp_path, monkeypatch):
+    from jlegal_okf import egov, input_limits
+
+    root = tmp_path / "inputs"
+    root.mkdir()
+    fragments = {
+        "plain.xml": b'<Law LawId="Invented001"/>',
+        "empty.xml": b"",
+        "syntax.xml": b"<broken",
+        "dtd.xml": b"<!DOCTYPE Law><Law/>",
+        "size.xml": b" " * 257,
+        "depth.xml": b"<a><b><c><d/></c></b></a>",
+        "elements.xml": b"<a><b/><b/><b/><b/></a>",
+    }
+    for name, raw in fragments.items():
+        (root / name).write_bytes(raw)
+    monkeypatch.setattr(egov, "MAX_EGOV_XML_BYTES", 256)
+    monkeypatch.setattr(input_limits, "MAX_XML_DEPTH", 3)
+    monkeypatch.setattr(input_limits, "MAX_XML_ELEMENTS", 4)
+    local, dataset = build_inventory(root)
+    assert dataset["files"] == dataset["unique_units"] == 7
+    assert {row["path"]: row["identity_status"] for row in local["files"]} == {
+        "plain.xml": "IDENTIFIED", "empty.xml": "INVALID_XML", "syntax.xml": "INVALID_XML",
+        "dtd.xml": "INVALID_XML", "size.xml": "INPUT_TOO_LARGE",
+        "depth.xml": "INPUT_XML_DEPTH_LIMIT", "elements.xml": "INPUT_XML_ELEMENT_LIMIT",
+    }
+
+
+@pytest.mark.parametrize("constant,code", [
+    ("MAX_XML_DEPTH", "INPUT_XML_DEPTH_LIMIT"),
+    ("MAX_XML_ELEMENTS", "INPUT_XML_ELEMENT_LIMIT"),
+])
+def test_survey_preserves_safe_limit_diagnostics_only(tmp_path, monkeypatch, constant, code):
+    from jlegal_okf import input_limits
+    from jlegal_okf.assurance import survey as module
+    from jlegal_okf.errors import AdapterError
+
+    monkeypatch.setattr(input_limits, constant, 1)
+    run_worker(FIXTURE, "SyntheticLaw001", FIXED_TIME, "test", tmp_path, tmp_path / "result.json")
+    result = json.loads((tmp_path / "result.json").read_text())
+    assert result["steps"]["admission"] == {"state": "fail", "code": code}
+    assert module._worker_envelope(result)
+    assert all(row == {"state": "blocked", "code": "PREREQUISITE"}
+               for name, row in result["steps"].items() if name != "admission")
+    assert metrics([result])["admission"]["all_units"] == 1
+    assert module._diagnostic(AdapterError(code + ":must-not-escape")) == code
+    assert module._diagnostic(AdapterError("UNKNOWN:must-not-escape")) == "CONTRACT_REJECTED"
+    result["steps"]["admission"]["code"] = code + ":must-not-escape"
+    assert not module._worker_envelope(result)

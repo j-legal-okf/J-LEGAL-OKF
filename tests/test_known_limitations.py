@@ -13,7 +13,7 @@ to replace those tests.
 
 from __future__ import annotations
 
-import xml.etree.ElementTree as _StdElementTree
+from pathlib import Path
 
 import pytest
 
@@ -118,18 +118,16 @@ def test_empty_structural_node_keeps_empty_text(tmp_path) -> None:
     assert cells == ["a", ""]
 
 
-def test_generic_xml_and_html_adapters_do_not_use_defusedxml() -> None:
-    """`docs/known-limitations.md` §2 claims the generic `xml`/`html` adapters are not hardened.
-
-    Checked by module identity, not by grepping source text for the string
-    "defusedxml": if `src/jlegal_okf/adapters.py` were changed to parse with
-    `defusedxml.ElementTree` instead of the standard library, `adapters.ET`
-    would no longer be the same module object as `xml.etree.ElementTree`,
-    and this test would fail -- which is the point, since that would mean
-    the limitation had been fixed and the document is stale.
-    """
-    assert adapters.ET is _StdElementTree
-    assert "defusedxml" not in adapters.ET.__name__
+@pytest.mark.parametrize("name", ["xml", "html"])
+def test_generic_xml_and_html_reject_dtd_as_documented(tmp_path, name) -> None:
+    """Pin actual refusal, not the identity of a module imported for types."""
+    path = tmp_path / ("source." + name)
+    path.write_text('<!DOCTYPE r [<!ENTITY e "invented">]><r>&e;</r>', encoding="utf-8")
+    code = f"ADAPTER_{name.upper()}_DTD_OR_ENTITY_FORBIDDEN"
+    with pytest.raises(AdapterError, match="^" + code + "$"):
+        getattr(adapters, name + "_adapter")(path, {})
+    document = (Path(__file__).resolve().parents[1] / "docs/known-limitations.md").read_text(encoding="utf-8")
+    assert code in document
 
 
 def test_acquisition_receipt_rights_is_always_null_and_non_null_is_rejected(tmp_path) -> None:

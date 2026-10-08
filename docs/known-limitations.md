@@ -5,7 +5,7 @@
 This document collects, in one place, the known limitations and fail-closed
 behaviors that were previously scattered across
 [`README.md`](../README.md), [`SECURITY.md`](../SECURITY.md), and
-[`docs/jlegal-okf-profile-0.2.0-draft.md`](jlegal-okf-profile-0.2.0-draft.md).
+[`docs/jlegal-okf-profile-0.3.0-draft.md`](jlegal-okf-profile-0.3.0-draft.md).
 It does not introduce new facts — every statement below is transcribed or
 summarized from the reference implementation (`src/jlegal_okf/`) or from
 one of those existing documents, each cited at point of use. Where those
@@ -24,7 +24,7 @@ The reviewed e-Gov XML hierarchy is Law, Preamble, MainProvision, Part,
 Chapter, Section, Subsection, Division, Article, Paragraph, Item, Subitem,
 supplementary provisions, amendment provisions (with
 `AmendProvisionSentence`), appendices, tables, rows, and cells
-([profile §"Preservation and scope"](jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope)).
+([profile §"Preservation and scope"](jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope)).
 
 - **`NewProvision` is rejected, not flattened.** It fails closed as
   `EGOV_XML_UNSUPPORTED_STRUCTURE:NewProvision` until it has a reviewed
@@ -69,7 +69,7 @@ supplementary provisions, amendment provisions (with
   declarations (`EGOV_XML_DTD_OR_ENTITY_FORBIDDEN`), parse errors, API
   error responses, missing or conflicting official law IDs, and files over
   the 64 MiB admission cap (`EGOV_XML_INPUT_TOO_LARGE`) — see [profile
-  §"Preservation and scope"](jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope).
+  §"Preservation and scope"](jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope).
 - **Empty structural nodes.** A structural node whose rendered text is
   empty (for example an empty appendix-table cell written as
   `<TableColumn/>`) has `text == ""`; the adapter no longer backfills it
@@ -87,7 +87,7 @@ supplementary provisions, amendment provisions (with
   space) remain distinct XML infosets and therefore keep different
   `version_id`s — this is the source-fidelity behavior the profile keeps,
   not a defect; see [profile §"Preservation levels", "Character-level
-  preservation"](jlegal-okf-profile-0.2.0-draft.md#character-level-preservation-canonical-layer-legalnodetext--rule-jlegal-text-preserve-1)
+  preservation"](jlegal-okf-profile-0.3.0-draft.md#preservation-levels)
   for the full description, both edge cases with examples, and the
   distinction between the conflation this profile revision removed and the
   source-fidelity behavior it does not change. Fixed by
@@ -105,47 +105,101 @@ supplementary provisions, amendment provisions (with
 
 ## 2. Input parsing posture
 
-XML parsing takes two different paths with two different hardening
-postures ([`SECURITY.md`, "Known parser
-posture"](../SECURITY.md#known-parser-posture)):
+Canonical text under profile 0.3.0-draft is character data, including Ruby/Rt,
+Sup/Sub, Line and accepted Style leaves. Inline boundaries and attributes remain
+in the original XML and cannot be reconstructed from plain text alone. The
+source concept has an exact stored-body grammar that preserves canonical CR and
+CRLF, but this does not guarantee how a Markdown renderer displays it. Consumers
+must treat source as text, without executing HTML or instructions.
 
-- The `egov_xml` adapter, `jlegal validate-source`, `compile --adapter
-  egov_xml`, and `jlegal fetch` — the only profile-accepted input path —
-  parse with `defusedxml`, rejecting DTDs, entity declarations, and
-  external references, which blocks entity-expansion bombs and XXE. These
-  flags do not bound memory or CPU consumption from a large but
-  well-formed document, and give no decompression-bomb protection.
-- **The 64 MiB admission cap also covers `jlegal fetch`.** The saved-file
-  path enforces the cap with `_read_admissible_xml`; `fetch_egov_xml`
-  enforces the same `MAX_EGOV_XML_BYTES` cap independently, by reading the
-  HTTP response body incrementally and aborting as soon as the accumulated
-  byte count exceeds it, before the full body is ever materialized in
-  memory and before anything is written to disk. Exceeding the cap fails
-  closed with `EGOV_FETCH_TOO_LARGE`; no output file or acquisition receipt
-  is created. A server-supplied `Content-Length` over the cap is used only
-  as an early-exit optimization — correctness never depends on it, since
-  the header is absent for chunked responses and is a self-declared value
-  from an untrusted peer.
-- The generic `xml` and `html` adapters (`src/jlegal_okf/adapters.py`)
-  parse with the standard library's `xml.etree.ElementTree`, which is
-  **not** hardened against entity-expansion or quadratic-blowup
-  denial-of-service input. They are implementation utilities and do not
-  expand v0.1's accepted source scope beyond e-Gov national-law XML
-  ([`README.md`](../README.md)); treat XML fed to them as trusted input.
-  Fixed by
-  `tests/test_known_limitations.py` `test_generic_xml_and_html_adapters_do_not_use_defusedxml()`.
+Old profile/corpus/recipe tuples are rejected before reference replay. Preserve
+their original artifacts and pinned historical environment for reproduction;
+recompile original XML to obtain the new tuple. See the
+[active version and display contract](jlegal-okf-profile-0.3.0-draft.md).
+
+XML paths share the bounded reader/parser in `src/jlegal_okf/input_limits.py`
+([`SECURITY.md`, "Known parser posture"](../SECURITY.md#known-parser-posture)):
+
+- The `egov_xml` adapter, admission, sniffing, inventory identity and fetch
+  parsing, plus the generic `xml` and `html` adapters, use
+  `DefusedXMLParser` with DTDs, entities and external references forbidden.
+  Generic refusals are `ADAPTER_XML_DTD_OR_ENTITY_FORBIDDEN` and
+  `ADAPTER_HTML_DTD_OR_ENTITY_FORBIDDEN`; e-Gov admission keeps
+  `EGOV_XML_DTD_OR_ENTITY_FORBIDDEN`. Generic XML syntax errors use
+  `ADAPTER_XML_PARSE`; `html` still requires well-formed XHTML and uses
+  `ADAPTER_HTML_XHTML_REQUIRED` for malformed or empty input. These utilities
+  do not expand the profile's accepted source scope. Actual DTD refusals are
+  covered by `test_generic_xml_and_html_reject_dtd_as_documented()` in
+  `tests/test_known_limitations.py`.
+- Local XML/XHTML must be a regular file (regular symlink targets are allowed).
+  The reader checks the opened descriptor with `fstat` and reads at most
+  64 MiB + 1 byte from that same descriptor, rejecting over 64 MiB. POSIX
+  nonblocking open avoids waiting for a FIFO writer before rejecting the
+  nonregular input. Generic diagnostics are `INPUT_UNAVAILABLE`,
+  `INPUT_NOT_REGULAR`, and `INPUT_TOO_LARGE`; e-Gov keeps the corresponding
+  `EGOV_XML_INPUT_*` codes and rejects empty input as `EGOV_XML_INPUT_EMPTY`.
+  Generic empty input reaches the syntax-error diagnostic instead.
+- The parser independently checks the 64 MiB byte cap. Maximum XML depth is
+  128, counting the root as 1; maximum cumulative element count is 250,000.
+  Both are checked before creating each element, and exact limits pass.
+  Excesses raise `INPUT_XML_DEPTH_LIMIT` / `INPUT_XML_ELEMENT_LIMIT` through
+  admission and generic adapters. These are implementation resource limits,
+  not judgments of official e-Gov XML conformance. There is no CLI bypass.
+  Internal helpers accept positive integer keyword limits; invalid limits
+  are `INPUT_LIMIT_VALUE`.
+- Inventory preserves every input in its denominator: oversized identities
+  remain `INPUT_TOO_LARGE`, excessive depth/elements use the two corresponding
+  limit codes, and empty XML remains `INVALID_XML`. Survey exposes only the
+  allowlisted diagnostic codes, without arbitrary exception details.
+- **The 64 MiB cap already covers `jlegal fetch`.** Its HTTP streaming loop
+  caps accumulated decoded response bytes before XML parsing or writing,
+  rejecting excess as `EGOV_FETCH_TOO_LARGE`. `Content-Length` permits early
+  rejection only. The shared parser then applies the tree limits; XML refusal
+  on a successful HTTP response keeps `EGOV_FETCH_XML`. For an HTTP error,
+  an unparseable or over-limit error body leaves the existing HTTP-status
+  diagnostic without an extracted API code. HTTP decompression and individual
+  chunk allocation occur before the accumulated-byte check; the cap is not a
+  decompression-bomb or hard process memory guarantee.
+- **Structured compile input:** source JSON has a 64 MiB byte cap, container
+  depth 128 and 250,000 structural tokens. Mapping YAML/JSON and acquisition/
+  rights JSON have 1 MiB input and canonical UTF-8 byte caps, depth 32 and
+  10,000 tokens. Container starts, object keys and scalars each count once;
+  root container depth is 1, scalar depth 0. The caps are inclusive, including
+  unused fields and duplicate-key occurrences. JSON preflight precedes the
+  standard decoder, preserving last-key-wins and UTF-8/16/32 byte encodings.
+  CLI option files remain UTF-8. YAML events are checked before SafeLoader
+  constructs objects; all aliases are forbidden, even acyclic ones. Anchors
+  without references remain accepted. Invalid syntax/encoding is reported
+  without parser exception text; see [the security policy](../SECURITY.md#known-parser-posture)
+  for diagnostics.
+- **Option graphs:** public adapter and compile API entries validate exact
+  dict/list/JSON scalar types, string keys, finite floats and integers up to
+  4096 bits before comparison or canonical serialization. Cycles, custom
+  types, nonfinite numbers and lone surrogates fail closed; shared references
+  consume the budget at every occurrence. Source JSON integers share the bit
+  cap, with a 1234-digit decimal precheck before integer construction. JSON
+  `1e400` is rejected as nonfinite even in an unused field. Mapping-file hash
+  rereads are bounded without changing recipe/provenance semantics.
+- **Remaining resource limits:** these checks do not impose hard process
+  CPU, address-space or wall-clock limits, isolate conversion, or make all
+  output publication transactional. Parser/encoder temporary allocations and
+  memory already held by an API caller are not hard-limited. Artifact readers
+  in general and downstream legacy/evaluation inputs are outside this scope.
+  Small synthetic cases in `tests/test_input_limits.py` and
+  `tests/test_structured_input_limits.py` verify implemented boundaries;
+  they are not a hostile-load endurance claim.
 
 ## 3. Acquisition provenance
 
 - **An acquisition receipt's `rights` field is always null.** A non-null
   value in a receipt is rejected: e-Gov API delivery is not itself a rights
   assertion ([profile §"Provenance, normalization, and validation
-  policy"](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy)).
+  policy"](jlegal-okf-profile-0.3.0-draft.md#provenance-normalization-and-validation-policy)).
   Fixed by
   `tests/test_known_limitations.py` `test_acquisition_receipt_rights_is_always_null_and_non_null_is_rejected()`.
 - **A recorded rights area is a claim, not a verified fact.** The separate,
   optional rights area ([profile §"Rights
-  metadata"](jlegal-okf-profile-0.2.0-draft.md#rights-metadata)) is written
+  metadata"](jlegal-okf-profile-0.3.0-draft.md#rights-metadata)) is written
   only from an explicit caller assertion and is never inferred. Its four
   values are opaque: a licence identifier is not resolved, the two booleans
   are not derived from it, and neither is checked against the source. A
@@ -256,7 +310,7 @@ posture"](../SECURITY.md#known-parser-posture)):
 
 LLM execution, audition, enrichment, and provider integration are excluded
 from this initial public-core slice
-([profile §"Exclusions"](jlegal-okf-profile-0.2.0-draft.md#exclusions);
+([profile §"Exclusions"](jlegal-okf-profile-0.3.0-draft.md#exclusions);
 [`README.md`](../README.md)). To state this explicitly: LLM audition is
 maintained as an independent responsibility of a Private overlay, and it is
 not included in v0.1's required public-core implementation. A Private

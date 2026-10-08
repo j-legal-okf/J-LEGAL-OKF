@@ -145,3 +145,49 @@ def test_adapter_registry_rejects_duplicate_name_registration() -> None:
             sniff=lambda path: False,
             priority=1,
         )
+
+
+@pytest.mark.parametrize("adapter", ["xml", "html"])
+@pytest.mark.parametrize("declaration", [
+    '<!DOCTYPE r>',
+    '<!DOCTYPE r [<!ENTITY invented "small invented text">]>',
+    '<!DOCTYPE r SYSTEM "https://example.invalid/never-resolve.dtd">',
+])
+def test_generic_xml_and_xhtml_reject_dtd_before_mapping(tmp_path, adapter, declaration):
+    path = tmp_path / ("input." + adapter)
+    path.write_text(declaration + "<r/>", encoding="utf-8")
+    with pytest.raises(AdapterError, match=f"^ADAPTER_{adapter.upper()}_DTD_OR_ENTITY_FORBIDDEN$"):
+        default_registry().adapt(path, name=adapter, mapping=_xml_mapping())
+
+
+@pytest.mark.parametrize("raw", [b"", b"<r>"])
+def test_generic_xml_syntax_errors_are_adapter_errors(tmp_path, raw):
+    path = tmp_path / "input.xml"
+    path.write_bytes(raw)
+    with pytest.raises(AdapterError, match="^ADAPTER_XML_PARSE$"):
+        default_registry().adapt(path, name="xml", mapping=_xml_mapping())
+
+
+def test_json_unused_structure_obeys_limits_before_node_adaptation(tmp_path, monkeypatch):
+    from jlegal_okf import input_limits
+
+    path = _raw_tree(tmp_path / "source.json")
+    original = json.loads(path.read_text(encoding="utf-8"))
+    original["unused"] = [[[[0]]]]
+    path.write_text(json.dumps(original), encoding="utf-8")
+    monkeypatch.setattr(input_limits, "MAX_JSON_DEPTH", 4)
+    with pytest.raises(AdapterError, match="^INPUT_JSON_DEPTH_LIMIT$"):
+        default_registry().adapt(path, name="json")
+
+
+@pytest.mark.parametrize("constant,limit,code", [
+    ("MAX_JSON_BYTES", 8, "INPUT_TOO_LARGE"),
+    ("MAX_JSON_TOKENS", 2, "INPUT_JSON_TOKEN_LIMIT"),
+])
+def test_json_registry_uses_runtime_budgets(tmp_path, monkeypatch, constant, limit, code):
+    from jlegal_okf import input_limits
+
+    path = _raw_tree(tmp_path / "source.json")
+    monkeypatch.setattr(input_limits, constant, limit)
+    with pytest.raises(AdapterError, match="^" + code + "$"):
+        default_registry().adapt(path, name="json")

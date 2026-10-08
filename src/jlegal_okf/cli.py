@@ -9,11 +9,10 @@ from pathlib import Path
 import sys
 import tempfile
 
-import yaml
-
 from . import __version__
 from .egov import admit_egov_xml, egov_xml_adapter, fetch_egov_xml, write_acquisition_receipt
 from .errors import AdapterError, JLegalError, ValidationError
+from .input_limits import load_json_option, load_mapping_option
 from .legal_okf import LegalOKFError, export_okf, validate_okf
 from .pipeline import JLEGAL_PROFILE, _egov_acquisition, compile_corpus, read_crosswalk, read_jsonl, verify_manifest
 from .validation import validate_corpus
@@ -27,34 +26,15 @@ _VERSION_TEXT = f"jlegal-okf {__version__} (profile {JLEGAL_PROFILE})"
 
 
 def _mapping(value: str | None):
-    if value is None:
-        return None, None
-    path = Path(value)
-    return (yaml.safe_load(path.read_text(encoding="utf-8")), path) if path.exists() else (yaml.safe_load(value), None)
+    return load_mapping_option(value)
 
 
 def _acquisition(value: str | None):
-    if value is None:
-        return None
-    path = Path(value)
-    if not path.is_file():
-        raise ValidationError("ACQUISITION_FILE_REQUIRED")
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ValidationError("ACQUISITION_JSON") from exc
+    return load_json_option(value, "ACQUISITION")
 
 
 def _rights(value: str | None):
-    if value is None:
-        return None
-    path = Path(value)
-    if not path.is_file():
-        raise ValidationError("RIGHTS_FILE_REQUIRED")
-    try:
-        return json.loads(path.read_text(encoding="utf-8"))
-    except json.JSONDecodeError as exc:
-        raise ValidationError("RIGHTS_JSON") from exc
+    return load_json_option(value, "RIGHTS")
 
 
 def _write_admission_report(value: str, report: dict) -> None:
@@ -85,7 +65,7 @@ def _admission_failure(diagnostic: str) -> dict:
         "diagnostics": [diagnostic],
         "input_kind": None,
         "official_law_id": None,
-        "profile": "J-LEGAL-OKF/0.2.0-draft",
+        "profile": JLEGAL_PROFILE,
         "receipt_verified": False,
         "schema": "jlegal-egov-admission/v1",
         "source_bytes": None,

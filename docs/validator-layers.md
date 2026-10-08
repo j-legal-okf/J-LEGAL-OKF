@@ -2,8 +2,8 @@
 
 ## Status and scope
 
-[`jlegal-okf-profile-0.2.0-draft.md`, "Provenance, normalization, and
-validation policy"](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy)
+[`jlegal-okf-profile-0.3.0-draft.md`, "Provenance, normalization, and
+validation policy"](jlegal-okf-profile-0.3.0-draft.md#provenance-normalization-and-validation-policy)
 organizes `validate_corpus()`'s checks into four layers (syntax, structure,
 source fidelity, semantic and temporal relations) but states that the
 code-to-layer map itself was not yet written. This document is that map.
@@ -137,7 +137,25 @@ distinguishes source preservation, canonical fidelity, bundle integrity and
 use eligibility. A diagnostic family named `source_fidelity` can contain only
 a hash-shape check; passing it is not source re-verification or proof of legal
 applicability. Target diagnostics listed in that design are not entries in the
-current `DIAGNOSTIC_LAYERS` table and are not implemented CLI promises.
+current `DIAGNOSTIC_LAYERS` table. Pending targets are not implemented CLI promises.
+
+## Text/display and version gates outside the corpus layer map
+
+These are reader/manifest/bundle/checker diagnostics, not new entries in
+`DIAGNOSTIC_LAYERS`. The supported tuple is in the
+[0.3.0-draft profile](jlegal-okf-profile-0.3.0-draft.md#supported-version-tuple).
+
+| Gate | Diagnostics and meaning |
+| --- | --- |
+| Ordinary corpus reader | `CORPUS_SCHEMA_UNSUPPORTED`: schema other than `jori-corpus/v3`, before source replay. |
+| Reference manifest | `MANIFEST_OPTIONS`: unsupported adapter/version pair; `MANIFEST_ACQUISITION`: unsupported reference converter/profile or e-Gov declared under generic manifest v3; `MANIFEST_KEYS`: missing required v5/v6 key; `MANIFEST_TYPES`: malformed option types. Each fails before replay. |
+| Reference bundle | `JLEGAL_OKF_MANIFEST_SHAPE`: unsupported outer profile; `JLEGAL_OKF_SOURCE_CONTENT`: complete stored body differs from DB-DISPLAY-1. |
+| Independent checker metadata | `NODE_SCHEMA`, `ADAPTER_METADATA`, `CONVERTER_METADATA`, `CONCEPT_PROVENANCE`, `BUNDLE_SCHEMA`: canonical schema, e-Gov adapter version, profile-bearing converter, source-concept provenance and outer-profile boundaries respectively. A malformed adapter type can also produce `MANIFEST_TYPES`. |
+| Independent checker fidelity | `NODE_TEXT` and `NODE_ATTRIBUTES`: fixed source expectations; `CONCEPT_TEXT`: content-hash mismatch; `SOURCE_DISPLAY_CONTRACT`: complete body mismatch, separately from its declared content hash. |
+
+Exact-body comparison retains marker-looking payload, CR and CRLF. It rejects
+markerless fallback, changed titles, added prose and a second blank separator
+line. Fixed-case checks do not attest producer execution or legal eligibility.
 
 ## CLI: machine-readable diagnostics
 

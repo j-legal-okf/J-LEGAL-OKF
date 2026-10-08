@@ -7,22 +7,24 @@ from pathlib import Path
 from defusedxml.common import DefusedXmlException
 from defusedxml import ElementTree as ET
 
-from ..egov import MAX_EGOV_XML_BYTES, _law_and_identifier, _safe_fromstring
+from ..egov import _law_and_identifier, _read_admissible_xml, _safe_fromstring
 from ..errors import AdapterError
 from .contracts import (AssuranceError, canonical_bytes, digest, file_digest, files_under,
                         new_output, read_json, relative_path, valid_law_id, write_json)
 
 
 def _identity(path: Path, supplied: str | None) -> tuple[str | None, str]:
-    if path.stat().st_size > MAX_EGOV_XML_BYTES:
-        return supplied, "INPUT_TOO_LARGE"
     try:
-        root = _safe_fromstring(path.read_bytes())
+        root = _safe_fromstring(_read_admissible_xml(path))
         _, law_id = _law_and_identifier(root, supplied)
     except (DefusedXmlException, ET.ParseError):
         return supplied, "INVALID_XML"
     except AdapterError as exc:
-        codes = {"EGOV_XML_LAW_ID_REQUIRED": "MISSING_ID", "EGOV_XML_LAW_ID_MISMATCH": "CONFLICTING_ID"}
+        codes = {"EGOV_XML_LAW_ID_REQUIRED": "MISSING_ID", "EGOV_XML_LAW_ID_MISMATCH": "CONFLICTING_ID",
+                 "EGOV_XML_INPUT_EMPTY": "INVALID_XML", "EGOV_XML_INPUT_TOO_LARGE": "INPUT_TOO_LARGE",
+                 "INPUT_TOO_LARGE": "INPUT_TOO_LARGE",
+                 "INPUT_XML_DEPTH_LIMIT": "INPUT_XML_DEPTH_LIMIT",
+                 "INPUT_XML_ELEMENT_LIMIT": "INPUT_XML_ELEMENT_LIMIT"}
         return supplied, codes.get(str(exc), "INVALID_ENVELOPE")
     if not valid_law_id(law_id):
         return None, "INVALID_ID"

@@ -15,17 +15,19 @@ from urllib.parse import parse_qsl, quote, urlparse
 
 from .adapters import Adaptation, BuildInput, default_registry
 from .errors import JLegalError, ValidationError
+from . import input_limits
+from .input_limits import read_bounded_bytes, validate_options
 from .model import LegalNode, LegacyCrosswalk, NodeKind, RetrievalDocument, SCHEMA, canonical_json, canonical_jsonl, content_addressed_uri, content_uri_sha256, text_sha256
 from .validation import validate_corpus
 
 _MANIFEST_CANONICALIZATION = "json-sort-keys-utf8-compact-jsonl-final-lf"
 _MANIFEST_SCHEMA = "jori-manifest/v5"
 # v6 is v5 plus an asserted rights area. A corpus compiled without one keeps
-# emitting v5 byte for byte, so recorded v5 digests stay valid.
+# emitting v5 byte for byte within the same supported recipe/version tuple.
 _MANIFEST_SCHEMA_RIGHTS = "jori-manifest/v6"
 _LEGACY_MANIFEST_SCHEMA = "jori-manifest/v3"
 _MANIFEST_ADAPTERS = frozenset({"json", "xml", "html", "egov_xml"})
-_MANIFEST_ADAPTER_VERSION = "1"
+_MANIFEST_ADAPTER_VERSIONS = {"json": "1", "xml": "1", "html": "1", "egov_xml": "2"}
 _MANIFEST_DIGESTS = ("corpus_sha256", "crosswalk_sha256", "projection_sha256", "build_options_sha256")
 _REQUIRED_INPUT_ROLES = {
     "json": frozenset({"source"}),
@@ -35,8 +37,8 @@ _REQUIRED_INPUT_ROLES = {
 }
 _OPTIONAL_INPUT_ROLES = {"egov_xml": frozenset({"mapping"})}
 _INLINE_MAPPING_URI = "inline:canonical-json-v1"
-JLEGAL_PROFILE = "J-LEGAL-OKF/0.2.0-draft"
-JLEGAL_CONVERTER = {"name": "JORI Engine", "version": "0.1.0-draft", "profile": JLEGAL_PROFILE}
+JLEGAL_PROFILE = "J-LEGAL-OKF/0.3.0-draft"
+JLEGAL_CONVERTER = {"name": "JORI Engine", "version": "0.2.0-draft", "profile": JLEGAL_PROFILE}
 _ACQUISITION_KEYS = {"schema", "source_authority", "source_url", "retrieved_at", "source_format", "official_law_id", "law_number", "requested_law_id", "as_of", "sha256", "rights"}
 _RIGHTS_KEYS = {"source_license", "bundle_license", "redistribution_allowed", "commercial_use_allowed"}
 
@@ -59,6 +61,7 @@ def _lower_hex_digest(value: Any) -> bool:
 
 def _canonical_mapping(mapping: Any) -> dict[str, Any] | None:
     if mapping is None: return None
+    validate_options(mapping)
     if not isinstance(mapping, dict): raise ValidationError("BUILD_RECIPE_MAPPING")
     return json.loads(canonical_json(mapping))
 
@@ -68,8 +71,9 @@ def _build_recipe(adapter: str, mapping: Any) -> dict[str, Any]:
 
 
 def _mapping_input(mapping: Any, mapping_path: str | Path | None) -> BuildInput:
+    validate_options(mapping)
     if mapping_path is not None:
-        raw=Path(mapping_path).read_bytes(); sha256=hashlib.sha256(raw).hexdigest()
+        raw=read_bounded_bytes(Path(mapping_path), max_bytes=input_limits.MAX_OPTION_BYTES); sha256=hashlib.sha256(raw).hexdigest()
         return BuildInput("mapping",content_addressed_uri(sha256),sha256)
     return BuildInput("mapping",_INLINE_MAPPING_URI,hashlib.sha256(canonical_json(mapping)).hexdigest())
 
@@ -128,11 +132,15 @@ def _validate_acquisition_url(value: Any, requested_law_id: str, as_of: str | No
 
 def _egov_acquisition(adaptation: Adaptation, supplied: dict[str, Any] | None) -> dict[str, Any] | None:
     """Accept retrieval facts only from the e-Gov fetch receipt, never mtime."""
+    if supplied is not None:
+        validate_options(supplied)
     if adaptation.adapter != "egov_xml":
         if supplied is not None:
             raise ValidationError("ACQUISITION_EGOV_ONLY")
         return None
     base = adaptation.source_metadata
+    if base is not None:
+        validate_options(base)
     if type(base) is not dict or set(base) != _ACQUISITION_KEYS:
         raise ValidationError("ACQUISITION_ADAPTER_METADATA")
     source = next((item for item in adaptation.inputs if item.role == "source"), None)
@@ -180,6 +188,7 @@ def _rights(value: Any) -> dict[str, Any] | None:
     """
     if value is None:
         return None
+    validate_options(value)
     if type(value) is not dict or set(value) != _RIGHTS_KEYS:
         raise ValidationError("RIGHTS_SHAPE")
     for key in ("source_license", "bundle_license"):
@@ -406,7 +415,9 @@ def verify_manifest(corpus_path: str | Path, manifest_path: str | Path, crosswal
     options = ("corpus_id", "adapter", "adapter_version", "canonicalization", "hierarchy_status")
     recipe=manifest["build_recipe"]
     if any(type(manifest[key]) is not int or manifest[key] < 0 for key in counts) or any(not isinstance(manifest[key], str) or not manifest[key] for key in options) or not isinstance(manifest["inputs"], list) or not isinstance(manifest["required_input_roles"],list) or any(not isinstance(role,str) or not role for role in manifest["required_input_roles"]) or type(recipe) is not dict or set(recipe)!={"adapter","mapping"} or not isinstance(recipe.get("adapter"),str) or (recipe.get("mapping") is not None and not isinstance(recipe.get("mapping"),dict)) or any(not _lower_hex_digest(manifest[key]) for key in _MANIFEST_DIGESTS): raise ValidationError("MANIFEST_TYPES")
-    if manifest["adapter"] not in _MANIFEST_ADAPTERS or manifest["adapter_version"] != _MANIFEST_ADAPTER_VERSION or manifest["canonicalization"] != _MANIFEST_CANONICALIZATION or manifest["hierarchy_status"] not in {"full", "partial"}: raise ValidationError("MANIFEST_OPTIONS")
+    if manifest["adapter"] not in _MANIFEST_ADAPTERS or manifest["adapter_version"] != _MANIFEST_ADAPTER_VERSIONS[manifest["adapter"]] or manifest["canonicalization"] != _MANIFEST_CANONICALIZATION or manifest["hierarchy_status"] not in {"full", "partial"}: raise ValidationError("MANIFEST_OPTIONS")
+    if manifest["adapter"] == "egov_xml" and schema not in {_MANIFEST_SCHEMA, _MANIFEST_SCHEMA_RIGHTS}:
+        raise ValidationError("MANIFEST_ACQUISITION")
     if recipe["adapter"] != manifest["adapter"]: raise ValidationError("MANIFEST_RECIPE")
     corpus_file, crosswalk_file, projection_file = _canonical_artifact_paths(corpus_path, crosswalk_path, projection_path)
     corpus = corpus_file.read_bytes()
@@ -502,6 +513,10 @@ def compile_adaptation(
     rights: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Compile a validated public adaptation into the four canonical artifacts."""
+    if mapping is not None: validate_options(mapping)
+    if acquisition is not None: validate_options(acquisition)
+    if isinstance(adaptation, Adaptation) and adaptation.adapter == "egov_xml" and adaptation.source_metadata is not None:
+        validate_options(adaptation.source_metadata)
     _validate_adaptation(adaptation)
     rights = _rights(rights)
     destination = _safe(out_dir)
@@ -535,5 +550,7 @@ def compile_adaptation(
 
 
 def compile_corpus(input_path: str | Path, *, adapter: str | None, out_dir: str | Path, corpus_id: str, mapping: dict[str, Any] | None = None, mapping_path: str | Path | None = None, acquisition: dict[str, Any] | None = None, converted_at: str | None = None, rights: dict[str, Any] | None = None) -> dict[str, Any]:
+    for value in (mapping, acquisition, rights):
+        if value is not None: validate_options(value)
     adaptation = default_registry().adapt(input_path, name=adapter, mapping=mapping)
     return compile_adaptation(adaptation, corpus_id=corpus_id, out_dir=out_dir, mapping=mapping, mapping_path=mapping_path, acquisition=acquisition, converted_at=converted_at, rights=rights)

@@ -5,12 +5,15 @@ from __future__ import annotations
 from dataclasses import dataclass
 from datetime import date
 import hashlib
-import json
 from pathlib import Path
 from typing import Any, Callable
 from xml.etree import ElementTree as ET
 
+from defusedxml.common import DefusedXmlException
+
 from .errors import AdapterError
+from . import input_limits
+from .input_limits import parse_json, parse_xml, read_bounded_bytes, read_xml_bytes, validate_options
 from .model import LegalNode, LegacyCrosswalk, NodeKind, SourceRef, Temporal, content_addressed_uri, law_identifier, semantic_locator
 
 
@@ -47,6 +50,7 @@ class AdapterRegistry:
         if name in self._adapters: raise AdapterError(f"ADAPTER_DUPLICATE: {name}")
         self._adapters[name] = (priority, sniff, adapter)
     def adapt(self, path: str | Path, *, name: str | None = None, mapping: dict[str, Any] | None = None) -> Adaptation:
+        if mapping is not None: validate_options(mapping)
         source = Path(path)
         if name is not None:
             if name not in self._adapters: raise AdapterError(f"ADAPTER_UNKNOWN: {name}")
@@ -99,8 +103,9 @@ def _tree_nodes(root: dict[str, Any], context: dict[str, Any], source: SourceRef
 
 
 def json_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adaptation:
+    if mapping is not None: validate_options(mapping)
     if mapping: raise AdapterError("ADAPTER_JSON_MAPPING")
-    raw = path.read_bytes(); value = json.loads(raw)
+    raw = read_bounded_bytes(path, max_bytes=input_limits.MAX_JSON_BYTES); value = parse_json(raw)
     if not isinstance(value, dict) or "nodes" not in value: raise AdapterError("ADAPTER_RAW_JSON_SHAPE")
     required = {"jurisdiction", "authority"}
     if not required <= set(value): raise AdapterError("ADAPTER_RAW_LAW_FIELDS")
@@ -124,7 +129,7 @@ def _value(element: ET.Element, spec: Any) -> Any:
 
 
 def _mapped(root: ET.Element, raw: bytes, mapping: dict[str, Any], adapter: str) -> Adaptation:
-    if set(mapping) != {"row", "fields"} or not isinstance(mapping["fields"], dict): raise AdapterError("ADAPTER_MAPPING_REQUIRED")
+    if type(mapping) is not dict or set(mapping) != {"row", "fields"} or not isinstance(mapping["fields"], dict): raise AdapterError("ADAPTER_MAPPING_REQUIRED")
     fields = mapping["fields"]; needed = {"jurisdiction", "authority", "locator", "kind", "depth", "text"}
     if not needed <= set(fields) or not ({"law_number_key","source_law_key"}&set(fields)): raise AdapterError("ADAPTER_MAPPING_FIELDS")
     source = _ref(raw, adapter); prepared: list[dict[str, Any]] = []
@@ -147,14 +152,21 @@ def _mapped(root: ET.Element, raw: bytes, mapping: dict[str, Any], adapter: str)
 
 
 def xml_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adaptation:
+    if mapping is not None: validate_options(mapping)
     if mapping is None: raise AdapterError("ADAPTER_XML_MAPPING_REQUIRED")
-    raw = path.read_bytes(); return _mapped(ET.fromstring(raw), raw, mapping, "xml")
+    raw = read_xml_bytes(path)
+    try: root = parse_xml(raw)
+    except DefusedXmlException as exc: raise AdapterError("ADAPTER_XML_DTD_OR_ENTITY_FORBIDDEN") from exc
+    except ET.ParseError as exc: raise AdapterError("ADAPTER_XML_PARSE") from exc
+    return _mapped(root, raw, mapping, "xml")
 
 
 def html_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adaptation:
+    if mapping is not None: validate_options(mapping)
     if mapping is None: raise AdapterError("ADAPTER_HTML_MAPPING_REQUIRED")
-    raw = path.read_bytes()
-    try: root = ET.fromstring(raw)
+    raw = read_xml_bytes(path)
+    try: root = parse_xml(raw)
+    except DefusedXmlException as exc: raise AdapterError("ADAPTER_HTML_DTD_OR_ENTITY_FORBIDDEN") from exc
     except ET.ParseError as exc: raise AdapterError("ADAPTER_HTML_XHTML_REQUIRED") from exc
     return _mapped(root, raw, mapping, "html")
 

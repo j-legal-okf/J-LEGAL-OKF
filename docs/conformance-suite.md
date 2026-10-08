@@ -20,7 +20,7 @@ recorded measurement workflow.
 | --- | --- | --- |
 | `okf_format` | UTF-8 concepts, YAML frontmatter and nonempty string `type`; reserved index frontmatter placement and log date headings | Mechanical checks of the fixed official specification's format floor; no editorial or prose interpretation |
 | `profile` | Fixed source bytes and explicit law key; every expected node, text, own XML attribute, parent, ordinal, branch, temporal field and UUID; projections, source concepts, build/source digests and cross-case relations | The listed fixed-case profile invariants hold |
-| `jori_byte_regression` | Optional immutable reference hashes from the existing structure-matrix golden | Exact compatibility with that JORI recipe; never required for another producer's common result |
+| `jori_byte_regression` | Optional fixed reference hashes for all five normal cases under profile 0.3.0-draft | Exact compatibility with that JORI recipe; never required for another producer's common result |
 
 The official source is [OKF v0.2 at commit
 `ad30107c31c06aec8a7d5636e0d1058118604e6f`](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/ad30107c31c06aec8a7d5636e0d1058118604e6f/SPEC.md#11-conformance).
@@ -62,12 +62,22 @@ All catalog recipes assert no rights area, so their wire contracts are
 Rights-bearing v6/v2 cases require a separately reviewed recipe; changing only
 a schema name cannot pass these no-rights cases.
 
-When a concept uses versioned `jlegal-source` comments, the checker requires
-exactly one matching begin/end pair and exact enclosed text, including empty
-and whitespace-only text. Headings and presentation outside the pair are not
-compared to the reference template. Markerless bodies receive only a text
-presence check; that check does not establish exact display-body fidelity or
-exclude additional prose. Canonical node text is always checked exactly.
+The active [0.3.0-draft profile](jlegal-okf-profile-0.3.0-draft.md) requires
+`jori-corpus/v3` and e-Gov adapter version string `"2"`. `NODE_SCHEMA` and
+`ADAPTER_METADATA` reject old, unknown or malformed values; non-string adapter
+versions additionally fail `MANIFEST_TYPES`. Converter name/version remain
+producer-independent, with the supported profile required by
+`CONVERTER_METADATA` and concept provenance checked by `CONCEPT_PROVENANCE`.
+
+Every source concept must match the complete `DB-DISPLAY-1` construction,
+including its canonical heading/label/locator title, markers and final LF.
+`SOURCE_DISPLAY_CONTRACT` rejects commentary, markerless bodies, title or
+payload changes and missing framing. Marker-like characters inside the known
+payload are retained. `CONCEPT_TEXT` separately checks the content hash.
+The parser preserves CR/CRLF inside the body; after the frontmatter delimiter
+it excludes at most one optional LF or CRLF blank separator line. A second
+blank line is part of the body and fails the grammar. Canonical node text is
+always checked exactly against the immutable expected records.
 
 Own XML attributes are required. The fixed expectations separately enumerate
 optional copies of source-descendant `Delete` and `AmendLawNum` flags on
@@ -83,28 +93,38 @@ includes; its SHA-256 is
 The schema is not distributed. All inputs are entirely invented, not legal
 sources. An empty table cell uses a schema-valid empty `Sentence` child.
 
-### Observed reference discrepancy
+### Historical reference discrepancy and coordinated correction
 
-The current reference converter preserves a `Style` leaf as literal
+Under profile 0.2.0-draft, the reference converter preserved a `Style` leaf as literal
 `<Style>…</Style>` inside the appendix and root canonical text. The profile's
 `JLEGAL-TEXT-PRESERVE-1` character-data rule does not specify this exception.
-Accordingly, the unmodified reference submission reports `NODE_TEXT` for
+Accordingly, that unmodified reference submission reported `NODE_TEXT` for
 `matrix`, `edges`, `relocated`, `different-time` and `tampered-source`.
-`appendix-alone` and `new-provision` pass their profile checks; the matrix still
-passes the separate existing JORI byte golden. These are measurements, not a
-change to the converter or the normative profile.
+`appendix-alone` and `new-provision` passed their profile checks; the matrix
+passed the separate historical JORI byte golden. These observations remain
+historical evidence; they never made markup an exception to the text rule.
 
-Checker tests also construct a fixture-only producer stand-in with
-character-only rendering and a distinct producer name. Its artifacts pass the
-common checks and fail the optional JORI bytes. This is a checker acceptance
-test, not evidence of a released second implementation. Tests explicitly keep
-the unmodified reference discrepancy visible and reject arbitrary added markup.
+Profile 0.3.0-draft corrects the renderer and enforces the complete display
+grammar. All seven cases now exercise the real producer without a rendering
+patch. The five normal cases pass common checks, source replay and their new
+reference hashes. `tampered-source` passes the expected-detection test while
+the input is rejected; `new-provision` passes the expected-rejection test while
+conversion remains unsupported. Passing these tests does not accept those two
+inputs.
+
+A fixture-only producer stand-in changes only converter name/version. Its
+artifacts pass the common checks and fail optional reference bytes. This is a
+checker acceptance test, not evidence of a released second implementation.
+The old [catalog](../examples/conformance/cases-profile-0.2.0-draft.json) and
+old matrix golden remain byte-identical for use with their pinned historical
+environment, not for recertification by this checker. Source and expected JSON
+files and their digests remain unchanged.
 
 ## Acceptance contract and current gaps
 
 The [deterministic acceptance contract](deterministic-bundle-contract.md)
-defines count equality, full-node projection identity/version and target strict
-display/use requirements. The checker enforces `DB-COUNTS-1`: all four counts
+defines count equality, full-node projection identity/version, strict display
+and pending use requirements. The checker enforces `DB-COUNTS-1`: all four counts
 must be nonnegative integers excluding booleans and equal the submitted data.
 It counts every node record, distinct `law_id` values, crosswalk records and
 projection records independently. The fixed cases still require an exactly
@@ -112,15 +132,43 @@ empty crosswalk file; a correctly counted nonempty crosswalk remains rejected.
 
 Resealed mutation tests change each count separately, including incorrect zero,
 negative, boolean and string values, so a digest failure cannot mask a missing
-count predicate. A genuine zero crosswalk count passes. These tests use the
-fixture-only producer described above and do not repair the Style discrepancy.
+count predicate. A genuine zero crosswalk count passes. These tests retain the
+fixture-only producer metadata described above.
 
-The checker still accepts arbitrary nonempty projection ID/version strings.
-That gap is not evidence that the missing predicates hold. The target display
-grammar is stricter than the marker/presence behavior documented above and is
-not yet enforced here.
+The checker enforces `DB-PROJECTION-1/2` independently of producer helpers.
+It matches projections by `(node_id, version_id)`, requires exactly one for
+every non-law canonical version, and rejects duplicate pairs, missing or
+surplus records and law-root projections with `PROJECTION_SET`. Copied fields
+and source evidence remain checked by `PROJECTION_CONTENT` and
+`PROJECTION_SOURCE`. The fixed cases have one version per node; using a pair
+as the key does not establish general multi-version coverage.
 
-`requirements.json` records the implemented count requirement in its
+`projection_version` must be exactly the string `"1"` (`PROJECTION_VERSION`).
+The checker computes `projection_` plus the first 32 lowercase SHA-256 hex
+digits of UTF-8 `version_id + "|full-node-v1|" + text`, without normalizing
+text (`PROJECTION_IDENTITY`), and checks ID uniqueness separately
+(`PROJECTION_ID_DUPLICATE`). These diagnostics can coexist; duplicate IDs do
+not suppress identity checks. Invalid projection field types are rejected by
+`PROJECTION_SCHEMA` before hashing or indexing them. Resealed tests cover
+ID, version, pair, copied-field and type failures, keep record counts
+consistent for set mutations, and retain positive empty/whitespace and
+different-producer cases.
+
+The ordinary `verify_canonical_artifacts()` rejects the same well-formed
+projection mutations with `PROJECTION_DERIVATION_MISMATCH`; malformed fields
+fail its `PROJECTION_LINE_<n>` reader. This agreement on acceptance does not
+imply identical diagnostics. That artifact verifier accepts the unmodified
+fixture-only producer's canonical files. `verify_manifest()` additionally
+requires the reference converter metadata and rejects that producer with
+`MANIFEST_ACQUISITION`; this reference-recipe restriction is separate from
+common fixed-case conformance.
+
+The implemented `DB-TEXT-1` and `DB-DISPLAY-1` checks use the independent
+[text/display oracle](text-display-oracle.md) and complete-body mutation tests.
+Execution attestation, additional parser limits and use eligibility remain
+pending; fixed artifact checks do not imply any of those capabilities.
+
+`requirements.json` records the implemented count, projection, text and display requirements in its
 `requirements` array. Its separate `contract_design` link remains non-executable
 metadata; a design reference adds no executed test or guarantee. The seven
 catalog cases and their immutable source-authored oracles remain unchanged.

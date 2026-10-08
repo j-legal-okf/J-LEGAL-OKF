@@ -18,7 +18,7 @@ import uuid
 import yaml
 
 
-PROFILE = "J-LEGAL-OKF/0.2.0-draft"
+PROFILE = "J-LEGAL-OKF/0.3.0-draft"
 NAMESPACE = uuid.UUID("9b7b7100-8305-5e41-b8d4-e541ce517491")
 LAYERS = ("okf_format", "profile", "jori_byte_regression")
 LIMIT = 16 * 1024 * 1024
@@ -107,14 +107,21 @@ def _tree(root: Path) -> dict[str, Path]:
 
 
 def _frontmatter(raw: bytes) -> tuple[dict, str]:
-    text = raw.decode("utf-8").replace("\r\n", "\n")
+    text = raw.decode("utf-8")
     lines = text.splitlines(keepends=True)
     _require(bool(lines) and lines[0].strip() == "---", "FRONTMATTER")
     end = next((i for i in range(1, len(lines)) if lines[i].strip() == "---"), None)
     _require(end is not None, "FRONTMATTER")
     value = yaml.safe_load("".join(lines[1:end]))
     _require(type(value) is dict, "FRONTMATTER")
-    return value, "".join(lines[end + 1:])
+    body = "".join(lines[end + 1:])
+    # One optional empty separator line is outside the body. Preserve every
+    # later code point, including CR/CRLF and a second blank line.
+    if body.startswith("\r\n"):
+        body = body[2:]
+    elif body.startswith("\n"):
+        body = body[1:]
+    return value, body
 
 
 def check_okf_format(bundle: Path) -> list[str]:
@@ -157,16 +164,11 @@ def _records(path: Path) -> list[dict]:
 
 
 def _source_payload_matches(body: str, node: dict) -> bool:
-    """Bind an explicitly marked payload without requiring producer headings."""
-    if "<!-- jlegal-source:" not in body:
-        # Markerless presentation has only bounded presence coverage.
-        return node["text"] in body
+    """Independently construct the complete DB-DISPLAY-1 body."""
+    title = node["heading"] or node["label"] or node["locator"]
     begin = f"<!-- jlegal-source:{node['version_id']}:begin -->"
     end = f"<!-- jlegal-source:{node['version_id']}:end -->"
-    if body.count("<!-- jlegal-source:") != 2 or body.count(begin) != 1 or body.count(end) != 1:
-        return False
-    start, finish = body.index(begin) + len(begin), body.index(end)
-    return finish >= start and body[start:finish] == node["text"]
+    return body == "# " + title + "\n\n## Source text\n\n" + begin + node["text"] + end + "\n"
 
 
 def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[str, dict]]:
@@ -193,7 +195,7 @@ def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[
         node = by_locator.get(fixed["locator"])
         if node is None:
             continue
-        check(node.get("schema") == "jori-corpus/v2", "NODE_SCHEMA")
+        check(node.get("schema") == "jori-corpus/v3", "NODE_SCHEMA")
         check(set(node) == {"schema", "jurisdiction", "authority", "law_number_key", "source_law_key", "law_id", "node_id", "version_id", "parent_id", "kind", "locator", "depth", "ordinal", "branch", "heading", "label", "attributes", "text", "temporal", "source"}, "NODE_KEYS")
         for key in ("jurisdiction", "authority", "law_number_key", "source_law_key", "temporal"):
             check(_canonical(node.get(key)) == _canonical(expected[key]), "NODE_" + key.upper())
@@ -217,14 +219,26 @@ def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[
 
     projections = _records(files["canonical/projection.jsonl"])
     projection_keys = {"schema", "projection_id", "projection_version", "node_id", "version_id", "law_id", "locator", "heading", "text", "kind", "temporal", "evidence"}
-    check(all(p.get("schema") == "jori-projection/v1" and set(p) == projection_keys
-              and all(type(p.get(k)) is str and bool(p[k]) for k in ("projection_id", "projection_version", "node_id", "version_id", "law_id", "locator"))
-              and (p.get("heading") is None or type(p["heading"]) is str)
-              and all(type(p.get(k)) is str for k in ("text", "kind"))
-              and all(type(p.get(k)) is dict for k in ("temporal", "evidence"))
-              for p in projections), "PROJECTION_SCHEMA")
-    projected = {p["node_id"]: p for p in projections}
-    substantive = {n["node_id"]: n for n in nodes if n["kind"] != "law"}
+    projected = {}
+    projection_ids = set()
+    for p in projections:
+        valid_fields = (all(type(p.get(k)) is str and bool(p[k]) for k in ("projection_id", "projection_version", "node_id", "version_id", "law_id", "locator"))
+                        and (p.get("heading") is None or type(p["heading"]) is str)
+                        and all(type(p.get(k)) is str for k in ("text", "kind"))
+                        and all(type(p.get(k)) is dict for k in ("temporal", "evidence")))
+        check(p.get("schema") == "jori-projection/v1" and set(p) == projection_keys and valid_fields, "PROJECTION_SCHEMA")
+        if not valid_fields:
+            # Do not hash, concatenate or use malformed values as mapping keys.
+            continue
+        check(p["projection_version"] == "1", "PROJECTION_VERSION")
+        identity = "projection_" + _sha((p["version_id"] + "|full-node-v1|" + p["text"]).encode("utf-8"))[:32]
+        check(p["projection_id"] == identity, "PROJECTION_IDENTITY")
+        check(p["projection_id"] not in projection_ids, "PROJECTION_ID_DUPLICATE")
+        projection_ids.add(p["projection_id"])
+        key = (p["node_id"], p["version_id"])
+        check(key not in projected, "PROJECTION_SET")
+        projected[key] = p
+    substantive = {(n["node_id"], n["version_id"]): n for n in nodes if n["kind"] != "law"}
     check(len(projected) == len(projections) and set(projected) == set(substantive), "PROJECTION_SET")
     for key in set(projected) & set(substantive):
         check(all(projected[key].get(k) == substantive[key][k] for k in ("node_id", "version_id", "law_id", "locator", "heading", "text", "kind", "temporal")), "PROJECTION_CONTENT")
@@ -242,6 +256,7 @@ def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[
           and all(type(manifest.get(k)) is list for k in ("inputs", "required_input_roles"))
           and all(type(manifest.get(k)) is dict for k in ("build_recipe", "acquisition", "conversion")), "MANIFEST_TYPES")
     check(manifest.get("adapter") == "egov_xml", "MANIFEST_ADAPTER")
+    check(type(manifest.get("adapter_version")) is str and manifest["adapter_version"] == "2", "ADAPTER_METADATA")
     check(manifest.get("converted_at") == case["converted_at"], "CONVERSION_TIME")
     check(manifest.get("corpus_id") == case["corpus_id"], "CORPUS_ID")
     # Count submitted records independently; the fixed-case empty-crosswalk
@@ -298,7 +313,8 @@ def _profile(bundle: Path, expected: dict, case: dict) -> tuple[list[str], dict[
             continue
         ext, body = concepts[node["node_id"]]
         check(all(ext.get(k) == node[k] for k in ("law_id", "node_id", "version_id", "parent_id", "kind", "locator", "ordinal", "branch", "source", "temporal", "attributes")), "CONCEPT_FIELDS")
-        check(ext.get("content_sha256") == _sha(node["text"].encode()) and _source_payload_matches(body, node), "CONCEPT_TEXT")
+        check(ext.get("content_sha256") == _sha(node["text"].encode()), "CONCEPT_TEXT")
+        check(_source_payload_matches(body, node), "SOURCE_DISPLAY_CONTRACT")
         check(ext.get("conversion") == conversion and ext.get("converted_at") == case["converted_at"] and ext.get("acquisition") == acquisition and ext.get("profile") == PROFILE, "CONCEPT_PROVENANCE")
     check(len(derived) == 1 and derived[0].get("content_policy") == "none-generated" and derived[0].get("source_version_ids") == [], "DERIVED_BOUNDARY")
     return sorted(set(errors)), by_locator

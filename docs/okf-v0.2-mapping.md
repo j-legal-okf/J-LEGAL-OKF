@@ -11,8 +11,10 @@ describes the exporter's actual output
 through `jlegal compile --adapter egov_xml` and `jlegal export-okf` into a
 scratch directory and reading the generated `source/*.md` and
 `derived/knowledge.md` concept frontmatter directly, not by reading the
-exporter source alone. Every mapping below is transcribed from that run's
-actual YAML, not inferred from the code that produced it.
+exporter source alone. The original mapping observation used profile 0.2.0-draft.
+The same field structure is retained under
+[0.3.0-draft](jlegal-okf-profile-0.3.0-draft.md); its coordinated converter and
+exporter literals below are checked against the new synthetic compile/export output.
 
 A bundle has two concept layers, and every OKF standard key is populated
 differently in each:
@@ -31,7 +33,7 @@ differently in each:
 | `description` | `f"Source-preserving {node.kind.value} from Japanese legal XML."`. | Fixed `"No AI-derived legal knowledge is included in this source-preserving export."`. |
 | `resource` | `jlegal://law/<source_key-or-law_id>/<node_id>` (`quote()`-escaped). | `jlegal://derived/<law_id>`, or `jlegal://derived/multi-law` when the bundle spans more than one `law_id`. |
 | `sources` | Two entries, both layers, unconditionally: `canonical-corpus` (`/canonical/corpus.jsonl`) and `official-source` (the embedded source reference path `src/jlegal_okf/legal_okf.py` `_source_reference()` returns — `/references/source.xml` for the single-source case this profile always produces; see `docs/known-limitations.md` §3 for the unused multi-source ledger). | Same two entries. |
-| `generated` | `{"by": EXPORTER}`, where `EXPORTER` is the fixed string `jlegal-okf-exporter/0.1.0-draft`. | Same. |
+| `generated` | `{"by": EXPORTER}`, where `EXPORTER` is the fixed string `jlegal-okf-exporter/0.2.0-draft`. | Same. |
 | `verified` | Always `[]`. See §3 below. | Always `[]`. |
 | `status` | Fixed literal `"draft"`. | Fixed literal `"draft"`. |
 
@@ -43,9 +45,8 @@ representable in the OKF standard shape above — lives. Both layers carry
 e-Gov acquisition record, `rights` field always `null` —
 `docs/known-limitations.md` §3), `conversion` (the fixed
 `name`/`version`/`profile` triple carried unchanged from
-`src/jlegal_okf/pipeline.py` `JLEGAL_CONVERTER` — in the verified run's
-actual YAML this was
-`{"name": "JORI Engine", "version": "0.1.0-draft", "profile": "J-LEGAL-OKF/0.2.0-draft"}`),
+`src/jlegal_okf/pipeline.py` `JLEGAL_CONVERTER` — under the active tuple this is
+`{"name": "JORI Engine", "version": "0.2.0-draft", "profile": "J-LEGAL-OKF/0.3.0-draft"}`),
 and `converted_at`.
 
 The source layer additionally carries the canonical node's own identity and
@@ -72,6 +73,13 @@ source versions — see `docs/known-limitations.md`, "Scope: LLM audition is
 not part of v0.1") and `content_policy: none-generated`.
 
 ## 3. Why `verified` is always empty
+
+The source Markdown body is separately governed by `DB-DISPLAY-1`: its title
+uses `heading or label or locator` (without the frontmatter title's kind prefix),
+and its complete version-bound payload equals canonical character data. The
+validator compares the full decoded body, preserving CR/CRLF and literal marker
+strings in payload, and rejects extra prose or markerless fallback. This display
+contract does not change the standard-key mapping or add review evidence.
 
 `src/jlegal_okf/legal_okf.py` `_source_frontmatter()` and
 `_derived_frontmatter()` both hard-code `"verified": []`; nothing in the

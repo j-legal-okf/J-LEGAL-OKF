@@ -14,7 +14,33 @@ neither SemVer nor PEP 440 governs.
 
 ## [Unreleased]
 
+The active profile is 0.3.0-draft. Entries explicitly naming 0.2.0-draft below
+record the earlier unreleased transition; its normative document and golden
+remain unchanged historical evidence.
+
 ### Added
+
+- Shared structured-input limits: source JSON at 64 MiB / depth 128 /
+  250,000 structural tokens; mapping YAML/JSON and acquisition/rights JSON
+  options at 1 MiB / depth 32 / 10,000 tokens, plus a 1 MiB canonical option
+  byte cap and 4096-bit integers. JSON lexical and YAML event checks run
+  before object construction. Public adapter/compile API graphs are checked
+  without recursion before comparisons and canonical encoding, including
+  e-Gov adapter metadata. Mapping-file hash rereads use the bounded reader.
+- Shared `input_limits.py` for local XML/XHTML and e-Gov XML: same-descriptor
+  regular-file reads capped at 64 MiB, nonblocking POSIX opens, DTD/entity/
+  external-reference rejection, and pre-construction limits of depth 128
+  (root 1) and 250,000 elements. Small boundary and failure-path tests cover
+  admission, adapters, sniffing, fetch parsing and inventory identity.
+- The active `docs/jlegal-okf-profile-0.3.0-draft.md`, with explicit inheritance
+  from the preserved prior profile, complete source-display grammar and old-
+  artifact rejection/recompilation policy. Independent text/display fixtures
+  and producer/parser acceptance tests cover character data, literal markers,
+  CR/CRLF, whitespace and complete-body mutations.
+- A separately named 0.3.0-draft matrix golden and reference hashes for all five
+  normal fixed cases, verified against the unchanged source-authored expected
+  records. The old matrix golden and byte-identical
+  `cases-profile-0.2.0-draft.json` remain historical evidence.
 
 - Offline assurance inventory and measurement commands with frozen input
   hashes, explicit law identities, failure-preserving denominators, bounded
@@ -33,6 +59,56 @@ neither SemVer nor PEP 440 governs.
 
 ### Changed
 
+- Previously accepted over-limit structured inputs, YAML aliases, cyclic or
+  custom API values, nonfinite numbers (including JSON float overflow) and
+  lone surrogates are intentionally refused with stable `INPUT_*` diagnostics.
+  Shared graph references count at each occurrence; all limits are inclusive.
+  Source JSON UTF-8/16/32 decoding and CLI UTF-8 option-file behavior remain.
+  Long inline mappings no longer fail as overlong filesystem names. Accepted
+  inputs retain their source bytes, IDs, version tuple and canonical outputs.
+  These are compile-input limits; general artifact readers, hard CPU/memory/
+  wall-clock isolation and output completion on failure remain outside them.
+- Generic XML/XHTML now reject DTD declarations with
+  `ADAPTER_XML_DTD_OR_ENTITY_FORBIDDEN` /
+  `ADAPTER_HTML_DTD_OR_ENTITY_FORBIDDEN`; XML syntax errors consistently use
+  `ADAPTER_XML_PARSE`. File refusals use `INPUT_UNAVAILABLE`,
+  `INPUT_NOT_REGULAR`, `INPUT_TOO_LARGE`; existing e-Gov file and fetch
+  diagnostics remain. Depth/element refusals use `INPUT_XML_DEPTH_LIMIT` /
+  `INPUT_XML_ELEMENT_LIMIT`, including inventory status and safe survey
+  diagnostics. Rejected inputs remain in inventory denominators.
+  Previously accepted DTD-bearing or over-limit XML is intentionally refused.
+  Accepted input retains its source bytes, character data, identifiers,
+  version tuple and artifact hashes. JSON/YAML and conversion-option limits
+  are added separately above; hard process isolation remains outside scope.
+  Security documentation
+  now accurately describes the existing fetch stream cap and its decompression
+  limits; no fetch streaming mechanism is introduced by this change.
+- **Breaking, profile 0.3.0-draft**: e-Gov text rendering now concatenates only
+  source character data, correcting Style/Ruby/Rt/Sup/Sub/Line markup emission.
+  The existing whitespace and identity rules are unchanged. Corpus schema is
+  now `jori-corpus/v3`, converter `JORI Engine` / `0.2.0-draft`, e-Gov adapter
+  `"2"`, and exporter `jlegal-okf-exporter/0.2.0-draft`. Generic adapters stay
+  at `"1"`; projection, manifest and bundle schema/policy versions are unchanged.
+- Source concepts require the complete DB-DISPLAY-1 body; markerless fallback,
+  added prose and title substitutions fail. Same-version marker strings inside
+  known payload are retained. Readers preserve canonical CR/CRLF, excluding
+  at most one optional blank separator after frontmatter. The independent
+  checker adds `SOURCE_DISPLAY_CONTRACT` separately from `CONCEPT_TEXT`, and
+  `ADAPTER_METADATA` for unsupported e-Gov versions.
+- Old and mixed tuples fail before replay. Recompile original XML under the new
+  recipe; do not relabel old artifacts in place. For the fixed 41-node matrix,
+  all node IDs, 39 version IDs and 39 of 40 projection IDs remain unchanged;
+  corrected Style text changes the law-root and appendix versions and the
+  appendix projection. Complete file-hash effects are described in
+  `docs/synthetic-golden-matrix.md`. Package and Git tag versions are unchanged.
+
+- The independent fixed-case checker now enforces the existing full-node
+  projection ID formula, exact version `"1"`, ID uniqueness and one-to-one
+  `(node_id, version_id)` mapping. Resealed mutation tests compare rejection
+  with the ordinary artifact verifier and preserve acceptance of distinct
+  producer metadata. This strengthens validation without changing producer
+  bytes, wire schemas or golden values at that earlier step; the Style
+  discrepancy was subsequently corrected by the 0.3.0-draft transition above.
 - **Breaking**: an empty structural node's canonical `text` is now `""`
   instead of that element's own XML serialization. An empty structural node
   is one whose rendered text is empty, such as an appendix-table cell written

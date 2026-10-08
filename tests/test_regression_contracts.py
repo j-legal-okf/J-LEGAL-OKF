@@ -613,9 +613,8 @@ def test_table_header_column_preserves_mixed_content_whitespace(tmp_path: Path) 
 def test_plain_text_display_fields_never_contain_inline_xml_markup(tmp_path: Path) -> None:
     """heading/label are character data only; an inline element like Ruby must not leak its XML markup into them.
 
-    LegalNode.text does keep inline markup verbatim (JLEGAL-TEXT-PRESERVE-1);
-    JLEGAL-DISPLAY-TRIM-1's _plain_text must not, matching the character-data-
-    only behaviour of the element.itertext() call it replaced.
+    Both use character data. JLEGAL-DISPLAY-TRIM-1 trims the comparison
+    fields, while JLEGAL-TEXT-PRESERVE-1 keeps canonical text untrimmed.
     """
     body = (
         "<MainProvision><Article Num=\"1\">"
@@ -627,7 +626,8 @@ def test_plain_text_display_fields_never_contain_inline_xml_markup(tmp_path: Pat
     article = next(n for n in egov_xml_adapter(path).nodes if n.kind is NodeKind.ARTICLE)
     assert article.heading == "（目的もくてき）"
     assert "<Ruby>" not in article.heading
-    assert "<Ruby>" in article.text
+    assert "（目的もくてき）" in article.text
+    assert "<Ruby>" not in article.text
 
 
 def test_bare_egov_law_never_guesses_identity(tmp_path: Path) -> None:
@@ -945,3 +945,32 @@ def test_validate_okf_verify_source_catches_a_corpus_not_derived_from_source(tmp
     assert result["valid"] is True and result["source_reverified"] is False
     with pytest.raises(LegalOKFError, match="JLEGAL_OKF_CANONICAL"):
         validate_okf(bundle, verify_source=True)
+
+
+def test_mapping_hash_reread_is_bounded_without_changing_provenance(tmp_path, monkeypatch):
+    from jlegal_okf import input_limits
+    from jlegal_okf.pipeline import _mapping_input
+
+    path = tmp_path / "mapping.yaml"
+    raw = b"a: 1\n# note\n"
+    path.write_bytes(raw)
+    monkeypatch.setattr(input_limits, "MAX_OPTION_BYTES", len(raw))
+    result = _mapping_input({"a": 1}, path)
+    assert result.sha256 == hashlib.sha256(raw).hexdigest()
+    assert result.uri == "jlegal:source:sha256:" + result.sha256
+    path.write_bytes(raw + b" ")
+    with pytest.raises(AdapterError, match="^INPUT_TOO_LARGE$"):
+        _mapping_input({"a": 1}, path)
+
+
+def test_direct_compile_rejects_mapping_cycle_before_canonicalization(tmp_path):
+    from jlegal_okf.pipeline import _canonical_mapping
+
+    mapping = {}
+    mapping["unused"] = mapping
+    with pytest.raises(AdapterError, match="^INPUT_OPTION_CYCLE$"):
+        _canonical_mapping(mapping)
+    adaptation = default_registry().adapt(_json_source(tmp_path / "input.json"), name="json")
+    with pytest.raises(AdapterError, match="^INPUT_OPTION_CYCLE$"):
+        compile_adaptation(adaptation, corpus_id="invented", out_dir=tmp_path / "out", mapping=mapping)
+    assert not (tmp_path / "out").exists()

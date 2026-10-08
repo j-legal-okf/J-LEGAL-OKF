@@ -12,7 +12,6 @@ from datetime import date, datetime, timezone
 import hashlib
 from pathlib import Path
 import re
-import stat
 from typing import Any, Callable, Iterable
 from urllib.parse import quote
 
@@ -21,6 +20,7 @@ from defusedxml.common import DefusedXmlException
 
 from .adapters import Adaptation, BuildInput
 from .errors import AdapterError, JLegalError
+from .input_limits import parse_xml, read_xml_bytes, validate_options
 from .model import LegalNode, NodeKind, SourceRef, Temporal, canonical_json, content_addressed_uri, semantic_locator
 from .pipeline import _atomic_bytes
 
@@ -30,7 +30,7 @@ EGOV_SOURCE_AUTHORITY = "e-Gov 法令API Version 2"
 EGOV_XML_FULL_TEXT_FORMAT = "e-Gov Law API v2 XML full-text response"
 EGOV_ACQUISITION_SCHEMA = "jlegal-egov-acquisition/v1"
 EGOV_ADMISSION_SCHEMA = "jlegal-egov-admission/v1"
-EGOV_ADMISSION_PROFILE = "J-LEGAL-OKF/0.2.0-draft"
+EGOV_ADMISSION_PROFILE = "J-LEGAL-OKF/0.3.0-draft"
 MAX_EGOV_XML_BYTES = 64 * 1024 * 1024
 
 _KANJI_DIGITS = {"〇": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5, "六": 6, "七": 7, "八": 8, "九": 9}
@@ -105,7 +105,7 @@ def _plain_text(element: ET.Element | None) -> str:
     ``source_metadata["law_number"]``), the envelope promulgation date, the
     API error code, and branch/ordinal number parsing -- never
     ``LegalNode.text`` itself, which ``_render_text`` alone defines without
-    any trimming. Unlike ``_render_text``, this renders character data only:
+    any trimming. Like ``_render_text``, this renders character data only:
     an inline element such as Ruby contributes its own text, never an XML
     snippet, matching what ``element.itertext()`` produced before this
     function was made content-model aware.
@@ -113,16 +113,6 @@ def _plain_text(element: ET.Element | None) -> str:
     if element is None:
         return ""
     return _character_data(element).strip()
-
-
-def _element_xml(element: ET.Element) -> str:
-    """Serialize an inline element without serializing its parent-owned tail."""
-    tail = element.tail
-    try:
-        element.tail = None
-        return ET.tostring(element, encoding="unicode", short_empty_elements=False)
-    finally:
-        element.tail = tail
 
 
 # XML 1.0's S (whitespace) production is exactly space, tab, CR, LF.
@@ -151,9 +141,8 @@ def _walk_text(element: ET.Element, render_child: Callable[[ET.Element], str]) -
     or an element not in ``_STRUCTURAL_TAGS``, has every one of its text
     nodes emitted verbatim. This never rewrites source character data; it
     only omits the XML S-production whitespace that the content model
-    guarantees is layout, not source text. ``render_child`` decides how each
-    child element itself contributes: verbatim XML markup for an inline/
-    unknown leaf (``_render_text``), or character data only (``_character_data``).
+    guarantees is layout, not source text. Already-rendered child content is
+    never re-elided by its parent.
     """
     tag = _local(element.tag)
     drop_formatting = tag in _STRUCTURAL_TAGS and len(element) > 0
@@ -172,31 +161,24 @@ def _walk_text(element: ET.Element, render_child: Callable[[ET.Element], str]) -
 def _render_text(element: ET.Element) -> str:
     """Render character-level preserved source text: rule ``JLEGAL-TEXT-PRESERVE-1``.
 
-    Ruby, Sup, and other inline/unknown leaf elements are kept as XML snippets
-    (unchanged). Structural wrappers are intentionally not emitted as markup
-    because every structural element is represented by its own canonical
-    node. See ``_walk_text`` for the content-model-aware formatting-whitespace
-    rule shared with ``_character_data``.
+    Every descendant contributes character data in source order, including
+    Ruby/Rt, Sup/Sub, Line and accepted unknown leaves such as Style. Markup
+    and inline attributes remain in the retained XML, not in canonical text.
+    Admission separately rejects unreviewed nontrivial structure.
     """
-    def render_child(child: ET.Element) -> str:
-        child_tag = _local(child.tag)
-        if child_tag in _INLINE_TAGS or child_tag not in _KNOWN_TAGS:
-            return _element_xml(child)
-        return _render_text(child)
-
-    return _walk_text(element, render_child)
+    return _character_data(element)
 
 
 def _character_data(element: ET.Element) -> str:
     """Character data only, content-model aware: never inline XML markup.
 
-    Used only by ``_plain_text`` (``JLEGAL-DISPLAY-TRIM-1``). Every
+    Used by ``_render_text`` and ``_plain_text`` (``JLEGAL-DISPLAY-TRIM-1``). Every
     descendant -- including an inline element such as Ruby/Sup and an unknown
     leaf -- contributes its own character data only, matching
     ``element.itertext()``'s recursive text-only concatenation, plus the same
     content-model-aware formatting-whitespace elision as ``_render_text``
-    (see ``_walk_text``). ``LegalNode.text`` is always built by
-    ``_render_text``, never this function.
+    (see ``_walk_text``). ``LegalNode.text`` enters through ``_render_text``;
+    only ``_plain_text`` adds boundary trimming for comparison fields.
     """
     return _walk_text(element, _character_data)
 
@@ -450,32 +432,13 @@ def _ensure_supported_tree(element: ET.Element) -> None:
 
 def _read_admissible_xml(path: Path) -> bytes:
     """Read one bounded regular XML file before safe, fail-closed parsing."""
-    try:
-        metadata = path.stat()
-    except OSError as exc:
-        raise AdapterError("EGOV_XML_INPUT_UNAVAILABLE") from exc
-    if not stat.S_ISREG(metadata.st_mode):
-        raise AdapterError("EGOV_XML_INPUT_NOT_REGULAR")
-    if metadata.st_size == 0:
-        raise AdapterError("EGOV_XML_INPUT_EMPTY")
-    if metadata.st_size > MAX_EGOV_XML_BYTES:
-        raise AdapterError("EGOV_XML_INPUT_TOO_LARGE")
-    try:
-        raw = path.read_bytes()
-    except OSError as exc:
-        raise AdapterError("EGOV_XML_INPUT_UNAVAILABLE") from exc
-    # Recheck after the read so a concurrent replacement cannot bypass the
-    # documented admission limit.
-    if not raw:
-        raise AdapterError("EGOV_XML_INPUT_EMPTY")
-    if len(raw) > MAX_EGOV_XML_BYTES:
-        raise AdapterError("EGOV_XML_INPUT_TOO_LARGE")
-    return raw
+    return read_xml_bytes(path, max_bytes=MAX_EGOV_XML_BYTES,
+                          diagnostic_prefix="EGOV_XML_INPUT", allow_empty=False)
 
 
 def _safe_fromstring(raw: bytes) -> ET.Element:
-    """Parse XML with every DTD/entity/external-reference feature disabled."""
-    return ET.fromstring(raw, forbid_dtd=True, forbid_entities=True, forbid_external=True)
+    """Apply the shared byte/tree limits and disable DTD/entity/external features."""
+    return parse_xml(raw, max_bytes=MAX_EGOV_XML_BYTES)
 
 
 def _direct_children(element: ET.Element, name: str) -> list[ET.Element]:
@@ -588,7 +551,9 @@ def egov_xml_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adapt
     itself carries one.  Identity is based on that official key, never a file
     name or a guessed title/number.
     """
-    if mapping is not None and (set(mapping) != {"law_id"} or not isinstance(mapping.get("law_id"), str) or not mapping["law_id"].strip()):
+    if mapping is not None:
+        validate_options(mapping)
+    if mapping is not None and (type(mapping) is not dict or set(mapping) != {"law_id"} or not isinstance(mapping.get("law_id"), str) or not mapping["law_id"].strip()):
         raise AdapterError("EGOV_XML_MAPPING")
     admitted = admit_egov_xml(path, law_id=mapping["law_id"] if mapping else None)
     raw, document, law = admitted.raw, admitted.document, admitted.law
@@ -668,7 +633,7 @@ def egov_xml_adapter(path: Path, mapping: dict[str, Any] | None = None) -> Adapt
     metadata = _base_source_metadata(law, source_law_key)
     metadata["sha256"] = source.sha256
     return Adaptation(
-        tuple(nodes), adapter="egov_xml", inputs=(BuildInput.from_source("source", source),),
+        tuple(nodes), adapter="egov_xml", version="2", inputs=(BuildInput.from_source("source", source),),
         source_metadata=metadata,
     )
 
@@ -722,7 +687,7 @@ def write_acquisition_receipt(result: FetchResult, output: str | Path) -> Path:
 def _response_error_code(content: bytes) -> str | None:
     try:
         root = _safe_fromstring(content)
-    except (DefusedXmlException, ET.ParseError):
+    except (DefusedXmlException, ET.ParseError, AdapterError):
         return None
     if _local(root.tag) != "error_info":
         return None
@@ -761,10 +726,9 @@ def fetch_egov_xml(
     if normalized_as_of is not None:
         params["asof"] = normalized_as_of
     try:
-        # Read the body incrementally and enforce MAX_EGOV_XML_BYTES as bytes
-        # arrive, so an oversize or malfunctioning endpoint can never make the
-        # full response materialise in memory (let alone reach disk) before
-        # the cap applies.
+        # Cap accumulated decoded response bytes before XML parsing or writing.
+        # httpx decompression/chunk allocations occur before this check; this
+        # is not a hard process memory limit.
         with httpx.stream(
             "GET", endpoint, params=params, timeout=float(timeout),
             headers={"Accept": "application/xml"}, follow_redirects=True,

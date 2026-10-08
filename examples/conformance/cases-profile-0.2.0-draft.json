@@ -31,10 +31,10 @@
         "amendment_supplementary_provision"
       ],
       "jori_sha256": {
-        "canonical/corpus.jsonl": "f1994424d9df362ce1ca3d38026db0ab8caf3e23e4d610dd23a6b6946e8dbf91",
+        "canonical/corpus.jsonl": "53f4b24f9749a2b9368097db97a61023b01ff718401dddf135feb0668b624b76",
         "canonical/crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "canonical/projection.jsonl": "27c487ddc8494ff97fb7d5c82a38392380323273f2164686b02c64dbea660cb4",
-        "canonical/manifest.json": "b2d90bff4fc9818265cc828f6f49da6c86b4597eea95959fba810b883d119835"
+        "canonical/projection.jsonl": "b5ec173cfbd4bac652d54b32a5749bab6ee8b3cffafeedb537637cbafb24dad9",
+        "canonical/manifest.json": "f482d7181b11ca2f1737ac385a553f643d357a52ccb38f10a999287c5bf16187"
       }
     },
     {
@@ -46,13 +46,7 @@
       "corpus_id": "synthetic-egov-structure-matrix",
       "converted_at": "2026-08-09T00:00:00Z",
       "expected": "expected/edges.json",
-      "expected_sha256": "e0876c53af9032dc4ca0c28d07feda8912459949f87785660b605c2eed8b6afe",
-      "jori_sha256": {
-        "canonical/corpus.jsonl": "6a32f67ac5e6358d55d0d63f8912dd7e1de05526f7dbeb4700545910e0e5ec88",
-        "canonical/crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "canonical/projection.jsonl": "138b48ea2a2b07d140314540225c14573081142cd232b77617fc85a7ef2f9294",
-        "canonical/manifest.json": "15a0f648638fc53d40550f8be53d8ffb622851a2382f5a932ad274564c3c03f0"
-      }
+      "expected_sha256": "e0876c53af9032dc4ca0c28d07feda8912459949f87785660b605c2eed8b6afe"
     },
     {
       "id": "appendix-alone",
@@ -63,13 +57,7 @@
       "corpus_id": "synthetic-egov-structure-matrix",
       "converted_at": "2026-08-09T00:00:00Z",
       "expected": "expected/appendix-alone.json",
-      "expected_sha256": "ecff97bab7aa083526d4f98d1431c2cb495a8dfb4eec9faa7fbfe6e690845ddc",
-      "jori_sha256": {
-        "canonical/corpus.jsonl": "ea72519fae7140cf49784502f68390ee7ab0fa5a77c44f0758641939cb04949c",
-        "canonical/crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "canonical/projection.jsonl": "046e7c46c620e58441dc2c1e9866c9eaa8b3cff286cc4aa440a4138ebcf56de2",
-        "canonical/manifest.json": "8dc9fa3fc47db6c2ab2ff35a24a7635b61f64a7dbf51d50ce8bfb0fb374f52b4"
-      }
+      "expected_sha256": "ecff97bab7aa083526d4f98d1431c2cb495a8dfb4eec9faa7fbfe6e690845ddc"
     },
     {
       "id": "relocated",
@@ -80,13 +68,7 @@
       "corpus_id": "synthetic-egov-structure-matrix",
       "converted_at": "2026-08-09T00:00:00Z",
       "expected": "expected/matrix.json",
-      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62",
-      "jori_sha256": {
-        "canonical/corpus.jsonl": "f1994424d9df362ce1ca3d38026db0ab8caf3e23e4d610dd23a6b6946e8dbf91",
-        "canonical/crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "canonical/projection.jsonl": "27c487ddc8494ff97fb7d5c82a38392380323273f2164686b02c64dbea660cb4",
-        "canonical/manifest.json": "b2d90bff4fc9818265cc828f6f49da6c86b4597eea95959fba810b883d119835"
-      }
+      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62"
     },
     {
       "id": "different-time",
@@ -97,13 +79,7 @@
       "corpus_id": "synthetic-egov-structure-matrix",
       "converted_at": "2026-08-10T00:00:00Z",
       "expected": "expected/matrix.json",
-      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62",
-      "jori_sha256": {
-        "canonical/corpus.jsonl": "f1994424d9df362ce1ca3d38026db0ab8caf3e23e4d610dd23a6b6946e8dbf91",
-        "canonical/crosswalk.jsonl": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
-        "canonical/projection.jsonl": "27c487ddc8494ff97fb7d5c82a38392380323273f2164686b02c64dbea660cb4",
-        "canonical/manifest.json": "5173e3b9d960912203ccb516423fa2ee7c99c163c2dcb624e47dc06f43f70eac"
-      }
+      "expected_sha256": "43e0859d509865ef0f0e0d82506688b09f01ebd9140bc68a04f39d64ac126e62"
     },
     {
       "id": "tampered-source",

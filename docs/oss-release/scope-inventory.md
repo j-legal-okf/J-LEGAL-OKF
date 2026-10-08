@@ -10,12 +10,23 @@
 
 ## In scope for v0.1
 
-The canonical `jori-corpus/v2` model, deterministic identifiers, hashes,
+The canonical `jori-corpus/v3` model, deterministic identifiers, hashes,
 manifests, crosswalk serialization, and retrieval projection; validator
 diagnostics; generic JSON/XML/XHTML adapters; saved e-Gov national-law XML
 conversion and the explicit `fetch` helper; OKF v0.2 export and validation for
 verified e-Gov corpora; the `jlegal` CLI; and authored synthetic fixtures with
 their offline regression tests.
+
+The public input utilities include `src/jlegal_okf/input_limits.py`: bounded
+regular-file reads, XML DTD/entity/external-reference rejection, and structured
+input checks. XML and source JSON are capped at 64 MiB and depth 128, with
+250,000 XML elements or JSON structural tokens. Conversion options use 1 MiB
+input/canonical byte caps, depth 32, 10,000 tokens and 4096-bit integers.
+JSON/YAML preflight and API graph checks reject aliases, cycles, custom types
+and nonfinite values as applicable. These implementation limits do not change
+accepted-source profile scope or claim official XML conformance or hard
+process resource isolation. See
+[`SECURITY.md`](../../SECURITY.md) for the exact boundaries.
 
 ## Out of scope for v0.1
 

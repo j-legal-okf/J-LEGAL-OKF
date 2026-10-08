@@ -32,7 +32,7 @@
       "id": "missing_article_numbers",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -42,7 +42,7 @@
       "id": "deleted_article",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -52,7 +52,7 @@
       "id": "branch_article",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -62,7 +62,7 @@
       "id": "implicit_first_paragraph",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -72,7 +72,7 @@
       "id": "iroha_subitems",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -82,7 +82,7 @@
       "id": "supplementary_provision",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -92,7 +92,7 @@
       "id": "appendix_table",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -102,7 +102,7 @@
       "id": "table_structure",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -112,7 +112,7 @@
       "id": "appendix_style",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -122,7 +122,7 @@
       "id": "multiple_effective_dates",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -132,7 +132,7 @@
       "id": "transitional_measure",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -142,7 +142,7 @@
       "id": "reference_sentence",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -152,7 +152,7 @@
       "id": "incorporation_sentence",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -162,7 +162,7 @@
       "id": "read_as_sentence",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -172,7 +172,7 @@
       "id": "delegation_sentence",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -182,7 +182,7 @@
       "id": "amendment_supplementary_provision",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "matrix"
       ],
@@ -192,7 +192,7 @@
       "id": "whitespace-and-empty",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-levels",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-levels",
       "cases": [
         "edges"
       ],
@@ -202,7 +202,7 @@
       "id": "unknown-date",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "edges"
       ],
@@ -223,7 +223,7 @@
       "id": "stable-id-and-reproducibility",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#provenance-normalization-and-validation-policy",
       "cases": [
         "matrix",
         "relocated",
@@ -236,7 +236,7 @@
       "id": "source-byte-identity",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-levels",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-levels",
       "cases": [
         "matrix",
         "edges",
@@ -251,7 +251,7 @@
       "id": "unsupported-new-provision",
       "layer": "profile",
       "level": "MUST",
-      "spec_anchor": "../../docs/jlegal-okf-profile-0.2.0-draft.md#preservation-and-scope",
+      "spec_anchor": "../../docs/jlegal-okf-profile-0.3.0-draft.md#preservation-and-scope",
       "cases": [
         "new-provision"
       ],
@@ -273,21 +273,85 @@
       "method": "independent_four_record_counts_nonnegative_integers_and_resealed_mutation_tests"
     },
     {
+      "id": "DB-PROJECTION-1",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/deterministic-bundle-contract.md#projection-policy-version-and-identity",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time",
+        "tampered-source"
+      ],
+      "method": "node_version_pair_set_uniqueness_exact_copied_fields_and_source_evidence"
+    },
+    {
+      "id": "DB-PROJECTION-2",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/deterministic-bundle-contract.md#projection-policy-version-and-identity",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time",
+        "tampered-source"
+      ],
+      "method": "exact_projection_version_independent_full_node_v1_digest_and_id_uniqueness"
+    },
+    {
+      "id": "DB-TEXT-1",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/deterministic-bundle-contract.md#character-data-and-display-grammar",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time",
+        "tampered-source"
+      ],
+      "method": "fixed_source_authored_character_data_structure_attributes_and_independent_oracle"
+    },
+    {
+      "id": "DB-DISPLAY-1",
+      "layer": "profile",
+      "level": "MUST",
+      "spec_anchor": "../../docs/deterministic-bundle-contract.md#character-data-and-display-grammar",
+      "cases": [
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time",
+        "tampered-source"
+      ],
+      "method": "complete_decoded_body_grammar_cr_crlf_preservation_and_resealed_mutation_tests_SOURCE_DISPLAY_CONTRACT"
+    },
+    {
       "id": "reference-byte-regression",
       "layer": "jori_byte_regression",
       "level": "IMPLEMENTATION_SPECIFIC",
       "spec_anchor": "../../docs/synthetic-golden-matrix.md",
       "cases": [
-        "matrix"
+        "matrix",
+        "edges",
+        "appendix-alone",
+        "relocated",
+        "different-time"
       ],
-      "method": "optional_existing_immutable_golden_hashes"
+      "method": "optional_fixed_profile_0_3_reference_hashes"
     }
   ],
   "contract_design": {
     "document": "../../docs/deterministic-bundle-contract.md",
     "revision": 1,
-    "status": "design-only",
+    "status": "partially-implemented",
     "executable": false,
-    "coverage": "No additional checks are implemented by this metadata; the requirements array describes the existing fixed-case scope."
+    "coverage": "This link is non-executable metadata. The requirements array names implemented fixed-case checks including DB-TEXT-1 and DB-DISPLAY-1; parser limits, execution evidence and use eligibility remain pending."
   }
 }

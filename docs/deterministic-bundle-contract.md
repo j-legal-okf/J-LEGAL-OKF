@@ -2,15 +2,15 @@
 
 ## Status and authority
 
-Design revision 1, 2026-10-06. This is the implementation contract for the next
-acceptance changes, not a claim that the current tools enforce every row below.
-The [0.2.0-draft profile](jlegal-okf-profile-0.2.0-draft.md) remains the active
-profile until the coordinated revision described under [Version transition](#version-transition).
-Existing normative rules are cited rather than silently redefined. New strict
-acceptance requirements are explicitly labelled **target**. No producer, parser,
-validator, runtime schema identifier, fixture oracle or golden is changed by
-this design. The executable fixed-case requirements remain separately identified
-in [requirements.json](../examples/conformance/requirements.json).
+Design revision 1, 2026-10-06; text/display implementation status updated
+2026-10-08. This is the acceptance contract, not a claim that current tools
+enforce every row below. The active
+[0.3.0-draft profile](jlegal-okf-profile-0.3.0-draft.md) activates the coordinated
+text/display tuple under [Version transition](#version-transition).
+Existing rules retain their definitions. `T` identifies a requirement introduced
+as a target in this design; DB-DISPLAY-1 is now implemented, while the other `T`
+rows remain pending. The executable fixed-case requirements are separately
+identified in [requirements.json](../examples/conformance/requirements.json).
 
 No result here certifies legal truth, source authenticity, completeness of all
 applicable law, or correctness of a legal answer. Hash agreement establishes
@@ -38,7 +38,7 @@ assurance; see [the diagnostic map](validator-layers.md).
 
 ## Requirement matrix
 
-Rule sources are the active profile's
+Rule sources are the unchanged provisions inherited from the prior profile's
 [preservation levels](jlegal-okf-profile-0.2.0-draft.md#preservation-levels),
 [provenance policy](jlegal-okf-profile-0.2.0-draft.md#provenance-normalization-and-validation-policy),
 [rights metadata](jlegal-okf-profile-0.2.0-draft.md#rights-metadata), the unchanged
@@ -60,9 +60,9 @@ implementation and must not be reported as an available CLI feature.
 | DB-ACQUISITION-1 / C | Profile, provenance policy; optional receipt | Receipt hash, explicit official/requested ID, URL/query, format, time and XML facts agree; absent receipt leaves URL/time null; receipt rights stays null | `ACQUISITION_CONFLICT`; unsupported authenticity claim: `target: USE_EVIDENCE_INSUFFICIENT` | No receipt with null URL/time is archival input / a receipt hash conflicts with the admitted XML hash: reject. Mtime is not retrieval evidence; an unchecked or self-authored timestamp is not authenticated by passing consistency checks. |
 | DB-COUNTS-1 / C | Manifest counts in `manifest_for()` and `verify_manifest()`; parsed canonical files | Every count is an integer excluding booleans, at least zero, and equals its definition below | `MANIFEST_TYPES`, `MANIFEST_COUNT_TAMPERED`; checker `MANIFEST_TYPES`, `MANIFEST_COUNTS` | For three nodes in one law, empty crosswalk and two projections: `(3,1,0,2)` / change only law or crosswalk count to 999 and reseal: reject. Values are independently counted, not trusted from the producer. |
 | DB-PROJECTION-1 / C | Full-node projection policy; supported corpus versions | Exactly one projection per substantive node version; no law-root projection, duplicates, missing or surplus records; all copied fields and evidence agree | `PROJECTION_DERIVATION_MISMATCH`, `PROJECTION_DUPLICATE`; checker `PROJECTION_SET`, `PROJECTION_CONTENT`, `PROJECTION_SOURCE` | One non-root version maps to one record, even for empty text / duplicate it while keeping the same total by removing another: reject. |
-| DB-PROJECTION-2 / C | Identity rule below; `jori-projection/v1` | `projection_version` is exactly string `"1"`; ID equals the defined digest and is unique within the submitted set | Existing reference `PROJECTION_DERIVATION_MISMATCH`; `target: PROJECTION_VERSION`, `target: PROJECTION_IDENTITY`, `target: PROJECTION_ID_DUPLICATE` in checker | Another producer implements the same rule and uses `"1"`: accept / `"test-1"`, integer 1, unknown version, one wrong ID or identical IDs: reject even after resealing. |
+| DB-PROJECTION-2 / C | Identity rule below; `jori-projection/v1` | `projection_version` is exactly string `"1"`; ID equals the defined digest and is unique within the submitted set | Reference `PROJECTION_DERIVATION_MISMATCH`; checker `PROJECTION_VERSION`, `PROJECTION_IDENTITY`, `PROJECTION_ID_DUPLICATE` (malformed fields: `PROJECTION_SCHEMA`) | Another producer implements the same rule and uses `"1"`: accept / `"test-1"`, integer 1, unknown version, one wrong ID or identical IDs: reject even after resealing. |
 | DB-TEXT-1 / C | `JLEGAL-TEXT-PRESERVE-1`; reviewed source tree | Concatenate character data with only the profile's structural XML-whitespace exception; retain meaningful structure/attributes in their declared representation and source bytes | Checker `NODE_TEXT`, `NODE_ATTRIBUTES`; unsupported structure: `EGOV_XML_UNSUPPORTED_STRUCTURE:<tag>` | `<Style>abc</Style>` contributes `abc`, not markup; `<Sentence>A<Sup>2</Sup>B</Sentence>` gives `A2B` / insert XML serialization into canonical text: reject. Expectations are read from invented XML and the published rule. |
-| DB-DISPLAY-1 / T | Source concept with canonical node; strict display acceptance | Exactly the body grammar below, with a version-bound payload equal to canonical text; no added prose and no markerless fallback | Reference `JLEGAL_OKF_SOURCE_CONTENT`; checker `target: SOURCE_DISPLAY_CONTRACT` | Exact empty or whitespace-only payload: accept / absent marker, changed payload or commentary before/after the body: reject strict display acceptance. Format-floor results remain separate. |
+| DB-DISPLAY-1 / T (implemented) | Source concept with canonical node; strict display acceptance | Exactly the body grammar below, with a version-bound payload equal to canonical text; no added prose and no markerless fallback | Reference `JLEGAL_OKF_SOURCE_CONTENT`; checker `SOURCE_DISPLAY_CONTRACT` | Exact empty or whitespace-only payload: accept / absent marker, changed payload or commentary before/after the body: reject strict display acceptance. Format-floor results remain separate. |
 | DB-TIME-1 / C | Profile, conversion history; same fixed source, recipe, corpus ID, rules, environment and assertions | All canonical and bundle file bytes agree across executions when `converted_at` is fixed; do not include local paths or execution durations in artifacts | Existing relation checks; `target: REPRODUCIBILITY_MISMATCH` for execution evidence | Run in two directories with the same explicit corpus ID / same fixed recipe but one byte or one file differs: reject. A changed filename-derived corpus ID is instead a different recipe, not a reproducibility comparison. |
 | DB-REPLAY-1 / T | Profile, source re-verification; explicit source and supported recipe | Source input is rechecked; source-to-canonical reproduction and evidence are bound to the exact bundle, recipe, code and dependencies | `MANIFEST_REPLAY_SOURCE_REQUIRED`, `MANIFEST_REPLAY_SOURCE_MISMATCH`, `MANIFEST_REBUILD_CORPUS`; `target: USE_EVIDENCE_INSUFFICIENT` | Matching independently observed replay is evidence for that input / hash-only validation, evidence for another bundle, or unknown converter recipe: hold use eligibility. |
 | DB-MULTISOURCE-1 / C | Profile, single-source limitation | Strict source re-verification accepts exactly the supported single XML source; a multi-source hash ledger is not a substitute | `JLEGAL_OKF_VERIFY_SOURCE_UNSUPPORTED` | One admitted embedded XML source / two-source ledger: retain if otherwise valid for archival handling, but report unsupported for this source-reverified path. |
@@ -78,16 +78,17 @@ The `C` rows clarify `J-LEGAL-OKF/0.2.0-draft` with `jori-corpus/v2`,
 `jori-projection/v1` / `"1"`, and the v5/v1 or rights-bearing v6/v2
 manifest/bundle pair. DB-PROJECTION-1/2 use the projection policy independently
 of producer name/version; DB-RIGHTS-1 selects the appropriate pair. These
-requirements carry forward unchanged to the coordinated target tuple below.
+requirements carry forward unchanged to the active coordinated tuple below.
 DB-COUNTS-1 and DB-PROJECTION-2 clarify existing output formats. At design
 review, their checker enforcement was incomplete; the
 [conformance suite](conformance-suite.md#acceptance-contract-and-current-gaps)
-records subsequent implementation status. DB-TEXT-1 is an existing rule with a
-known implementation discrepancy.
+records subsequent implementation status. DB-TEXT-1 is an existing rule whose
+observed markup discrepancy was corrected in the coordinated 0.3.0-draft tuple.
 
 The `T` rows apply only to the new strict acceptance path under
-`J-LEGAL-OKF/0.3.0-draft` and the coordinated target tuple, once implemented.
-DB-DISPLAY-1 has its complete grammar here; DB-TEMPORAL-1 and DB-USE-1 use the
+`J-LEGAL-OKF/0.3.0-draft` and its coordinated tuple. Only DB-DISPLAY-1 is
+implemented by this revision; the remaining `T` rows require their later work.
+DB-DISPLAY-1 has its complete, now-enforced grammar here; DB-TEMPORAL-1 and DB-USE-1 use the
 request decision table. DB-REPLAY-1 and DB-PARSER-1 require separately versioned
 execution-evidence and parser-limit contracts before implementation acceptance.
 Their identifiers/serialization and numeric limits remain the explicit
@@ -150,8 +151,11 @@ reason to invent a salt.
 
 Source of this clarification: `src/jlegal_okf/pipeline.py` `make_projection()`
 and `src/jlegal_okf/model.py` `RetrievalDocument`. The normal artifact verifier
-already compares against this derived projection; the independent checker must
-implement the formula without importing producer code.
+already compares against this derived projection; the independent checker
+implements the formula without importing producer code. It also checks the
+version, ID uniqueness and the node/version pair set; see the
+[conformance suite](conformance-suite.md#acceptance-contract-and-current-gaps)
+for the implemented diagnostics and fixed-case limits.
 
 `conversion.name` and `conversion.version` are producer metadata. A different
 nonempty producer name/version is allowed by the common fixed-case contract
@@ -182,7 +186,7 @@ formatting whitespace as defined by the profile. XML parser newline/entity
 processing and the resulting character data are distinct from byte preservation:
 the original XML bytes remain available regardless of that parse.
 
-For target strict source-display acceptance define `title` as the first
+For strict source-display acceptance define `title` as the first
 nonempty value of canonical `heading`, `label`, `locator`, and define:
 
 ```text
@@ -195,11 +199,14 @@ Compare the complete decoded body to that construction. Match the two framing
 markers at their constructed positions; marker-like characters inside the
 known payload are source data, not additional framing. No trimming, substring
 presence test or insertion of helpful commentary is allowed. This is an
-explicit common target grammar, implementable by another producer, not a
+explicit common grammar, implementable by another producer, not a
 requirement for that producer's complete YAML formatting or byte golden to
-match JORI. Existing markerless or differently headed submissions may still
-receive their historical bounded result; they cannot receive this new strict
-display result. This checks stored character data, not the visual output of an
+match JORI. Markerless or differently headed submissions fail this strict
+display result; historical bounded results belong only to their historical
+verifier. Frontmatter may use LF or CRLF. Zero or one empty separator line
+after its closing delimiter is excluded; a second empty line is body content
+and fails the grammar. Decoding preserves CR and CRLF in the body without
+normalization. This checks stored character data, not the visual output of an
 arbitrary Markdown renderer. Consumers must display source as text, not execute
 or reinterpret it as HTML or instructions.
 
@@ -268,15 +275,17 @@ assurance levels there. An empty `verified` is not evidence of a legal review.
 
 ## Version transition
 
-The following version plan is fixed for the coordinated text/display correction;
-the values are reserved here, not activated in runtime code by this document.
+The following coordinated text/display transition is implemented under
+[profile 0.3.0-draft](jlegal-okf-profile-0.3.0-draft.md). The left column records
+the preserved historical tuple, not a second currently supported recipe.
 
-| Identifier | Current | Coordinated target and reason |
+| Identifier | Historical | Active coordinated tuple and reason |
 | --- | --- | --- |
 | Profile | `J-LEGAL-OKF/0.2.0-draft` | `J-LEGAL-OKF/0.3.0-draft`: explicit acceptance and changed output contract |
 | Canonical wire schema | `jori-corpus/v2` | `jori-corpus/v3`: prevent silent reinterpretation of old text/identity products |
 | Reference converter | `JORI Engine` / `0.1.0-draft` | `JORI Engine` / `0.2.0-draft`: distinguish the corrected transformation |
 | e-Gov adapter | `egov_xml` / `1` | `egov_xml` / `2`: changed character-data rendering; generic adapters retain their own version until separately revised |
+| Reference exporter | `jlegal-okf-exporter/0.1.0-draft` | `jlegal-okf-exporter/0.2.0-draft`: complete display acceptance and newline preservation |
 | Projection | `jori-projection/v1`, version `"1"`, `full-node-v1` | Retain: its field mapping and ID formula are unchanged; changed version content changes derived IDs, while unchanged content retains them |
 | Manifest / bundle | v5/v1 without rights; v6/v2 with rights | Retain exact key shapes if unchanged; validate the supported profile/converter/adapter tuple, not schema names alone |
 | Package version / Git tag | Independent of the above | No automatic change; distribution and release decisions are separate |
@@ -313,25 +322,24 @@ historical result, not automatic fallback after new acceptance fails.
   enforcement and resealed negative tests are recorded in the
   [conformance suite](conformance-suite.md#acceptance-contract-and-current-gaps).
   That implementation status does not widen the fixed catalog's scope.
-- The fixed checker currently accepts nonempty arbitrary projection ID/version
-  strings. Add the exact rule and uniqueness checks; retain valid distinct
-  producer metadata. Its single-version catalog does not measure multi-version
+- The fixed checker now enforces the exact projection ID/version rule, ID
+  uniqueness and node/version pair matching, while retaining valid distinct
+  producer metadata. Resealed negative tests compare rejection with the normal
+  artifact verifier. Its single-version catalog does not measure multi-version
   implementations.
-- Reference Style rendering currently disagrees with the character-data rule.
-  Preserve the measured discrepancy until the coordinated correction and its
-  independent source-authored expectations pass; do not turn it into an
-  allowed exception. Extend examples for inline content and whitespace.
-- The reference source-body builder already rejects a same-version framing
-  marker inside payload with `JLEGAL_OKF_SOURCE_MARKER_COLLISION`, and its
-  verifier uses first-occurrence search plus whole-body comparison. The fixed
-  checker also rejects any additional `<!-- jlegal-source:` occurrence, even
-  inside literal source text. The target constructed-body comparison changes
-  that rejection policy intentionally: known payload is data, not framing.
-  Add an independent literal-marker payload example at the grammar boundary;
-  do not claim this current refusal silently accepts incorrect source text.
-- The strict display rule and use-evidence decisions are target requirements.
+- Under the historical tuple, Style/Ruby/Sup/Sub rendering inserted markup
+  contrary to the character-data rule. The coordinated correction now passes
+  the immutable independent oracle; the earlier observation remains recorded
+  in [conformance-suite.md](conformance-suite.md).
+- The historical source-body builder rejected same-version payload markers
+  with `JLEGAL_OKF_SOURCE_MARKER_COLLISION`, the reference verifier searched for
+  first occurrences, and the checker rejected additional marker prefixes.
+  The implemented constructed-body comparison intentionally replaces that
+  policy: known payload is data. The same-version fixture tests this at the
+  grammar boundary, without claiming a self-referential complete-law artifact.
+- Strict display is implemented; use-evidence decisions remain targets.
   Generic parser limits, transactional output completion, execution-attestation
-  evidence and supported replay environments require implementation and tests.
+  evidence and supported replay environments still require implementation and tests.
 - Concrete depth/element/time/memory limits and evidence serialization are
   deferred to those implementations. They cannot be left implicit there:
   until reviewed and implemented, record `unsupported` or `not_checked` and

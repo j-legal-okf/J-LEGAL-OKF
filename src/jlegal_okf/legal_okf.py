@@ -1,7 +1,7 @@
 """Deterministic J-LEGAL-OKF projection and offline verifier.
 
 The generated legal bundle is deliberately separate from the repository's own
-``okf/`` project-knowledge bundle.  It projects a verified ``jori-corpus/v2``
+``okf/`` project-knowledge bundle.  It projects a verified ``jori-corpus/v3``
 artifact into an official OKF v0.2-shaped bundle without changing canonical
 source text or introducing AI-derived legal assertions.
 """
@@ -12,6 +12,7 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import re
 import shutil
 import tempfile
 from typing import Any
@@ -30,7 +31,7 @@ BUNDLE_SCHEMA = "jlegal-okf-bundle/v1"
 # v2 is v1 plus the rights area carried over from a jori-manifest/v6 corpus.
 # A bundle exported from a corpus without one stays v1, byte for byte.
 BUNDLE_SCHEMA_RIGHTS = "jlegal-okf-bundle/v2"
-EXPORTER = "jlegal-okf-exporter/0.1.0-draft"
+EXPORTER = "jlegal-okf-exporter/0.2.0-draft"
 _MANIFEST = "manifest.json"
 _SOURCE_STANDARD_FIELDS = {"type", "title", "description", "resource", "sources", "generated", "verified", "status", "jlegal"}
 _SOURCE_JLEGAL_FIELDS = {"profile", "layer", "law_id", "node_id", "version_id", "parent_id", "kind", "locator", "ordinal", "branch", "content_sha256", "source", "temporal", "attributes", "acquisition", "conversion", "converted_at"}
@@ -60,24 +61,23 @@ def _concept(frontmatter: dict[str, Any], body: str) -> bytes:
 
 def _parse_concept(path: Path) -> tuple[dict[str, Any], str]:
     try:
-        raw = path.read_text(encoding="utf-8")
+        raw = path.read_bytes().decode("utf-8")
     except OSError as exc:
         raise LegalOKFError(f"JLEGAL_OKF_CONCEPT_READ:{path}") from exc
-    if not raw.startswith("---\n"):
+    match = re.match(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|\Z)", raw, re.DOTALL)
+    if match is None:
         raise LegalOKFError(f"JLEGAL_OKF_FRONTMATTER:{path}")
-    _, marker, tail = raw.partition("\n---\n")
-    if not marker:
-        raise LegalOKFError(f"JLEGAL_OKF_FRONTMATTER:{path}")
-    yaml_text = raw[4 : len(raw) - len(tail) - len(marker)]
+    yaml_text, tail = match.group(1), raw[match.end():]
     try:
         value = yaml.safe_load(yaml_text)
     except yaml.YAMLError as exc:
         raise LegalOKFError(f"JLEGAL_OKF_FRONTMATTER:{path}") from exc
     if type(value) is not dict:
         raise LegalOKFError(f"JLEGAL_OKF_FRONTMATTER:{path}")
-    # _concept emits one blank line between frontmatter and the markdown body.
-    # Keep the body boundary deterministic rather than treating that separator
-    # as source content.
+    # Remove at most one optional separator line. CR/CRLF inside the body are
+    # character data; neither universal-newline decoding nor strip is allowed.
+    if tail.startswith("\r\n"):
+        return value, tail[2:]
     return value, tail[1:] if tail.startswith("\n") else tail
 
 
@@ -194,8 +194,6 @@ def _source_frontmatter(node: LegalNode, source_resource: str, acquisition: dict
 def _source_body(node: LegalNode) -> str:
     begin = f"<!-- jlegal-source:{node.version_id}:begin -->"
     end = f"<!-- jlegal-source:{node.version_id}:end -->"
-    if begin in node.text or end in node.text:
-        raise LegalOKFError("JLEGAL_OKF_SOURCE_MARKER_COLLISION")
     return f"# {node.heading or node.label or node.locator}\n\n## Source text\n\n{begin}{node.text}{end}\n"
 
 
@@ -339,7 +337,7 @@ def _validate_bundle_manifest(root: Path) -> dict[str, Any]:
 
 
 def _validate_index(root: Path, nodes: list[LegalNode], source_resource: str) -> None:
-    raw = (root / "index.md").read_text(encoding="utf-8")
+    raw = (root / "index.md").read_bytes().decode("utf-8")
     if raw != _index_content(nodes, source_resource):
         raise LegalOKFError("JLEGAL_OKF_INDEX")
 
@@ -388,11 +386,9 @@ def _validate_source_concept(path: Path, node: LegalNode, source_resource: str, 
     }
     if any(extension.get(key) != value for key, value in expected.items()):
         raise LegalOKFError(f"JLEGAL_OKF_SOURCE_IDENTITY:{path.name}")
-    begin = f"<!-- jlegal-source:{node.version_id}:begin -->"
-    end = f"<!-- jlegal-source:{node.version_id}:end -->"
-    start = body.find(begin)
-    finish = body.find(end)
-    if start < 0 or finish < start or body[start + len(begin) : finish] != node.text or body != _source_body(node):
+    # Compare the complete DB-DISPLAY-1 construction. Marker-looking text in
+    # the known payload is data, including identical version-bound markers.
+    if body != _source_body(node):
         raise LegalOKFError(f"JLEGAL_OKF_SOURCE_CONTENT:{path.name}")
 
 

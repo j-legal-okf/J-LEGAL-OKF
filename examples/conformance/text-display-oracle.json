@@ -1,0 +1,157 @@
+{
+  "schema": "jlegal-text-display-oracle/v1",
+  "authorship": "entirely-invented",
+  "rule_ids": ["JLEGAL-TEXT-PRESERVE-1", "DB-TEXT-1", "DB-DISPLAY-1", "DB-ORACLE-1"],
+  "formatting_owners": ["Article", "Paragraph", "ParagraphSentence", "Table", "TableRow", "TableColumn", "StyleStruct"],
+  "text_cases": [
+    {
+      "id": "style",
+      "xml": "<StyleStruct><Style>abc</Style></StyleStruct>",
+      "expected_text": "abc",
+      "formatting_slots": []
+    },
+    {
+      "id": "ruby",
+      "xml": "<Sentence>A<Ruby>B<Rt>C</Rt></Ruby>D</Sentence>",
+      "expected_text": "ABCD",
+      "formatting_slots": []
+    },
+    {
+      "id": "sup-sub",
+      "xml": "<Sentence>A<Sup>2</Sup>B<Sub>3</Sub>C</Sentence>",
+      "expected_text": "A2B3C",
+      "formatting_slots": []
+    },
+    {
+      "id": "empty-cell",
+      "xml": "<TableColumn/>",
+      "expected_text": "",
+      "formatting_slots": []
+    },
+    {
+      "id": "leaf-whitespace",
+      "xml": "<TableColumn> \n  </TableColumn>",
+      "expected_text": " \n  ",
+      "formatting_slots": []
+    },
+    {
+      "id": "structural-whitespace",
+      "xml": "<Article>\n <Paragraph>\n<ParagraphSentence><Sentence>x</Sentence></ParagraphSentence>\n</Paragraph>\n</Article>",
+      "expected_text": "x",
+      "formatting_slots": ["0:text", "0/0:text", "0/0/0:tail", "0/0:tail"]
+    },
+    {
+      "id": "unicode-whitespace",
+      "xml": "<Sentence>　a\u00a0  b　</Sentence>",
+      "expected_text": "　a\u00a0  b　",
+      "formatting_slots": []
+    },
+    {
+      "id": "character-references",
+      "xml": "<Sentence>A&amp;B&#x20;C</Sentence>",
+      "expected_text": "A&B C",
+      "formatting_slots": []
+    },
+    {
+      "id": "mixed-tails",
+      "xml": "<Sentence>A<Ruby>B<Rt>C</Rt></Ruby> D<Sup>2</Sup> E</Sentence>",
+      "expected_text": "ABC D2 E",
+      "formatting_slots": []
+    },
+    {
+      "id": "table-leaf-whitespace",
+      "xml": "<Table>\n<TableRow>\n<TableColumn> </TableColumn>\n<TableColumn><Sentence>x</Sentence></TableColumn>\n</TableRow>\n</Table>",
+      "expected_text": " x",
+      "formatting_slots": ["0:text", "0/0:text", "0/0/0:tail", "0/0/1:tail", "0/0:tail"]
+    },
+    {
+      "id": "header-mixed-whitespace",
+      "xml": "<TableHeaderColumn> <Ruby>B<Rt>C</Rt></Ruby> </TableHeaderColumn>",
+      "expected_text": " BC ",
+      "formatting_slots": []
+    },
+    {
+      "id": "unicode-not-normalized",
+      "xml": "<Sentence>e\u0301 Ａ</Sentence>",
+      "expected_text": "e\u0301 Ａ",
+      "formatting_slots": []
+    },
+    {
+      "id": "xml-newlines",
+      "xml": "<Sentence>A\r\nB&#xD;C</Sentence>",
+      "expected_text": "A\nB\rC",
+      "formatting_slots": []
+    },
+    {
+      "id": "line-attribute",
+      "xml": "<Sentence><Line Style=\"solid\">AB</Line>C</Sentence>",
+      "expected_text": "ABC",
+      "formatting_slots": []
+    }
+  ],
+  "display_cases": [
+    {
+      "id": "heading",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": "Synthetic heading",
+      "label": "Unused label",
+      "locator": "/law/synthetic/article/1",
+      "text": "First line.\nSecond line.",
+      "expected_body": "# Synthetic heading\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->First line.\nSecond line.<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    },
+    {
+      "id": "empty",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": "Empty text",
+      "label": null,
+      "locator": "/law/synthetic/article/2",
+      "text": "",
+      "expected_body": "# Empty text\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin --><!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    },
+    {
+      "id": "whitespace-only",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": "Whitespace text",
+      "label": null,
+      "locator": "/law/synthetic/article/3",
+      "text": " \t\n　\u00a0 ",
+      "expected_body": "# Whitespace text\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin --> \t\n　\u00a0 <!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    },
+    {
+      "id": "label-fallback",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": "",
+      "label": "Synthetic label",
+      "locator": "/law/synthetic/article/4",
+      "text": "Label body.",
+      "expected_body": "# Synthetic label\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->Label body.<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    },
+    {
+      "id": "locator-fallback",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": null,
+      "label": "",
+      "locator": "/law/synthetic/article/5",
+      "text": "Locator body.",
+      "expected_body": "# /law/synthetic/article/5\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->Locator body.<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    },
+    {
+      "id": "preserved-newlines",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": "Preserved newlines",
+      "label": null,
+      "locator": "/law/synthetic/article/7",
+      "text": "A\r\nB\rC",
+      "expected_body": "# Preserved newlines\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->A\r\nB\rC<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    },
+    {
+      "id": "literal-markers",
+      "version_id": "ver_00000000-0000-4000-8000-000000000001",
+      "heading": "Literal source markers",
+      "label": null,
+      "locator": "/law/synthetic/article/6",
+      "text": "A<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->B<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->C",
+      "expected_body": "# Literal source markers\n\n## Source text\n\n<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->A<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:begin -->B<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->C<!-- jlegal-source:ver_00000000-0000-4000-8000-000000000001:end -->\n"
+    }
+  ]
+}

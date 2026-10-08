@@ -17,7 +17,7 @@ from jlegal_okf.validation import collect_diagnostics
 
 ROOT = Path(__file__).resolve().parents[1]
 FIXTURE = ROOT / "examples/fixtures/synthetic_egov_structure_matrix.xml"
-GOLDEN = ROOT / "examples/fixtures/synthetic_egov_structure_matrix.golden.json"
+GOLDEN = ROOT / "examples/fixtures/synthetic_egov_structure_matrix.profile-0.3.0-draft.golden.json"
 FIXTURE_LAW_ID = "SyntheticStructureMatrix001"
 FIXED_CONVERTED_AT = "2026-08-09T00:00:00Z"
 EXPECTED_COVERAGE = {
@@ -165,11 +165,11 @@ def test_structure_matrix_matches_fixed_golden_and_replays_from_bundle(tmp_path:
     )
     assert manifest["schema"] == "jori-manifest/v5"
     assert manifest["adapter"] == "egov_xml"
-    assert manifest["adapter_version"] == "1"
+    assert manifest["adapter_version"] == "2"
     assert manifest["conversion"] == {
         "name": "JORI Engine",
-        "profile": "J-LEGAL-OKF/0.2.0-draft",
-        "version": "0.1.0-draft",
+        "profile": "J-LEGAL-OKF/0.3.0-draft",
+        "version": "0.2.0-draft",
     }
     assert manifest["acquisition"]["schema"] == "jlegal-egov-acquisition/v1"
     assert manifest["converted_at"] == FIXED_CONVERTED_AT
@@ -388,3 +388,21 @@ def test_appendix_same_number_same_parent_uses_source_tag_identity() -> None:
     }
     assert len({node.node_id for node in appendices}) == 2
     assert len({node.version_id for node in appendices}) == 2
+
+
+def test_historical_profile_golden_and_catalog_remain_immutable() -> None:
+    protected = {
+        "docs/jlegal-okf-profile-0.2.0-draft.md": "de602a7f68995771c693d58002c4266d712fb0066b0de0b753621891132454bd",
+        "examples/fixtures/synthetic_egov_structure_matrix.golden.json": "f81510c43c31c1fe8d6f2ac1218a0b5c8a653823ce3330835aa7a7c6c3ecf5ba",
+        "examples/conformance/cases-profile-0.2.0-draft.json": "946668853953814e3ccf73eef3d83cbe26df7691c6b43d7323bdc1c74279b08e",
+    }
+    for name, digest in protected.items():
+        assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest
+    historical = json.loads((ROOT / "examples/conformance/cases-profile-0.2.0-draft.json").read_bytes())
+    current = json.loads((ROOT / "examples/conformance/cases.json").read_bytes())
+    # Only reference hashes change; authored inputs, expectations and relations
+    # remain exact. Historical artifacts need their pinned historical verifier.
+    for catalog in (historical, current):
+        for case in catalog["cases"]:
+            case.pop("jori_sha256", None)
+    assert historical == current

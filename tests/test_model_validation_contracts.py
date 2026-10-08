@@ -114,10 +114,11 @@ def test_empty_identifier_field_raises_dedicated_diagnostic(field: str) -> None:
         replace(make_node(), **{field: "   "})
 
 
-def test_legacy_schema_raises_dedicated_diagnostic() -> None:
-    """A v1 corpus schema must fail closed with CORPUS_SCHEMA_UNSUPPORTED, not the generic NODE_KEYS."""
+@pytest.mark.parametrize("schema", ["jori-corpus/v1", "jori-corpus/v2"])
+def test_legacy_schema_raises_dedicated_diagnostic(schema: str) -> None:
+    """Old corpus schemas fail closed rather than reinterpreting old text."""
     raw = make_node().to_dict()
-    raw["schema"] = "jori-corpus/v1"
+    raw["schema"] = schema
     with pytest.raises(ValueError, match="CORPUS_SCHEMA_UNSUPPORTED"):
         LegalNode.from_dict(raw)
 
@@ -152,7 +153,7 @@ def test_schema_mismatch_message_names_received_and_expected_schema() -> None:
     raw["schema"] = "jori-corpus/v1"
     with pytest.raises(ValueError) as caught:
         LegalNode.from_dict(raw)
-    assert str(caught.value) == "CORPUS_SCHEMA_UNSUPPORTED: received 'jori-corpus/v1', expected 'jori-corpus/v2'"
+    assert str(caught.value) == "CORPUS_SCHEMA_UNSUPPORTED: received 'jori-corpus/v1', expected 'jori-corpus/v3'"
 
 
 def test_missing_schema_key_stays_a_key_mismatch() -> None:

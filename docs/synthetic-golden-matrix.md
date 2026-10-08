@@ -6,9 +6,12 @@ to the current official e-Gov Japanese-law XML Schema v3 when validated
 against the schema downloaded from the official documentation page. It is a
 regression fixture, not a law, a government publication, or a source for legal
 use. Because the XSD does not define a `LawId` attribute, the regression passes
-the synthetic admission ID explicitly as the reviewed adapter mapping. The companion
+the synthetic admission ID explicitly as the reviewed adapter mapping. The current
+companion is
+[`synthetic_egov_structure_matrix.profile-0.3.0-draft.golden.json`](../examples/fixtures/synthetic_egov_structure_matrix.profile-0.3.0-draft.golden.json),
+test-only data under the `jlegal-synthetic-golden/v1` schema. The unchanged
 [`synthetic_egov_structure_matrix.golden.json`](../examples/fixtures/synthetic_egov_structure_matrix.golden.json)
-is test-only data under the `jlegal-synthetic-golden/v1` schema.
+records profile 0.2.0-draft and is retained for historical reproduction only.
 
 ## Contract
 
@@ -44,8 +47,38 @@ XML → corpus.jsonl → manifest.json → projection.jsonl
 The fixed timestamp in the golden data makes the canonical artifact and bundle
 bytes reproducible. The golden file is deliberately read-only from the test:
 the test never regenerates or updates it. To change the fixture or golden
-values, review the complete diff, recalculate the values in an isolated
-temporary directory, and update the JSON explicitly.
+values, review the complete diff and recalculate the values in an isolated
+temporary directory. Compare all node text, structure and attributes with the
+independent source-authored `examples/conformance/expected/*.json`, and rebuild
+IDs, counts, corpus/projection bytes and digests independently before adopting
+new values. A producer's regenerated output alone is insufficient. A profile
+transition creates a separately named golden; it does not overwrite old evidence.
+
+## Profile 0.3.0-draft dependency changes
+
+The source XML bytes, all source-authored expectations, hierarchy, attributes,
+locators and 41 node IDs remain unchanged. Character-only Style rendering changes
+exactly two version IDs in this matrix: the `AppdxStyle` appendix at
+`/law/root/appendix/appendix-appdxstyle-1` and the law root at `/law/root`.
+The other 39 versions remain identical. Only the appendix's projection ID changes,
+because the law root has no projection; the other 39 of 40 projection IDs remain
+identical. The identity formulas and projection policy are unchanged.
+
+Every corpus row changes to `jori-corpus/v3`; adapter/converter/profile metadata
+changes build-options and canonical-manifest digests. Exporter/profile provenance
+changes source and derived concept bytes, the profile changes the index, and
+these changes reach the outer manifest. There are 49 files including that outer
+manifest in both bundles (48 listed entries); two source concept paths change
+with their version IDs. Only `canonical/crosswalk.jsonl` and
+`references/source.xml` remain byte-identical across this matrix transition.
+
+The five normal cases in the current [catalog](../examples/conformance/cases.json)
+have new reference hashes. The byte-identical
+[historical catalog](../examples/conformance/cases-profile-0.2.0-draft.json), old
+golden and old profile are protected by fixed digest checks. Use an old pinned
+environment to reproduce its historical result; the new checker does not
+recertify old acceptance. Recompile original source for a new bundle instead of
+rewriting an old artifact's schema or hashes.
 
 The current public adapter retains multiple effective dates, references,
 incorporation, read-as clauses, and delegation clauses as source text only. It

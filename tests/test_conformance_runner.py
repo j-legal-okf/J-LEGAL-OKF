@@ -6,12 +6,13 @@ import json
 import hashlib
 from pathlib import Path
 import shutil
+import unicodedata
 
 import pytest
 from jlegal_okf.assurance.conformance import check_okf_format, check_submission
-from jlegal_okf.errors import AdapterError
-from jlegal_okf.pipeline import compile_corpus
-from jlegal_okf.legal_okf import export_okf
+from jlegal_okf.errors import AdapterError, JLegalError, ValidationError
+from jlegal_okf.pipeline import compile_corpus, verify_canonical_artifacts, verify_manifest
+from jlegal_okf.legal_okf import LegalOKFError, export_okf, validate_okf
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -40,7 +41,7 @@ def _reseal(bundle):
     _write(bundle / "manifest.json", outer)
 
 
-@pytest.mark.parametrize("mutation,code", [("source-payload", "CONCEPT_TEXT"), ("manifest-schema", "MANIFEST_SCHEMA"), ("projection-schema", "PROJECTION_SCHEMA"), ("rights-schema", "MANIFEST_SCHEMA"), ("bundle-schema", "BUNDLE_SCHEMA")])
+@pytest.mark.parametrize("mutation,code", [("source-payload", "SOURCE_DISPLAY_CONTRACT"), ("manifest-schema", "MANIFEST_SCHEMA"), ("projection-schema", "PROJECTION_SCHEMA"), ("rights-schema", "MANIFEST_SCHEMA"), ("bundle-schema", "BUNDLE_SCHEMA")])
 def test_rehashed_semantic_mutations_do_not_pass(built, tmp_path, mutation, code):
     root = _copy(built, tmp_path)
     for case in _load(CATALOG)["cases"]:
@@ -138,13 +139,179 @@ def test_crosswalk_record_count_does_not_relax_empty_file_contract(built, tmp_pa
                for row in result["cases"] if row["id"] != "new-provision")
 
 
+def _projection_id(version_id, text):
+    # The published full-node-v1 rule, independent of producer helpers.
+    payload = (version_id + "|full-node-v1|" + text).encode("utf-8")
+    return "projection_" + hashlib.sha256(payload).hexdigest()[:32]
+
+
+def _write_projections(bundle, values):
+    # Retain reference ordering where fields are strings, so comparison with
+    # the ordinary verifier fails on derivation rather than serialization.
+    values.sort(key=lambda p: tuple(p[k] if type(p.get(k)) is str else ""
+                                  for k in ("locator", "version_id", "projection_id")))
+    raw = "".join(json.dumps(p, ensure_ascii=False, sort_keys=True, separators=(",", ":")) + "\n" for p in values)
+    (bundle / "canonical/projection.jsonl").write_text(raw, encoding="utf-8")
+    manifest = _load(bundle / "canonical/manifest.json")
+    manifest["projection_count"] = len(values)
+    _write(bundle / "canonical/manifest.json", manifest)
+    _reseal(bundle)
+
+
+def _mutate_projection(values, nodes, mutation):
+    if mutation == "wrong-id":
+        values[0]["projection_id"] = "projection_" + "0" * 32
+    elif mutation == "duplicate-id":
+        values[1]["projection_id"] = values[0]["projection_id"]
+    elif mutation == "duplicate-pair":
+        values[1] = dict(values[0])
+    elif mutation == "duplicate-pair-distinct-id":
+        values[1] = dict(values[0], projection_id="projection_" + "0" * 32)
+    elif mutation == "missing":
+        values.pop()
+    elif mutation == "surplus":
+        extra = dict(values[0], node_id="node_surplus", version_id="ver_surplus")
+        extra["projection_id"] = _projection_id(extra["version_id"], extra["text"])
+        values.append(extra)
+    elif mutation == "law-root":
+        law = next(n for n in nodes if n["kind"] == "law")
+        extra = {k: law[k] for k in ("node_id", "version_id", "law_id", "locator", "heading", "text", "kind", "temporal")}
+        extra.update(schema="jori-projection/v1", projection_version="1", evidence=law["source"],
+                     projection_id=_projection_id(law["version_id"], law["text"]))
+        values.append(extra)
+    elif mutation == "wrong-version-pair":
+        # A valid digest cannot excuse a node/version pair absent from corpus.
+        values[0]["version_id"] = values[1]["version_id"]
+        values[0]["projection_id"] = _projection_id(values[0]["version_id"], values[0]["text"])
+    elif mutation == "text":
+        values[0]["text"] += "改変。"
+    elif mutation == "heading":
+        values[0]["heading"] = "改変見出し"
+    elif mutation == "temporal":
+        values[0]["temporal"] = dict(values[0]["temporal"], valid_from="2026-01-01")
+    elif mutation == "evidence":
+        values[0]["evidence"] = dict(values[0]["evidence"], source_key="WrongLaw")
+    else:
+        raise AssertionError("unknown projection mutation")
+
+
+@pytest.mark.parametrize("mutation,codes", [
+    ("wrong-id", {"PROJECTION_IDENTITY"}),
+    ("duplicate-id", {"PROJECTION_IDENTITY", "PROJECTION_ID_DUPLICATE"}),
+    ("duplicate-pair", {"PROJECTION_SET", "PROJECTION_ID_DUPLICATE"}),
+    ("duplicate-pair-distinct-id", {"PROJECTION_SET", "PROJECTION_IDENTITY"}),
+    ("missing", {"PROJECTION_SET"}),
+    ("surplus", {"PROJECTION_SET"}),
+    ("law-root", {"PROJECTION_SET"}),
+    ("wrong-version-pair", {"PROJECTION_SET"}),
+    ("text", {"PROJECTION_IDENTITY", "PROJECTION_CONTENT"}),
+    ("heading", {"PROJECTION_CONTENT"}),
+    ("temporal", {"PROJECTION_CONTENT"}),
+    ("evidence", {"PROJECTION_SOURCE"}),
+])
+def test_projection_contract_rejects_resealed_mutations(built, tmp_path, mutation, codes):
+    root = _copy(built, tmp_path)
+    for case in _load(CATALOG)["cases"]:
+        if case["method"] == "rejection":
+            continue
+        bundle = root / case["id"] / "bundle"
+        values = [json.loads(line) for line in (bundle / "canonical/projection.jsonl").read_text().splitlines()]
+        nodes = [json.loads(line) for line in (bundle / "canonical/corpus.jsonl").read_text().splitlines()]
+        _mutate_projection(values, nodes, mutation)
+        _write_projections(bundle, values)
+        with pytest.raises(JLegalError, match="^PROJECTION_DERIVATION_MISMATCH$"):
+            verify_canonical_artifacts(bundle / "canonical/corpus.jsonl")
+    result = check_submission(CATALOG, root / "submission.json", tmp_path / "report")
+    assert not result["common_passed"]
+    assert all(row["status"] == "pass" for row in result["relations"])
+    for row in result["cases"]:
+        assert set(row["layers"]["profile"]["codes"]) == (set() if row["id"] == "new-provision" else codes)
+
+
+@pytest.mark.parametrize("version", ["999", "test-1", "01", " 1", "１"])
+def test_projection_contract_rejects_unsupported_version(built, tmp_path, version):
+    root = _copy(built, tmp_path)
+    for case in _load(CATALOG)["cases"]:
+        if case["method"] == "rejection":
+            continue
+        bundle = root / case["id"] / "bundle"
+        values = [json.loads(line) for line in (bundle / "canonical/projection.jsonl").read_text().splitlines()]
+        values[0]["projection_version"] = version
+        _write_projections(bundle, values)
+        with pytest.raises(JLegalError, match="^PROJECTION_DERIVATION_MISMATCH$"):
+            verify_canonical_artifacts(bundle / "canonical/corpus.jsonl")
+    result = check_submission(CATALOG, root / "submission.json", tmp_path / "report")
+    assert not result["common_passed"]
+    assert all(row["status"] == "pass" for row in result["relations"])
+    for row in result["cases"]:
+        assert row["layers"]["profile"]["codes"] == ([] if row["id"] == "new-provision" else ["PROJECTION_VERSION"])
+
+
+@pytest.mark.parametrize("field,value", [
+    ("projection_version", 1), ("projection_version", True),
+    ("projection_version", 1.0), ("projection_version", None),
+    ("projection_version", ""), ("projection_version", []),
+    ("projection_id", []), ("projection_id", {}), ("projection_id", None),
+    ("projection_id", ""), ("node_id", []), ("version_id", {}),
+    ("text", None), ("temporal", []), ("evidence", []),
+])
+def test_projection_contract_rejects_malformed_fields_without_crashing(built, tmp_path, field, value):
+    root = _copy(built, tmp_path)
+    bundle = root / "edges/bundle"
+    values = [json.loads(line) for line in (bundle / "canonical/projection.jsonl").read_text().splitlines()]
+    values[0][field] = value
+    _write_projections(bundle, values)
+    with pytest.raises(ValidationError, match="^PROJECTION_LINE_"):
+        verify_canonical_artifacts(bundle / "canonical/corpus.jsonl")
+    result = check_submission(CATALOG, root / "submission.json", tmp_path / "report")
+    assert not result["common_passed"]
+    codes = next(r["layers"]["profile"]["codes"] for r in result["cases"] if r["id"] == "edges")
+    assert "PROJECTION_SCHEMA" in codes
+    assert set(codes) <= {"PROJECTION_SCHEMA", "PROJECTION_SET"}
+
+
+def test_projection_identity_does_not_normalize_unicode_or_whitespace(built, tmp_path):
+    root = _copy(built, tmp_path)
+    bundle = root / "edges/bundle"
+    values = [json.loads(line) for line in (bundle / "canonical/projection.jsonl").read_text().splitlines()]
+    selected = [p for p in values if p["text"] != unicodedata.normalize("NFKC", p["text"]).strip()]
+    assert selected
+    for value in selected:
+        value["projection_id"] = _projection_id(value["version_id"], unicodedata.normalize("NFKC", value["text"]).strip())
+    _write_projections(bundle, values)
+    result = check_submission(CATALOG, root / "submission.json", tmp_path / "report")
+    assert not result["common_passed"]
+    row = next(r for r in result["cases"] if r["id"] == "edges")
+    assert row["layers"]["profile"]["codes"] == ["PROJECTION_IDENTITY"]
+
+
+def test_projection_contract_accepts_another_producer_with_exact_empty_and_whitespace_text(built, tmp_path):
+    result = check_submission(CATALOG, built / "submission.json", tmp_path / "report")
+    assert result["common_passed"]
+    for case in _load(CATALOG)["cases"]:
+        if case["method"] == "rejection":
+            continue
+        corpus = built / case["id"] / "bundle/canonical/corpus.jsonl"
+        artifacts = verify_canonical_artifacts(corpus)
+        assert len(artifacts.projection) == len(artifacts.nodes) - 1
+        assert all(p.projection_version == "1" and p.projection_id == _projection_id(p.version_id, p.text)
+                   for p in artifacts.projection)
+        # The manifest verifier deliberately accepts only its reference recipe.
+        with pytest.raises(ValidationError, match="^MANIFEST_ACQUISITION$"):
+            verify_manifest(corpus, corpus.parent / "manifest.json")
+        if case["id"] == "edges":
+            texts = {p.text for p in artifacts.projection}
+            assert {"", " \n  ", "　合成空白\u00a0  を保持する。　"} <= texts
+
+
 @pytest.mark.parametrize("text", ["", " ", "\n　text\u00a0\n"])
-def test_marked_payload_is_exact_without_requiring_reference_headings(text):
+def test_marked_payload_requires_complete_common_display_grammar(text):
     from jlegal_okf.assurance.conformance import _source_payload_matches
-    node = {"version_id": "ver_demo", "text": text}
+    node = {"version_id": "ver_demo", "text": text, "heading": "Title", "label": None, "locator": "/law/root"}
     begin, end = "<!-- jlegal-source:ver_demo:begin -->", "<!-- jlegal-source:ver_demo:end -->"
-    assert _source_payload_matches("# Other display title\n" + begin + text + end, node)
-    for body in (begin + "extra" + text + end, begin + text, begin + text + end + begin + end, begin.replace("ver_demo", "ver_wrong") + text + end):
+    body = "# Title\n\n## Source text\n\n" + begin + text + end + "\n"
+    assert _source_payload_matches(body, node)
+    for body in ("# Other display title\n" + begin + text + end, begin + "extra" + text + end, begin + text, begin + text + end + begin + end, begin.replace("ver_demo", "ver_wrong") + text + end):
         assert not _source_payload_matches(body, node)
 
 
@@ -185,15 +352,12 @@ def _build_submission(root):
 
 @pytest.fixture(scope="module")
 def built(tmp_path_factory):
-    # A fixture-only producer stand-in supplies character-only Style rendering.
-    # Expectations remain immutable source-authored files. This is deliberately
-    # separate from the measured unmodified reference implementation below.
-    import jlegal_okf.egov
+    # Only producer metadata differs. Rendering and the common display grammar
+    # use the unmodified implementation; fixed expectations remain independent.
     import jlegal_okf.pipeline
     import jlegal_okf.legal_okf
     with pytest.MonkeyPatch.context() as patch:
-        patch.setattr(jlegal_okf.egov, "_render_text", jlegal_okf.egov._character_data)
-        conversion = {"name": "Synthetic independent producer", "version": "test-1", "profile": "J-LEGAL-OKF/0.2.0-draft"}
+        conversion = {"name": "Synthetic independent producer", "version": "test-1", "profile": "J-LEGAL-OKF/0.3.0-draft"}
         patch.setattr(jlegal_okf.pipeline, "JLEGAL_CONVERTER", conversion)
         patch.setattr(jlegal_okf.legal_okf, "JLEGAL_CONVERTER", conversion)
         root = _build_submission(tmp_path_factory.mktemp("conformance-submission"))
@@ -216,6 +380,8 @@ def test_fixed_suite_passes_and_never_invokes_producer(built, tmp_path, monkeypa
     def forbidden(*args, **kwargs):
         raise AssertionError("producer invoked by artifact checker")
     monkeypatch.setattr(jlegal_okf.pipeline, "compile_corpus", forbidden)
+    monkeypatch.setattr(jlegal_okf.pipeline, "make_projection", forbidden)
+    monkeypatch.setattr(jlegal_okf.pipeline, "verify_canonical_artifacts", forbidden)
     monkeypatch.setattr(jlegal_okf.egov, "egov_xml_adapter", forbidden)
     monkeypatch.setattr(jlegal_okf.legal_okf, "validate_okf", forbidden)
     result = check_submission(CATALOG, built / "submission.json", tmp_path / "report")
@@ -231,16 +397,27 @@ def test_fixed_suite_passes_and_never_invokes_producer(built, tmp_path, monkeypa
             assert (bundle / "canonical/crosswalk.jsonl").read_bytes() == b""
 
 
-def test_reference_style_discrepancy_is_reported_without_changing_golden(tmp_path):
+def test_reference_producer_passes_fixed_oracle_and_new_byte_golden(tmp_path):
     root = tmp_path / "reference"
     root.mkdir()
     _build_submission(root)
     result = check_submission(CATALOG, root / "submission.json", tmp_path / "report")
-    assert result["common_passed"] is False
+    assert result["common_passed"] is True
+    assert result["passed"] is True
     for row in result["cases"]:
-        expected_codes = [] if row["id"] in {"appendix-alone", "new-provision"} else ["NODE_TEXT"]
-        assert row["layers"]["profile"]["codes"] == expected_codes
+        assert row["layers"]["profile"]["codes"] == []
+    for case in _load(CATALOG)["cases"]:
+        if case["method"] == "artifact":
+            assert validate_okf(root / case["id"] / "bundle", verify_source=True)["source_reverified"]
+        elif case["method"] == "source_tamper":
+            with pytest.raises(LegalOKFError, match="^JLEGAL_OKF_MANIFEST_TAMPERED$"):
+                validate_okf(root / case["id"] / "bundle", verify_source=True)
+        else:
+            assert not (root / case["id"] / "corpus").exists()
     assert result["cases"][0]["layers"]["jori_byte_regression"]["status"] == "pass"
+    assert [row["layers"]["jori_byte_regression"]["status"] for row in result["cases"]] == [
+        "pass", "pass", "pass", "pass", "pass", "not_checked", "not_checked",
+    ]
 
 
 def test_jori_bytes_are_separate_from_common_checks(built, tmp_path):
