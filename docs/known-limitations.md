@@ -182,7 +182,8 @@ XML paths share the bounded reader/parser in `src/jlegal_okf/input_limits.py`
   rereads are bounded without changing recipe/provenance semantics.
 - **Remaining resource limits:** these checks do not impose hard process
   CPU, address-space or wall-clock limits, isolate conversion, or make all
-  output publication transactional. Parser/encoder temporary allocations and
+  output publication transactional. Compilation and OKF export have the
+  bounded publication checks in section 5 below. Parser/encoder temporary allocations and
   memory already held by an API caller are not hard-limited. Artifact readers
   in general and downstream legacy/evaluation inputs are outside this scope.
   Small synthetic cases in `tests/test_input_limits.py` and
@@ -305,6 +306,43 @@ XML paths share the bounded reader/parser in `src/jlegal_okf/input_limits.py`
   (`src/jlegal_okf/model.py`); a single-instant or inverted validity
   window is refused at construction time, not caught later by
   `validate_corpus()`.
+
+## 5. Output publication and interruption
+
+Compilation retains the expected bytes of its four canonical products and,
+after writing, checks the stage contains exactly those four names, each a
+regular file without symlinks. Missing, extra or nonregular entries fail as
+`STAGED_OUTPUT_FILE_SET`; changed bytes fail as `STAGED_OUTPUT_MISMATCH`.
+`verify_canonical_artifacts` and `validate_corpus` then check disk content.
+The trusted adaptation's adapter selects manifest validation: the supported
+public adapters pass `verify_manifest`, while custom adaptations receive the
+common checks without public-profile manifest validation
+(`src/jlegal_okf/pipeline.py`, `_verify_staged_compilation`).
+
+OKF export validates the completed stage with the existing
+`validate_okf(stage, verify_source=False)` before publication, preserving its
+existing diagnostics and validation scope. In particular, this does not add
+compilation's stricter filesystem checks to the bundle validator. Ordinary
+validation checks consistency and source-concept fidelity; it does not prove
+the corpus was derived by re-compiling the embedded XML. That requires the
+explicit `verify_source=True` mode
+(`src/jlegal_okf/legal_okf.py`, `export_okf`, `validate_okf`).
+
+Both producers attempt to remove only their own stage on `BaseException`,
+including write/validation/rename failures, `KeyboardInterrupt` and `SystemExit`,
+and re-raise the original exception. Existing outputs are refused before stage
+creation; an existing file or nonempty directory causing final rename to fail
+is left intact. Final directory rename is the commit point. Interruption after
+that point preserves the complete validated final directory, so a missing API
+success response does not imply the output is absent. Small fault-injection
+tests exercise these paths in `tests/test_staged_output.py`.
+
+These are bounded cleanup and consistency checks, not crash-durability or
+hostile-filesystem guarantees. OS deletion denial, repeated interrupts,
+`SIGKILL` and power loss can leave a stage. Concurrent creation of an empty
+destination directory can still be overwritten by the replacement rename.
+Concurrent no-replace publication and hard CPU/memory/time limits remain
+separate work; see the [security policy](../SECURITY.md#output-publication-and-interruption).
 
 ## Scope: LLM audition is not part of v0.1
 

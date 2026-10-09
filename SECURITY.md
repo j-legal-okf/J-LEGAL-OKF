@@ -106,8 +106,39 @@ These implementation boundaries do not provide process isolation, hard CPU,
 address-space or wall-clock limits, or a transaction covering every generated
 output. Parser/encoder internals can allocate temporary objects; caller-owned
 API graphs already occupy memory. Artifact readers in general are outside
-these compile-input limits. Process resource isolation and output completion
-on failure remain separate work.
+these compile-input limits. Process resource isolation remains separate work;
+the publication checks below cover compilation and OKF export only.
+
+### Output publication and interruption
+
+Before its final directory rename, compilation checks that the stage contains
+exactly `corpus.jsonl`, `crosswalk.jsonl`, `projection.jsonl`, and `manifest.json`,
+all regular files without symlinks, and that their bytes match the products
+generated in memory. File-set/type failures are `STAGED_OUTPUT_FILE_SET`;
+changed bytes are `STAGED_OUTPUT_MISMATCH`. It then checks the written canonical
+artifacts and corpus structure. Public adapters additionally pass
+`verify_manifest`; custom adaptations receive the common byte, canonical and
+structure checks, without claiming public-profile manifest validation.
+
+OKF export runs the existing `validate_okf(stage, verify_source=False)` before
+the final rename and preserves its diagnostics. This checks bundle consistency
+and source-concept fidelity, without re-compiling the embedded source XML.
+Source re-derivation remains an explicit `verify_source=True` check. Export
+does not acquire compilation's stricter regular-file and symlink checks.
+
+Both stage operations catch `BaseException`, including `KeyboardInterrupt` and
+`SystemExit`, attempt to remove their own stage and re-raise the original
+failure. An existing output is refused before stage creation. If final rename
+fails against an existing file or nonempty directory, cleanup leaves that
+output intact. Successful final rename is the commit point: a subsequent
+interruption leaves the complete validated output, even if the caller receives
+no success response.
+
+Cleanup and crash durability are not guaranteed when the OS refuses removal,
+during repeated interrupts, after `SIGKILL` or power loss, or on a hostile
+filesystem. The existing replacement rename can still overwrite a concurrently
+created empty destination directory. These checks do not provide concurrent
+no-replace publication or hard process resource limits.
 
 Reports of concrete exploitable behavior are in scope.
 

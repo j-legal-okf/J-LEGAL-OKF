@@ -303,8 +303,9 @@ def export_okf(corpus: str | Path, manifest: str | Path, out_dir: str | Path, *,
         _atomic_bytes(stage / "index.md", _index_content(nodes, source_resource).encode("utf-8"))
         bundle_manifest = _bundle_manifest(stage, input_manifest["corpus_sha256"], _digest(manifest_path.read_bytes()), input_manifest.get("rights"))
         _atomic_bytes(stage / _MANIFEST, canonical_json(bundle_manifest) + b"\n")
+        validate_okf(stage, verify_source=False)
         os.replace(stage, destination)
-    except Exception:
+    except BaseException:
         shutil.rmtree(stage, ignore_errors=True)
         raise
     return {"bundle": str(destination), "corpus_sha256": input_manifest["corpus_sha256"], "nodes": len(nodes), "profile": PROFILE}

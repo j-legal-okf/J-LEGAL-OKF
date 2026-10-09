@@ -59,6 +59,21 @@ remain unchanged historical evidence.
 
 ### Changed
 
+- Compilation now verifies the four written stage files against their expected
+  bytes, rejects missing/extra/nonregular entries and symlinks, and checks disk
+  canonical artifacts and corpus structure before publishing. Supported public
+  adapters additionally pass manifest validation; custom adaptations keep the
+  common checks without extending public manifest support. File-set/type and
+  byte failures use `STAGED_OUTPUT_FILE_SET` and `STAGED_OUTPUT_MISMATCH`.
+- OKF export now runs existing ordinary bundle validation before final rename,
+  retaining its diagnostics and scope, without source re-compilation or new
+  filesystem-shape guarantees. Both producers attempt stage cleanup for
+  `BaseException`, including `KeyboardInterrupt` and `SystemExit`, and re-raise
+  the original failure. Interruption after final rename preserves the complete
+  validated final output. Accepted output bytes, IDs and version tuples remain
+  unchanged. OS deletion denial, repeated interrupts, `SIGKILL`, power loss,
+  hostile filesystems, concurrent empty-directory replacement and hard resource
+  isolation remain outside these guarantees; see [known limitations](docs/known-limitations.md#5-output-publication-and-interruption).
 - Previously accepted over-limit structured inputs, YAML aliases, cyclic or
   custom API values, nonfinite numbers (including JSON float overflow) and
   lone surrogates are intentionally refused with stable `INPUT_*` diagnostics.

@@ -9,6 +9,7 @@ from datetime import date, datetime, timezone
 from dataclasses import dataclass, replace
 from pathlib import Path
 import shutil
+import stat
 import tempfile
 from typing import Any, Iterable, Sequence
 from urllib.parse import parse_qsl, quote, urlparse
@@ -501,6 +502,26 @@ def _validate_adaptation(adaptation: Adaptation) -> None:
         raise ValidationError("ADAPTATION_INVALID")
 
 
+def _verify_staged_compilation(stage: Path, expected_bytes: dict[str, bytes], adapter: str) -> None:
+    """Check the written products before publishing, using the trusted adapter."""
+    names = {"corpus.jsonl", "crosswalk.jsonl", "projection.jsonl", "manifest.json"}
+    paths = list(stage.iterdir())
+    if set(expected_bytes) != names or {path.name for path in paths} != names or any(
+        not stat.S_ISREG(path.lstat().st_mode) for path in paths
+    ):
+        raise JLegalError("STAGED_OUTPUT_FILE_SET")
+    for path in paths:
+        if path.read_bytes() != expected_bytes[path.name]:
+            raise JLegalError("STAGED_OUTPUT_MISMATCH")
+    corpus = stage / "corpus.jsonl"
+    crosswalk = stage / "crosswalk.jsonl"
+    projection = stage / "projection.jsonl"
+    artifacts = verify_canonical_artifacts(corpus, crosswalk, projection)
+    validate_corpus(artifacts.nodes, artifacts.crosswalk)
+    if adapter in _MANIFEST_ADAPTERS:
+        verify_manifest(corpus, stage / "manifest.json", crosswalk, projection)
+
+
 def compile_adaptation(
     adaptation: Adaptation,
     *,
@@ -542,9 +563,17 @@ def compile_adaptation(
     try:
         corpus = canonical_jsonl(nodes); crosswalk_bytes = canonical_crosswalk_jsonl(crosswalk); projection=make_projection(nodes); projection_bytes=canonical_projection_jsonl(projection)
         manifest = manifest_for(corpus_id, nodes, crosswalk, projection, adaptation, corpus, recipe, acquisition, converted_at, rights)
-        _atomic_bytes(stage / "corpus.jsonl", corpus); _atomic_bytes(stage / "crosswalk.jsonl", crosswalk_bytes); _atomic_bytes(stage / "projection.jsonl", projection_bytes); _atomic_bytes(stage / "manifest.json", canonical_json(manifest) + b"\n")
+        expected_bytes = {
+            "corpus.jsonl": corpus,
+            "crosswalk.jsonl": crosswalk_bytes,
+            "projection.jsonl": projection_bytes,
+            "manifest.json": canonical_json(manifest) + b"\n",
+        }
+        for name, raw in expected_bytes.items():
+            _atomic_bytes(stage / name, raw)
+        _verify_staged_compilation(stage, expected_bytes, adaptation.adapter)
         os.replace(stage, destination)
-    except Exception:
+    except BaseException:
         shutil.rmtree(stage, ignore_errors=True); raise
     return {"out_dir": str(destination), "corpus": str(destination / "corpus.jsonl"), "crosswalk": str(destination / "crosswalk.jsonl"), "projection":str(destination/"projection.jsonl"), "manifest": str(destination / "manifest.json"), "nodes": len(nodes), "corpus_id": corpus_id}
 
