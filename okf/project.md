@@ -8,19 +8,26 @@ status: draft
 sources:
   - resource: ../README.md
     title: README.md
-    last_modified: 2026-09-19
+    last_modified: 2026-10-09
+    sha256: "b1cd00f57cecdc6d766b728dbfb479a8d4f2878b80f3c5de997373d388f33584"
   - resource: ../ARCHITECTURE_BOUNDARY.md
     title: ARCHITECTURE_BOUNDARY.md
     last_modified: 2026-09-18
   - resource: ../docs/jlegal-okf-profile-0.2.0-draft.md
     title: J-LEGAL-OKF Profile 0.2.0-draft
     last_modified: 2026-10-06
+  - resource: ../docs/jlegal-okf-profile-0.3.0-draft.md
+    title: J-LEGAL-OKF Profile 0.3.0-draft
+    last_modified: 2026-10-09
+    sha256: "2605f1d017be3bd4505c06849c85dfbf4b38195c29fc424318e3e4f1bbe4cc45"
   - resource: ../docs/oss-release/scope-inventory.md
     title: Public scope inventory
-    last_modified: 2026-09-18
+    last_modified: 2026-10-09
+    sha256: "7692366dd550b026f98699eb1c924d87624a46265381a0abba334051a0c7ec67"
   - resource: ../CHANGELOG.md
     title: CHANGELOG.md
-    last_modified: 2026-09-19
+    last_modified: 2026-10-09
+    sha256: "e15c50f67c6614f988ef9dd468a79cfe82f0d39bfdafc978ec616d9131dcb364"
 generated:
   by: anthropic/claude-opus-5
   at: 2026-09-18T00:42:00+09:00
@@ -50,7 +57,7 @@ JORI Engine はこの公開コアの参照実装であり、`jlegal_okf` パッ�
 
 公開コアに含めるもの:
 
-- `jori-corpus/v2` の正準モデル、決定論的ID・hash・manifest処理、crosswalkのシリアライズ、retrieval projection
+- `jori-corpus/v3` の正準モデル、決定論的ID・hash・manifest処理、crosswalkのシリアライズ、retrieval projection
 - validator診断、generic JSON/XML/XHTML adapter
 - 保存済みe-Gov国法令XMLの変換と明示的なfetch helper
 - OKF v0.2-shaped export/validation
@@ -73,7 +80,7 @@ J-LEGAL-OKFは非公式のプロジェクトであり、政府・e-Gov・OKFの�
 fail-closedで報告する。exporterはsource、canonical、derivedの層を分離した
 OKF v0.2-shaped bundleを生成する。
 
-`jori-corpus/v2` をはじめとする `jori-*` スキーマ識別子は互換契約の一部であり、
+`jori-corpus/v3` をはじめとする `jori-*` スキーマ識別子は互換契約の一部であり、
 改名は編集ではなく破壊的変更である。`JORI Engine` の名称が記録される場所は
 [NOTICE](../NOTICE) が列挙し、実装・フォーマット識別子としての使用に留めて商標・
 ブランドの主張はしない（[ARCHITECTURE_BOUNDARY.md](../ARCHITECTURE_BOUNDARY.md) の Naming）。
@@ -93,7 +100,7 @@ OKF v0.2-shaped bundleを生成する。
 | 知りたいこと | 正本 |
 |---|---|
 | 公開コアの利用手順とoffline例 | [README.md](../README.md) |
-| 規範プロファイル（0.2.0-draft） | [docs/jlegal-okf-profile-0.2.0-draft.md](../docs/jlegal-okf-profile-0.2.0-draft.md) |
+| 規範プロファイル（0.3.0-draft。0.2.0-draft の規範を引き継ぐ） | [docs/jlegal-okf-profile-0.3.0-draft.md](../docs/jlegal-okf-profile-0.3.0-draft.md) |
 | 公開／非公開の判定原則 | [ARCHITECTURE_BOUNDARY.md](../ARCHITECTURE_BOUNDARY.md) |
 | 移植対象と除外対象 | [docs/oss-release/scope-inventory.md](../docs/oss-release/scope-inventory.md) |
 | 変更履歴 | [CHANGELOG.md](../CHANGELOG.md) |
