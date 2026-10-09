@@ -12,10 +12,12 @@ sources:
     sha256: "b1cd00f57cecdc6d766b728dbfb479a8d4f2878b80f3c5de997373d388f33584"
   - resource: ../ARCHITECTURE_BOUNDARY.md
     title: ARCHITECTURE_BOUNDARY.md
-    last_modified: 2026-09-18
+    last_modified: 2026-10-09
+    sha256: "95dccd8aff606c991e57cc47154a0fe32fdac230d1ade95532ece17bd1d6e34c"
   - resource: ../docs/jlegal-okf-profile-0.2.0-draft.md
     title: J-LEGAL-OKF Profile 0.2.0-draft
-    last_modified: 2026-10-06
+    last_modified: 2026-10-09
+    sha256: "de602a7f68995771c693d58002c4266d712fb0066b0de0b753621891132454bd"
   - resource: ../docs/jlegal-okf-profile-0.3.0-draft.md
     title: J-LEGAL-OKF Profile 0.3.0-draft
     last_modified: 2026-10-09

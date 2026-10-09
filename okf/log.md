@@ -91,3 +91,5 @@ schema `jori-corpus/v1` → `jori-corpus/v2`）に追従した。`OKF.md` と `p
 ## 2026-10-09
 
 **Update** — 陳腐化検査の SOURCE-DRIFT 3組（`project.md` × `README.md`・`CHANGELOG.md`・`docs/oss-release/scope-inventory.md`）を読み直した。参照元の差分は 7a3f0c1 で、規範プロファイルが 0.3.0-draft に、正準形式が `jori-corpus/v3` に上がり、構造化入力の上限検査が公開コアに加わった。本文の `jori-corpus/v2` を v3 に、流動情報の表の規範プロファイルを 0.3.0-draft に直し、参照元に `docs/jlegal-okf-profile-0.3.0-draft.md` を足した（0.2.0-draft は 0.3.0-draft が規範を引き継ぐので参照元に残す）。参照元4件に中身の指紋（`sha256`）を記入し、以後は日付でなく中身で判定する。目的・スコープ境界・正本の在り処の記述は変わらない。`okf/index.md` は編集していない。`status: draft` / `verified: []` は変更していない。
+
+**Update 2** — 同じ作業で、残りの参照元に、ファイル全体の中身の指紋（`sha256`）を記入した。残りの2件（`ARCHITECTURE_BOUNDARY.md`・profile 0.2.0-draft）は、参照元の最後のコミットが文書の最後のコミットより前のため、読み直さずに機械で記入した。本文は変えていない。
